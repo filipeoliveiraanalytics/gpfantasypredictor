@@ -1,0 +1,34 @@
+entity_type,key,name,team,price_m,season_points,price_date,active
+driver,ANT,Kimi Antonelli,Mercedes,24.4,192,2026-05-16,TRUE
+driver,RUS,George Russell,Mercedes,28.6,153,2026-05-16,TRUE
+driver,LEC,Charles Leclerc,Ferrari,24.0,138,2026-05-16,TRUE
+driver,VER,Max Verstappen,Red Bull Racing,28.3,129,2026-05-16,TRUE
+driver,HAM,Lewis Hamilton,Ferrari,23.5,112,2026-05-16,TRUE
+driver,NOR,Lando Norris,McLaren,26.4,89,2026-05-16,TRUE
+driver,PIA,Oscar Piastri,McLaren,24.7,63,2026-05-16,TRUE
+driver,SAI,Carlos Sainz,Williams,13.0,60,2026-05-16,TRUE
+driver,OCO,Esteban Ocon,Haas F1 Team,9.7,56,2026-05-16,TRUE
+driver,PER,Sergio Perez,Cadillac,7.6,47,2026-05-16,TRUE
+driver,BEA,Oliver Bearman,Haas F1 Team,9.4,46,2026-05-16,TRUE
+driver,COL,Franco Colapinto,Alpine,8.2,41,2026-05-16,TRUE
+driver,LAW,Liam Lawson,Racing Bulls,8.1,38,2026-05-16,TRUE
+driver,GAS,Pierre Gasly,Alpine,12.8,37,2026-05-16,TRUE
+driver,ALB,Alexander Albon,Williams,9.6,20,2026-05-16,TRUE
+driver,LIN,Arvid Lindblad,Racing Bulls,7.0,19,2026-05-16,TRUE
+driver,BOR,Gabriel Bortoleto,Audi,5.2,9,2026-05-16,TRUE
+driver,ALO,Fernando Alonso,Aston Martin,8.0,3,2026-05-16,TRUE
+driver,HAD,Isack Hadjar,Red Bull Racing,12.7,0,2026-05-16,TRUE
+driver,BOT,Valtteri Bottas,Cadillac,3.9,-7,2026-05-16,TRUE
+driver,HUL,Nico Hulkenberg,Audi,4.4,-32,2026-05-16,TRUE
+driver,STR,Lance Stroll,Aston Martin,5.6,-37,2026-05-16,TRUE
+constructor,MER,Mercedes,Mercedes,30.5,407,2026-05-16,TRUE
+constructor,FER,Ferrari,Ferrari,24.5,320,2026-05-16,TRUE
+constructor,MCL,McLaren,McLaren,28.9,194,2026-05-16,TRUE
+constructor,RBR,Red Bull Racing,Red Bull Racing,29.2,143,2026-05-16,TRUE
+constructor,HAA,Haas F1 Team,Haas F1 Team,9.8,118,2026-05-16,TRUE
+constructor,ALP,Alpine,Alpine,14.9,109,2026-05-16,TRUE
+constructor,RBL,Racing Bulls,Racing Bulls,8.7,105,2026-05-16,TRUE
+constructor,WIL,Williams,Williams,14.4,93,2026-05-16,TRUE
+constructor,CAD,Cadillac,Cadillac,5.6,38,2026-05-16,TRUE
+constructor,AUD,Audi,Audi,5.0,-8,2026-05-16,TRUE
+constructor,AMR,Aston Martin,Aston Martin,7.9,-32,2026-05-16,TRUE
