@@ -31,7 +31,6 @@ const els = {
   drivers: document.querySelector("#drivers"),
   constructors: document.querySelector("#constructors"),
   strategy: document.querySelector("#strategy"),
-  boostMode: document.querySelector("#boost-mode"),
   openDriverPicker: document.querySelector("#open-driver-picker"),
   openConstructorPicker: document.querySelector("#open-constructor-picker"),
   driverPickerSummary: document.querySelector("#driver-picker-summary"),
@@ -154,8 +153,7 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
   const transferPenalty = paidTransfers * -10;
   const bestBoost = [...driverCombo].sort((a, b) => toNumber(b.expected_fantasy_points) - toNumber(a.expected_fantasy_points))[0];
   const boostBase = toNumber(bestBoost?.expected_fantasy_points);
-  const boostExtraPoints =
-    inputs.boostMode === "none" ? 0 : inputs.boostMode === "x3" ? boostBase * 2 : boostBase;
+  const boostExtraPoints = boostBase;
   const netExpectedPoints = expectedPoints + transferPenalty + boostExtraPoints;
 
   return {
@@ -188,7 +186,6 @@ function optimize() {
     currentDrivers: parseKeys(els.drivers.value),
     currentConstructors: parseKeys(els.constructors.value),
     strategy: els.strategy.value,
-    boostMode: els.boostMode.value,
   };
 
   const driverCombos = combinations(state.drivers, 5);
@@ -303,10 +300,7 @@ function render(teams) {
 
 function boostLabel(team) {
   const driver = team.bestBoost;
-  if (els.boostMode.value === "none") return "None";
-  if (els.boostMode.value === "x3") return `${driver.key} x3`;
-  if (els.boostMode.value === "autopilot") return `Auto: ${driver.key}`;
-  return `${driver.key} x2`;
+  return driver ? `${driver.key} x2` : "--";
 }
 
 function updatePickerSummaries() {
@@ -363,8 +357,8 @@ function applyPicker() {
   if (isDriver) els.drivers.value = value;
   else els.constructors.value = value;
   updatePickerSummaries();
+  els.status.textContent = "Selection applied. Click Optimize Team to refresh the recommendation.";
   closePicker();
-  runOptimization();
 }
 
 async function init() {

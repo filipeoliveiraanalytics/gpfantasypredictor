@@ -31,7 +31,7 @@
         <strong>How the recommendation works</strong>
         <p>
           The optimizer combines the latest GP prediction model, F1 Fantasy prices, expected qualifying/race points,
-          transfer penalties and your selected boost. It is built for lineup decisions before team lock, with deeper race
+          transfer penalties and the recommended mandatory driver boost. It is built for lineup decisions before team lock, with deeper race
           context available in the full GP forecast.
         </p>
       </div>
@@ -85,16 +85,6 @@
           </select>
         </label>
 
-        <label>
-          Boost / chip
-          <select id="boost-mode">
-            <option value="regular">Regular 2x Boost</option>
-            <option value="x3">x3 Boost</option>
-            <option value="autopilot">Autopilot</option>
-            <option value="none">No boost/chip</option>
-          </select>
-        </label>
-
         <button id="optimize-button" type="submit">Optimize Team</button>
         <p class="disclaimer">Not affiliated with Formula 1. Projections are model estimates, not guarantees.</p>
       </form>
@@ -118,7 +108,7 @@
             <strong id="team-cost">--</strong>
           </div>
           <div>
-            <span>Boost / chip</span>
+            <span>Recommended boost</span>
             <strong id="boost-driver">--</strong>
           </div>
         </div>
