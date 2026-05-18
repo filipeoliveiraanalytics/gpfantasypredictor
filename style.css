@@ -55,14 +55,7 @@ body.is-optimizing * {
 }
 
 .brand-lockup {
-  align-items: center;
-  display: flex;
-  gap: 18px;
-}
-
-.brand-lockup img {
-  filter: drop-shadow(0 12px 30px rgba(20, 200, 189, 0.18));
-  flex: 0 0 auto;
+  display: block;
 }
 
 h1 {
@@ -146,18 +139,6 @@ button {
   line-height: 1.5;
   margin: 0;
   max-width: 860px;
-}
-
-.model-note span {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--yellow);
-  flex: 0 0 auto;
-  font-size: 0.78rem;
-  font-weight: 900;
-  padding: 9px 12px;
-  text-transform: uppercase;
 }
 
 .grid {
@@ -552,15 +533,6 @@ td {
 
   h1 {
     font-size: clamp(2.2rem, 14vw, 4.4rem);
-  }
-
-  .brand-lockup {
-    align-items: flex-start;
-    display: grid;
-  }
-
-  .brand-lockup img {
-    width: 58px;
   }
 
   .model-note {
