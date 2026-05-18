@@ -167,9 +167,8 @@ function combinations(items, size) {
 }
 
 function strategyScore(team, strategy) {
-  if (strategy === "value") return 0.7 * team.netExpectedPoints + 12 * team.valuePerMillion;
-  if (strategy === "current_friendly") return team.netExpectedPoints - 1.25 * team.transferCount;
-  return team.netExpectedPoints;
+  if (strategy === "current_friendly") return team.netExpectedPoints;
+  return team.projectedPoints;
 }
 
 function teamColor(team) {
@@ -195,7 +194,8 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
   const bestBoost = [...driverCombo].sort((a, b) => toNumber(b.expected_fantasy_points) - toNumber(a.expected_fantasy_points))[0];
   const boostBase = toNumber(bestBoost?.expected_fantasy_points);
   const boostExtraPoints = boostBase;
-  const netExpectedPoints = expectedPoints + transferPenalty + boostExtraPoints;
+  const projectedPoints = expectedPoints + boostExtraPoints;
+  const netExpectedPoints = projectedPoints + transferPenalty;
 
   return {
     drivers: driverCombo,
@@ -205,6 +205,7 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
     totalCost,
     budgetRemaining: inputs.budget - totalCost,
     expectedPoints,
+    projectedPoints,
     netExpectedPoints,
     valuePerMillion: expectedPoints / totalCost,
     avgRiskScore,
@@ -240,12 +241,13 @@ function optimize() {
     for (const constructorCombo of constructorCombos) {
       const team = summarizeTeam(driverCombo, constructorCombo, inputs);
       if (team.totalCost > inputs.budget) continue;
+      if (inputs.strategy === "current_friendly" && team.transferCount > inputs.freeTransfers) continue;
       team.strategyScore = strategyScore(team, inputs.strategy);
       teams.push(team);
     }
   }
 
-  teams.sort((a, b) => b.strategyScore - a.strategyScore || b.netExpectedPoints - a.netExpectedPoints);
+  teams.sort((a, b) => b.strategyScore - a.strategyScore || b.projectedPoints - a.projectedPoints);
   const topTeams = teams.slice(0, 10);
   render(topTeams);
 
@@ -297,7 +299,7 @@ function render(teams) {
   }
 
   els.status.textContent = `${best.drivers[0]?.next_gp ?? "Next GP"} | ${best.drivers[0]?.mode ?? "Projection"}`;
-  els.netPoints.textContent = formatNumber(best.netExpectedPoints, 1);
+  els.netPoints.textContent = formatNumber(best.projectedPoints, 1);
   els.teamCost.textContent = `${formatNumber(best.totalCost, 1)}M`;
   els.boostDriver.textContent = boostLabel(best);
   els.driverList.innerHTML = best.drivers.map(chip).join("");
@@ -314,7 +316,7 @@ function render(teams) {
         <td>${team.driverKeys.join(", ")}</td>
         <td>${team.constructorKeys.join(", ")}</td>
         <td>${formatNumber(team.totalCost, 1)}M</td>
-        <td>${formatNumber(team.netExpectedPoints, 1)}</td>
+        <td>${formatNumber(team.projectedPoints, 1)}</td>
         <td>${team.transferCount} (${team.paidTransfers} paid)</td>
       </tr>`
     )
@@ -326,7 +328,7 @@ function render(teams) {
       <article class="alternative-card">
         <header>
           <span>Lineup #${index + 1}</span>
-          <strong>${formatNumber(team.netExpectedPoints, 1)} pts</strong>
+          <strong>${formatNumber(team.projectedPoints, 1)} pts</strong>
         </header>
         <dl>
           <div>

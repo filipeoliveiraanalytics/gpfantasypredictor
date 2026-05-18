@@ -52,7 +52,7 @@
         </div>
         <p class="hero-copy">
           Turn GP predictions into fantasy picks. Enter your current team and budget, then let the model search every
-          valid 5driver + 2constructor lineup.
+          valid 5-driver + 2-constructor lineup.
         </p>
       </div>
       <aside class="forecast-cta" aria-label="Full GP Predictor">
@@ -117,10 +117,10 @@
         <label>
           Strategy
           <select id="strategy">
-            <option value="max_points">Max points</option>
-            <option value="current_friendly">Transfer friendly</option>
-            <option value="value">Value focused</option>
+            <option value="max_points">Max Points</option>
+            <option value="current_friendly">Transfer Friendly</option>
           </select>
+          <span class="field-note">Max Points ignores transfers when ranking. Transfer Friendly only uses free transfers.</span>
         </label>
 
         <button id="optimize-button" type="submit">Optimize Team</button>
@@ -138,7 +138,7 @@
 
         <div class="score-strip">
           <div>
-            <span>Net points</span>
+            <span>Projected points</span>
             <strong id="net-points">--</strong>
           </div>
           <div>
@@ -194,7 +194,7 @@
               <th>Drivers</th>
               <th>Constructors</th>
               <th>Cost</th>
-              <th>Net Pts</th>
+              <th>Proj Pts</th>
               <th>Transfers</th>
             </tr>
           </thead>
