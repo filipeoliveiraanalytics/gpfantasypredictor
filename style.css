@@ -165,6 +165,27 @@ select {
   width: 100%;
 }
 
+.picker-trigger {
+  align-items: center;
+  background: #090e1a;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  color: var(--text);
+  display: flex;
+  font: inherit;
+  font-weight: 800;
+  justify-content: space-between;
+  margin: 0;
+  padding: 13px 14px;
+  width: 100%;
+}
+
+.picker-trigger span:last-child {
+  color: var(--teal);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
 input:focus,
 select:focus {
   border-color: var(--teal);
@@ -217,19 +238,19 @@ button {
 }
 
 .chip {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--line);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--team-color) 28%, #161b29), #171c2a 72%);
+  border: 1px solid color-mix(in srgb, var(--team-color) 48%, var(--line));
   border-radius: 999px;
   color: var(--text);
   padding: 9px 12px;
 }
 
 .chip strong {
-  color: var(--yellow);
+  color: var(--team-color);
 }
 
 .constructors .chip strong {
-  color: var(--teal);
+  color: var(--team-color);
 }
 
 .transfer-card {
@@ -275,6 +296,97 @@ td {
   color: #e7eaf4;
 }
 
+.modal {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.68);
+  display: none;
+  inset: 0;
+  justify-content: center;
+  padding: 22px;
+  position: fixed;
+  z-index: 20;
+}
+
+.modal.open {
+  display: flex;
+}
+
+.modal-card {
+  background: #0c1222;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  max-height: min(760px, calc(100vh - 44px));
+  max-width: 760px;
+  overflow: auto;
+  padding: 24px;
+  width: min(100%, 760px);
+}
+
+.modal-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.modal-close {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+  margin: 0;
+  width: auto;
+}
+
+.picker-help {
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.picker-list {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 18px;
+}
+
+.picker-option {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  color: var(--text);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  margin: 0;
+  padding: 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.picker-option.selected {
+  background: color-mix(in srgb, var(--team-color) 26%, #111827);
+  border-color: var(--team-color);
+}
+
+.option-key {
+  align-items: center;
+  background: var(--team-color);
+  border-radius: 12px;
+  color: #05070b;
+  display: inline-flex;
+  font-weight: 1000;
+  height: 38px;
+  justify-content: center;
+  min-width: 48px;
+}
+
+.picker-option small {
+  display: block;
+  margin-top: 3px;
+}
+
 @media (max-width: 900px) {
   .hero,
   .grid {
@@ -291,6 +403,10 @@ td {
 
   .score-strip,
   .transfer-card {
+    grid-template-columns: 1fr;
+  }
+
+  .picker-list {
     grid-template-columns: 1fr;
   }
 }
