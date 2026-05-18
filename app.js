@@ -422,9 +422,8 @@ async function init() {
   state.drivers = state.projections.filter((row) => row.entity_type === "driver");
   state.constructors = state.projections.filter((row) => row.entity_type === "constructor");
   const sample = state.projections[0];
-  els.status.textContent = `${sample?.next_gp ?? "Next GP"} ${sample?.mode ? `| ${sample.mode}` : ""} model ready.`;
+  els.status.textContent = `${sample?.next_gp ?? "Next GP"} ${sample?.mode ? `| ${sample.mode}` : ""} model ready. Click Optimize Team to run it.`;
   updatePickerSummaries();
-  runOptimization();
 }
 
 els.form.addEventListener("submit", (event) => {
