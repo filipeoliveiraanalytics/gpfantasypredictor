@@ -24,6 +24,7 @@ const state = {
 
 const els = {
   form: document.querySelector("#optimizer-form"),
+  optimizeButton: document.querySelector("#optimize-button"),
   status: document.querySelector("#data-status"),
   budget: document.querySelector("#budget"),
   freeTransfers: document.querySelector("#free-transfers"),
@@ -38,7 +39,6 @@ const els = {
   modal: document.querySelector("#picker-modal"),
   pickerTitle: document.querySelector("#picker-title"),
   pickerHelp: document.querySelector("#picker-help"),
-  pickerSearch: document.querySelector("#picker-search"),
   pickerList: document.querySelector("#picker-list"),
   closePicker: document.querySelector("#close-picker"),
   applyPicker: document.querySelector("#apply-picker"),
@@ -211,6 +211,23 @@ function optimize() {
   render(teams.slice(0, 10));
 }
 
+function runOptimization() {
+  document.body.classList.add("is-optimizing");
+  els.optimizeButton.disabled = true;
+  els.optimizeButton.textContent = "Optimizing...";
+  els.status.textContent = "Calculating the best lineup...";
+
+  requestAnimationFrame(() => {
+    try {
+      optimize();
+    } finally {
+      document.body.classList.remove("is-optimizing");
+      els.optimizeButton.disabled = false;
+      els.optimizeButton.textContent = "Optimize Team";
+    }
+  });
+}
+
 function chip(row) {
   const color = teamColor(row.team);
   return `<span class="chip" style="--team-color:${color}"><strong>${row.key}</strong> ${row.name}</span>`;
@@ -306,25 +323,16 @@ function openPicker(type) {
   state.pickerSelection = new Set(selected);
   els.pickerTitle.textContent = isDriver ? "Choose current drivers" : "Choose current constructors";
   els.pickerHelp.textContent = `Selected ${state.pickerSelection.size} of ${max}. Choose exactly ${max} ${isDriver ? "drivers" : "constructors"}.`;
-  els.pickerSearch.value = "";
   renderPickerOptions(rows);
   els.modal.classList.add("open");
   els.modal.setAttribute("aria-hidden", "false");
-  els.pickerSearch.focus();
 }
 
-function renderPickerOptions(rows, query = "") {
-  const normalizedQuery = query.trim().toLowerCase();
-  const filteredRows = rows
-    .filter((row) => {
-      const haystack = `${row.key} ${row.name} ${row.team}`.toLowerCase();
-      return haystack.includes(normalizedQuery);
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  els.pickerList.innerHTML = filteredRows.length
-    ? filteredRows.map((row) => pickerOption(row, state.pickerSelection.has(row.key))).join("")
-    : `<p class="picker-help">No matches found. Try a driver, constructor, team, or code.</p>`;
+function renderPickerOptions(rows) {
+  els.pickerList.innerHTML = rows
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((row) => pickerOption(row, state.pickerSelection.has(row.key)))
+    .join("");
 }
 
 function pickerOption(row, selected) {
@@ -356,7 +364,7 @@ function applyPicker() {
   else els.constructors.value = value;
   updatePickerSummaries();
   closePicker();
-  optimize();
+  runOptimization();
 }
 
 async function init() {
@@ -368,26 +376,18 @@ async function init() {
   const sample = state.projections[0];
   els.status.textContent = `${sample?.next_gp ?? "Next GP"} ${sample?.mode ? `| ${sample.mode}` : ""} model ready.`;
   updatePickerSummaries();
-  optimize();
+  runOptimization();
 }
 
 els.form.addEventListener("submit", (event) => {
   event.preventDefault();
-  optimize();
+  runOptimization();
 });
 
 els.openDriverPicker.addEventListener("click", () => openPicker("driver"));
 els.openConstructorPicker.addEventListener("click", () => openPicker("constructor"));
 els.closePicker.addEventListener("click", closePicker);
 els.applyPicker.addEventListener("click", applyPicker);
-els.boostMode.addEventListener("change", optimize);
-els.strategy.addEventListener("change", optimize);
-els.budget.addEventListener("change", optimize);
-els.freeTransfers.addEventListener("change", optimize);
-els.pickerSearch.addEventListener("input", () => {
-  const rows = state.pickerType === "driver" ? state.drivers : state.constructors;
-  renderPickerOptions(rows, els.pickerSearch.value);
-});
 els.modal.addEventListener("click", (event) => {
   if (event.target === els.modal) closePicker();
 });
@@ -403,7 +403,7 @@ els.pickerList.addEventListener("click", (event) => {
   }
   els.pickerHelp.textContent = `Selected ${state.pickerSelection.size} of ${max}.`;
   const rows = state.pickerType === "driver" ? state.drivers : state.constructors;
-  renderPickerOptions(rows, els.pickerSearch.value);
+  renderPickerOptions(rows);
 });
 
 init().catch((error) => {

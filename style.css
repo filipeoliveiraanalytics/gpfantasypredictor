@@ -26,6 +26,11 @@ body {
   font-family: "Segoe UI", "Trebuchet MS", sans-serif;
 }
 
+body.is-optimizing,
+body.is-optimizing * {
+  cursor: progress !important;
+}
+
 .shell {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
@@ -234,6 +239,10 @@ button {
   width: 100%;
 }
 
+button:disabled {
+  opacity: 0.68;
+}
+
 .disclaimer {
   font-size: 0.82rem;
   line-height: 1.45;
@@ -380,10 +389,6 @@ td {
 
 .picker-help {
   color: var(--muted);
-  margin-bottom: 12px;
-}
-
-.picker-search {
   margin-bottom: 16px;
 }
 

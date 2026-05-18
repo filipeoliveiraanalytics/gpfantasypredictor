@@ -44,7 +44,7 @@
           <span class="step">01</span>
           <div>
             <h2>Your Team</h2>
-            <p>Pick your current lineup. Search by name, team, or code.</p>
+            <p>Pick your current lineup, then run the optimizer.</p>
           </div>
         </div>
 
@@ -95,7 +95,7 @@
           </select>
         </label>
 
-        <button type="submit">Optimize Team</button>
+        <button id="optimize-button" type="submit">Optimize Team</button>
         <p class="disclaimer">Not affiliated with Formula 1. Projections are model estimates, not guarantees.</p>
       </form>
 
@@ -187,7 +187,6 @@
         <button class="modal-close" id="close-picker" type="button">Close</button>
       </div>
       <p class="picker-help" id="picker-help">Select the required number of assets.</p>
-      <input class="picker-search" id="picker-search" type="search" placeholder="Search by driver, constructor, team or code" />
       <div class="picker-list" id="picker-list"></div>
       <button id="apply-picker" type="button">Apply selection</button>
     </div>
