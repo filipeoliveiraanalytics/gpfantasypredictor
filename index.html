@@ -52,15 +52,15 @@
         </div>
         <p class="hero-copy">
           Turn GP predictions into fantasy picks. Enter your current team and budget, then let the model search every
-          valid 5-driver + 2-constructor lineup.
+          valid 5driver + 2constructor lineup.
         </p>
       </div>
-      <aside class="forecast-cta" aria-label="Full GP forecast">
+      <aside class="forecast-cta" aria-label="Full GP Predictor">
         <span>Want the race context?</span>
-        <strong>See the full GP forecast behind the optimizer.</strong>
+        <strong>See the full GP Predictor behind the optimizer.</strong>
         <a class="analysis-link" id="forecast-link" href="https://www.filipeoliveiraanalytics.com/" target="_blank"
           rel="noreferrer">
-          Open full GP forecast
+          Open full GP Predictor
         </a>
       </aside>
     </section>
@@ -71,7 +71,7 @@
         <p>
           The optimizer combines the latest GP prediction model, F1 Fantasy prices, expected qualifying/race points,
           transfer penalties and the recommended mandatory driver boost. It is built for lineup decisions before team lock, with deeper race
-          context available in the full GP forecast.
+          context available in the full GP Predictor.
         </p>
       </div>
     </section>
@@ -206,15 +206,21 @@
   </main>
 
   <div class="cookie-banner" id="cookie-banner" hidden>
-    <div>
-      <strong>Analytics cookies</strong>
+    <div class="cookie-card" role="dialog" aria-modal="true" aria-label="Analytics cookie consent">
       <p>
-        I use Google Analytics to understand visits and optimizer actions. No analytics script loads unless you accept.
+        I use <strong>Google Analytics</strong> to understand how visitors use the site and which optimizer actions are
+        useful. You can accept or reject analytics cookies.
       </p>
-    </div>
-    <div class="cookie-actions">
-      <button id="decline-analytics" type="button">Decline</button>
-      <button id="accept-analytics" type="button">Accept</button>
+      <p class="cookie-links">
+        Read Google's
+        <a href="https://policies.google.com/technologies/cookies" target="_blank" rel="noreferrer">Cookie Policy</a>
+        and
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+      </p>
+      <div class="cookie-actions">
+        <button id="decline-analytics" type="button">Reject</button>
+        <button id="accept-analytics" type="button">Accept</button>
+      </div>
     </div>
   </div>
 
@@ -234,7 +240,7 @@
   </div>
 
   <script>
-    window.GA_MEASUREMENT_ID = "G-XXXXXXXXXX";
+    window.GA_MEASUREMENT_ID = "G-0GCZQDW467";
   </script>
   <script src="app.js"></script>
 </body>
