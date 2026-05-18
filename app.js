@@ -1,4 +1,5 @@
 const DATA_PATH = "data/fantasy_projections.csv";
+const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
 const TEAM_COLORS = {
   Mercedes: "#00d2be",
@@ -51,7 +52,47 @@ const els = {
   transferPenalty: document.querySelector("#transfer-penalty"),
   alternatives: document.querySelector("#alternatives"),
   alternativeCards: document.querySelector("#alternative-cards"),
+  cookieBanner: document.querySelector("#cookie-banner"),
+  acceptAnalytics: document.querySelector("#accept-analytics"),
+  declineAnalytics: document.querySelector("#decline-analytics"),
+  forecastLink: document.querySelector("#forecast-link"),
 };
+
+function hasAnalyticsId() {
+  return window.GA_MEASUREMENT_ID && !window.GA_MEASUREMENT_ID.includes("XXXXXXXXXX");
+}
+
+function loadAnalytics() {
+  if (!hasAnalyticsId() || window.gtag) return;
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function gtag() {
+    window.dataLayer.push(arguments);
+  };
+  window.gtag("js", new Date());
+  window.gtag("config", window.GA_MEASUREMENT_ID, { anonymize_ip: true });
+
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${window.GA_MEASUREMENT_ID}`;
+  document.head.appendChild(script);
+}
+
+function trackEvent(name, params = {}) {
+  if (typeof window.gtag !== "function") return;
+  window.gtag("event", name, params);
+}
+
+function initConsent() {
+  const consent = localStorage.getItem(CONSENT_KEY);
+  if (consent === "accepted") {
+    loadAnalytics();
+    return;
+  }
+  if (consent !== "declined") {
+    els.cookieBanner.hidden = false;
+  }
+}
 
 function parseCsv(text) {
   const rows = [];
@@ -205,7 +246,19 @@ function optimize() {
   }
 
   teams.sort((a, b) => b.strategyScore - a.strategyScore || b.netExpectedPoints - a.netExpectedPoints);
-  render(teams.slice(0, 10));
+  const topTeams = teams.slice(0, 10);
+  render(topTeams);
+
+  if (topTeams[0]) {
+    trackEvent("optimize_team", {
+      strategy: inputs.strategy,
+      free_transfers: inputs.freeTransfers,
+      budget: inputs.budget,
+      recommended_boost: topTeams[0].bestBoost?.key ?? "",
+      transfer_count: topTeams[0].transferCount,
+      paid_transfers: topTeams[0].paidTransfers,
+    });
+  }
 }
 
 function runOptimization() {
@@ -358,6 +411,7 @@ function applyPicker() {
   else els.constructors.value = value;
   updatePickerSummaries();
   els.status.textContent = "Selection applied. Click Optimize Team to refresh the recommendation.";
+  trackEvent("apply_selection", { asset_type: isDriver ? "driver" : "constructor" });
   closePicker();
 }
 
@@ -382,6 +436,19 @@ els.openDriverPicker.addEventListener("click", () => openPicker("driver"));
 els.openConstructorPicker.addEventListener("click", () => openPicker("constructor"));
 els.closePicker.addEventListener("click", closePicker);
 els.applyPicker.addEventListener("click", applyPicker);
+els.acceptAnalytics.addEventListener("click", () => {
+  localStorage.setItem(CONSENT_KEY, "accepted");
+  els.cookieBanner.hidden = true;
+  loadAnalytics();
+  trackEvent("analytics_consent", { choice: "accepted" });
+});
+els.declineAnalytics.addEventListener("click", () => {
+  localStorage.setItem(CONSENT_KEY, "declined");
+  els.cookieBanner.hidden = true;
+});
+els.forecastLink.addEventListener("click", () => {
+  trackEvent("open_full_gp_forecast");
+});
 els.modal.addEventListener("click", (event) => {
   if (event.target === els.modal) closePicker();
 });
@@ -403,3 +470,4 @@ els.pickerList.addEventListener("click", (event) => {
 init().catch((error) => {
   els.status.textContent = error.message;
 });
+initConsent();

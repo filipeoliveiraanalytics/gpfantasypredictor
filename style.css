@@ -54,6 +54,17 @@ body.is-optimizing * {
   text-transform: uppercase;
 }
 
+.brand-lockup {
+  align-items: center;
+  display: flex;
+  gap: 18px;
+}
+
+.brand-lockup img {
+  filter: drop-shadow(0 12px 30px rgba(20, 200, 189, 0.18));
+  flex: 0 0 auto;
+}
+
 h1 {
   font-size: clamp(2.4rem, 6vw, 5.9rem);
   letter-spacing: -0.08em;
@@ -82,6 +93,35 @@ button {
   justify-content: center;
   padding: 14px 20px;
   text-decoration: none;
+}
+
+.forecast-cta {
+  background: rgba(17, 22, 36, 0.78);
+  border: 1px solid rgba(20, 200, 189, 0.28);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  max-width: 330px;
+  padding: 18px;
+}
+
+.forecast-cta span {
+  color: var(--teal);
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.forecast-cta strong {
+  display: block;
+  line-height: 1.35;
+  margin-bottom: 14px;
+}
+
+.forecast-cta .analysis-link {
+  width: 100%;
 }
 
 .model-note {
@@ -134,14 +174,6 @@ button {
   overflow: hidden;
   padding: 24px;
   position: relative;
-}
-
-.panel::before {
-  background: linear-gradient(90deg, var(--teal), var(--yellow), var(--red));
-  content: "";
-  height: 3px;
-  inset: 0 0 auto;
-  position: absolute;
 }
 
 .panel-heading {
@@ -436,6 +468,53 @@ td {
   margin-top: 3px;
 }
 
+.cookie-banner {
+  align-items: center;
+  background: rgba(12, 18, 34, 0.96);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  bottom: 18px;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  left: 50%;
+  max-width: 780px;
+  padding: 16px;
+  position: fixed;
+  transform: translateX(-50%);
+  width: min(calc(100% - 28px), 780px);
+  z-index: 30;
+}
+
+.cookie-banner[hidden] {
+  display: none;
+}
+
+.cookie-banner p {
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 5px 0 0;
+}
+
+.cookie-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+}
+
+.cookie-actions button {
+  margin: 0;
+  padding: 11px 16px;
+  width: auto;
+}
+
+.cookie-actions button:first-child {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
 @media (max-width: 900px) {
   .hero,
   .grid {
@@ -444,6 +523,11 @@ td {
 
   .analysis-link {
     margin-top: 22px;
+  }
+
+  .forecast-cta {
+    margin-top: 22px;
+    max-width: none;
   }
 
   .panel {
@@ -470,8 +554,23 @@ td {
     font-size: clamp(2.2rem, 14vw, 4.4rem);
   }
 
+  .brand-lockup {
+    align-items: flex-start;
+    display: grid;
+  }
+
+  .brand-lockup img {
+    width: 58px;
+  }
+
   .model-note {
     align-items: flex-start;
+    display: grid;
+  }
+
+  .cookie-banner,
+  .cookie-actions {
+    align-items: stretch;
     display: grid;
   }
 
