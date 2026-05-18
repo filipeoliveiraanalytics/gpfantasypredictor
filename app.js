@@ -38,6 +38,7 @@ const els = {
   modal: document.querySelector("#picker-modal"),
   pickerTitle: document.querySelector("#picker-title"),
   pickerHelp: document.querySelector("#picker-help"),
+  pickerSearch: document.querySelector("#picker-search"),
   pickerList: document.querySelector("#picker-list"),
   closePicker: document.querySelector("#close-picker"),
   applyPicker: document.querySelector("#apply-picker"),
@@ -50,6 +51,7 @@ const els = {
   transfersOut: document.querySelector("#transfers-out"),
   transferPenalty: document.querySelector("#transfer-penalty"),
   alternatives: document.querySelector("#alternatives"),
+  alternativeCards: document.querySelector("#alternative-cards"),
 };
 
 function parseCsv(text) {
@@ -222,6 +224,8 @@ function render(teams) {
   const best = teams[0];
   if (!best) {
     els.status.textContent = "No valid team found for this budget.";
+    els.alternatives.innerHTML = "";
+    els.alternativeCards.innerHTML = "";
     return;
   }
 
@@ -248,6 +252,36 @@ function render(teams) {
       </tr>`
     )
     .join("");
+
+  els.alternativeCards.innerHTML = teams
+    .map(
+      (team, index) => `
+      <article class="alternative-card">
+        <header>
+          <span>Lineup #${index + 1}</span>
+          <strong>${formatNumber(team.netExpectedPoints, 1)} pts</strong>
+        </header>
+        <dl>
+          <div>
+            <dt>Drivers</dt>
+            <dd>${team.driverKeys.join(", ")}</dd>
+          </div>
+          <div>
+            <dt>Constructors</dt>
+            <dd>${team.constructorKeys.join(", ")}</dd>
+          </div>
+          <div>
+            <dt>Cost</dt>
+            <dd>${formatNumber(team.totalCost, 1)}M</dd>
+          </div>
+          <div>
+            <dt>Transfers</dt>
+            <dd>${team.transferCount} (${team.paidTransfers} paid)</dd>
+          </div>
+        </dl>
+      </article>`
+    )
+    .join("");
 }
 
 function boostLabel(team) {
@@ -271,13 +305,26 @@ function openPicker(type) {
   const max = isDriver ? 5 : 2;
   state.pickerSelection = new Set(selected);
   els.pickerTitle.textContent = isDriver ? "Choose current drivers" : "Choose current constructors";
-  els.pickerHelp.textContent = `Select exactly ${max} ${isDriver ? "drivers" : "constructors"}.`;
-  els.pickerList.innerHTML = rows
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((row) => pickerOption(row, selected.has(row.key)))
-    .join("");
+  els.pickerHelp.textContent = `Selected ${state.pickerSelection.size} of ${max}. Choose exactly ${max} ${isDriver ? "drivers" : "constructors"}.`;
+  els.pickerSearch.value = "";
+  renderPickerOptions(rows);
   els.modal.classList.add("open");
   els.modal.setAttribute("aria-hidden", "false");
+  els.pickerSearch.focus();
+}
+
+function renderPickerOptions(rows, query = "") {
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredRows = rows
+    .filter((row) => {
+      const haystack = `${row.key} ${row.name} ${row.team}`.toLowerCase();
+      return haystack.includes(normalizedQuery);
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  els.pickerList.innerHTML = filteredRows.length
+    ? filteredRows.map((row) => pickerOption(row, state.pickerSelection.has(row.key))).join("")
+    : `<p class="picker-help">No matches found. Try a driver, constructor, team, or code.</p>`;
 }
 
 function pickerOption(row, selected) {
@@ -318,7 +365,8 @@ async function init() {
   state.projections = parseCsv(await response.text());
   state.drivers = state.projections.filter((row) => row.entity_type === "driver");
   state.constructors = state.projections.filter((row) => row.entity_type === "constructor");
-  els.status.textContent = "Model data loaded.";
+  const sample = state.projections[0];
+  els.status.textContent = `${sample?.next_gp ?? "Next GP"} ${sample?.mode ? `| ${sample.mode}` : ""} model ready.`;
   updatePickerSummaries();
   optimize();
 }
@@ -333,6 +381,13 @@ els.openConstructorPicker.addEventListener("click", () => openPicker("constructo
 els.closePicker.addEventListener("click", closePicker);
 els.applyPicker.addEventListener("click", applyPicker);
 els.boostMode.addEventListener("change", optimize);
+els.strategy.addEventListener("change", optimize);
+els.budget.addEventListener("change", optimize);
+els.freeTransfers.addEventListener("change", optimize);
+els.pickerSearch.addEventListener("input", () => {
+  const rows = state.pickerType === "driver" ? state.drivers : state.constructors;
+  renderPickerOptions(rows, els.pickerSearch.value);
+});
 els.modal.addEventListener("click", (event) => {
   if (event.target === els.modal) closePicker();
 });
@@ -343,12 +398,12 @@ els.pickerList.addEventListener("click", (event) => {
   const key = option.dataset.key;
   if (state.pickerSelection.has(key)) {
     state.pickerSelection.delete(key);
-    option.classList.remove("selected");
   } else if (state.pickerSelection.size < max) {
     state.pickerSelection.add(key);
-    option.classList.add("selected");
   }
   els.pickerHelp.textContent = `Selected ${state.pickerSelection.size} of ${max}.`;
+  const rows = state.pickerType === "driver" ? state.drivers : state.constructors;
+  renderPickerOptions(rows, els.pickerSearch.value);
 });
 
 init().catch((error) => {

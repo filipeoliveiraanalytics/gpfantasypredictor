@@ -79,6 +79,42 @@ button {
   text-decoration: none;
 }
 
+.model-note {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(20, 200, 189, 0.12), rgba(240, 200, 75, 0.08));
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  padding: 18px 20px;
+}
+
+.model-note strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.model-note p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 860px;
+}
+
+.model-note span {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--yellow);
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 900;
+  padding: 9px 12px;
+  text-transform: uppercase;
+}
+
 .grid {
   display: grid;
   gap: 22px;
@@ -272,6 +308,10 @@ button {
   overflow-x: auto;
 }
 
+.alternative-cards {
+  display: none;
+}
+
 table {
   border-collapse: collapse;
   width: 100%;
@@ -340,6 +380,10 @@ td {
 
 .picker-help {
   color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.picker-search {
   margin-bottom: 16px;
 }
 
@@ -408,5 +452,67 @@ td {
 
   .picker-list {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    width: min(100% - 22px, 1180px);
+    padding: 24px 0;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 14vw, 4.4rem);
+  }
+
+  .model-note {
+    align-items: flex-start;
+    display: grid;
+  }
+
+  .table-wrap {
+    display: none;
+  }
+
+  .alternative-cards {
+    display: grid;
+    gap: 12px;
+  }
+
+  .alternative-card {
+    background: var(--panel-strong);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 15px;
+  }
+
+  .alternative-card header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .alternative-card strong {
+    font-size: 1.2rem;
+  }
+
+  .alternative-card dl {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+  }
+
+  .alternative-card dt {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .alternative-card dd {
+    margin: 4px 0 0;
   }
 }

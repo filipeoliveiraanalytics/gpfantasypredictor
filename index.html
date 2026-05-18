@@ -26,13 +26,25 @@
       </a>
     </section>
 
+    <section class="model-note">
+      <div>
+        <strong>How the recommendation works</strong>
+        <p>
+          The optimizer combines the latest GP prediction model, F1 Fantasy prices, expected qualifying/race points,
+          transfer penalties and your selected boost. It is built for lineup decisions before team lock, with deeper race
+          context available in the full GP forecast.
+        </p>
+      </div>
+      <span>Fan-made model</span>
+    </section>
+
     <section class="grid">
       <form class="panel controls" id="optimizer-form">
         <div class="panel-heading">
           <span class="step">01</span>
           <div>
             <h2>Your Team</h2>
-            <p>Use driver/constructor keys from F1 Fantasy.</p>
+            <p>Pick your current lineup. Search by name, team, or code.</p>
           </div>
         </div>
 
@@ -92,7 +104,7 @@
           <span class="step">02</span>
           <div>
             <h2>Recommended Lineup</h2>
-            <p id="data-status">Loading model data...</p>
+            <p id="data-status">Fill in your team and click Optimize Team.</p>
           </div>
         </div>
 
@@ -161,6 +173,7 @@
           <tbody id="alternatives"></tbody>
         </table>
       </div>
+      <div class="alternative-cards" id="alternative-cards"></div>
     </section>
   </main>
 
@@ -174,6 +187,7 @@
         <button class="modal-close" id="close-picker" type="button">Close</button>
       </div>
       <p class="picker-help" id="picker-help">Select the required number of assets.</p>
+      <input class="picker-search" id="picker-search" type="search" placeholder="Search by driver, constructor, team or code" />
       <div class="picker-list" id="picker-list"></div>
       <button id="apply-picker" type="button">Apply selection</button>
     </div>
