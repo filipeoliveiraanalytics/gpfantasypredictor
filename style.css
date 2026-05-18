@@ -493,7 +493,7 @@ td {
 }
 
 .cookie-links a {
-  color: #ffb14a;
+  color: var(--teal);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -518,8 +518,8 @@ td {
 }
 
 .cookie-actions button:last-child {
-  background: #ff9f32;
-  box-shadow: 0 10px 24px rgba(255, 159, 50, 0.28);
+  background: var(--teal);
+  box-shadow: 0 10px 24px rgba(20, 200, 189, 0.24);
   color: #05070b;
 }
 
