@@ -83,6 +83,24 @@ function trackEvent(name, params = {}) {
   window.gtag("event", name, params);
 }
 
+function assetByKey(type, key) {
+  return state.projections.find((row) => row.entity_type === type && row.key === key);
+}
+
+function trackAssetSet(eventName, keys, type, context = {}) {
+  keys.forEach((key, index) => {
+    const asset = assetByKey(type, key);
+    trackEvent(eventName, {
+      ...context,
+      asset_type: type,
+      asset_key: key,
+      asset_name: asset?.name ?? key,
+      asset_team: asset?.team ?? "",
+      asset_slot: index + 1,
+    });
+  });
+}
+
 function initConsent() {
   const consent = localStorage.getItem(CONSENT_KEY);
   if (consent === "accepted") {
@@ -252,14 +270,32 @@ function optimize() {
   render(topTeams);
 
   if (topTeams[0]) {
+    const currentDriverKeys = [...inputs.currentDrivers];
+    const currentConstructorKeys = [...inputs.currentConstructors];
+    const recommended = topTeams[0];
+    const modelContext = {
+      strategy: inputs.strategy,
+      next_gp: recommended.drivers[0]?.next_gp ?? "",
+      model_mode: recommended.drivers[0]?.mode ?? "",
+    };
+
     trackEvent("optimize_team", {
       strategy: inputs.strategy,
       free_transfers: inputs.freeTransfers,
       budget: inputs.budget,
-      recommended_boost: topTeams[0].bestBoost?.key ?? "",
-      transfer_count: topTeams[0].transferCount,
-      paid_transfers: topTeams[0].paidTransfers,
+      current_drivers: currentDriverKeys.join("|"),
+      current_constructors: currentConstructorKeys.join("|"),
+      recommended_drivers: recommended.driverKeys.join("|"),
+      recommended_constructors: recommended.constructorKeys.join("|"),
+      recommended_boost: recommended.bestBoost?.key ?? "",
+      transfer_count: recommended.transferCount,
+      paid_transfers: recommended.paidTransfers,
     });
+
+    trackAssetSet("fantasy_asset_selected", currentDriverKeys, "driver", modelContext);
+    trackAssetSet("fantasy_asset_selected", currentConstructorKeys, "constructor", modelContext);
+    trackAssetSet("fantasy_asset_recommended", recommended.driverKeys, "driver", modelContext);
+    trackAssetSet("fantasy_asset_recommended", recommended.constructorKeys, "constructor", modelContext);
   }
 }
 
