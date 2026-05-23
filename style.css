@@ -74,6 +74,29 @@ h1 {
   max-width: 680px;
 }
 
+.model-update-pill {
+  align-items: center;
+  background: rgba(20, 200, 189, 0.12);
+  border: 1px solid rgba(20, 200, 189, 0.34);
+  border-radius: 999px;
+  color: var(--text);
+  display: inline-flex;
+  font-size: 0.88rem;
+  font-weight: 800;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 8px 12px;
+}
+
+.model-update-pill::before {
+  background: var(--teal);
+  border-radius: 999px;
+  box-shadow: 0 0 16px rgba(20, 200, 189, 0.65);
+  content: "";
+  height: 8px;
+  width: 8px;
+}
+
 .analysis-link,
 button {
   background: var(--text);
