@@ -326,19 +326,322 @@ button:disabled {
 }
 
 .chip {
+  align-items: center;
   background: linear-gradient(135deg, color-mix(in srgb, var(--team-color) 28%, #161b29), #171c2a 72%);
   border: 1px solid color-mix(in srgb, var(--team-color) 48%, var(--line));
-  border-radius: 999px;
+  border-radius: 18px;
   color: var(--text);
-  padding: 9px 12px;
+  display: inline-flex;
+  gap: 10px;
+  min-height: 58px;
+  padding: 8px 12px 8px 8px;
+}
+
+.chip-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
 }
 
 .chip strong {
   color: var(--team-color);
+  font-size: 0.78rem;
+  line-height: 1;
 }
 
-.constructors .chip strong {
-  color: var(--team-color);
+.chip-copy span {
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.driver-avatar,
+.constructor-mark {
+  flex: 0 0 auto;
+}
+
+.driver-avatar {
+  --avatar-size: 46px;
+  align-items: center;
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.74), transparent 0.28rem),
+    linear-gradient(145deg, color-mix(in srgb, var(--team-color) 44%, #23304a), #080d19 78%);
+  border: 1px solid color-mix(in srgb, var(--team-color) 62%, #ffffff);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 -8px 14px rgba(0, 0, 0, 0.28),
+    0 10px 24px color-mix(in srgb, var(--team-color) 22%, transparent);
+  display: inline-flex;
+  height: var(--avatar-size);
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  width: var(--avatar-size);
+}
+
+.driver-avatar__photo {
+  height: 100%;
+  inset: 0;
+  object-fit: cover;
+  object-position: 50% 18%;
+  position: absolute;
+  width: 100%;
+  z-index: 2;
+}
+
+.driver-avatar--photo {
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--team-color) 40%, #172033), #070b15);
+}
+
+.driver-avatar--photo .driver-avatar__suit,
+.driver-avatar--photo .driver-avatar__neck,
+.driver-avatar--photo .driver-avatar__ear,
+.driver-avatar--photo .driver-avatar__head,
+.driver-avatar--photo .driver-avatar__hair,
+.driver-avatar--photo .driver-avatar__brows,
+.driver-avatar--photo .driver-avatar__eyes,
+.driver-avatar--photo .driver-avatar__nose,
+.driver-avatar--photo .driver-avatar__beard,
+.driver-avatar--photo .driver-avatar__smile {
+  display: none;
+}
+
+.driver-avatar__suit {
+  background:
+    linear-gradient(90deg, transparent 43%, rgba(255, 255, 255, 0.85) 45% 55%, transparent 57%),
+    radial-gradient(circle at 50% 0, rgba(255, 255, 255, 0.24), transparent 30%),
+    linear-gradient(135deg, color-mix(in srgb, var(--team-color) 90%, #ffffff), color-mix(in srgb, var(--team-color) 66%, #05070b));
+  border-radius: 50% 50% 0 0;
+  bottom: -12%;
+  height: 41%;
+  left: 10%;
+  position: absolute;
+  right: 10%;
+}
+
+.driver-avatar__neck {
+  background: color-mix(in srgb, var(--avatar-skin) 86%, #7b4c32);
+  border-radius: 0 0 999px 999px;
+  bottom: 20%;
+  height: 20%;
+  left: 38%;
+  position: absolute;
+  right: 38%;
+}
+
+.driver-avatar__ear {
+  background: color-mix(in srgb, var(--avatar-skin) 92%, #8a5a3d);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 999px;
+  height: 19%;
+  position: absolute;
+  top: 38%;
+  width: 10%;
+}
+
+.driver-avatar__ear--left {
+  left: 23%;
+}
+
+.driver-avatar__ear--right {
+  right: 23%;
+}
+
+.driver-avatar__head {
+  background:
+    radial-gradient(circle at 34% 38%, rgba(255, 255, 255, 0.25), transparent 0.18rem),
+    radial-gradient(circle at 72% 60%, rgba(70, 35, 24, 0.12), transparent 0.24rem),
+    var(--avatar-skin);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 43% 43% 47% 47%;
+  height: 56%;
+  left: 25%;
+  position: absolute;
+  top: 19%;
+  transform: rotate(var(--avatar-tilt));
+  width: 50%;
+}
+
+.driver-avatar__hair {
+  background: var(--avatar-hair);
+  border-radius: 999px 999px 42% 42%;
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.14);
+  height: var(--avatar-hair-height);
+  left: calc((100% - var(--avatar-hair-width)) / 2);
+  position: absolute;
+  top: 14%;
+  transform: rotate(var(--avatar-tilt));
+  width: var(--avatar-hair-width);
+}
+
+.driver-avatar__hair::after {
+  background: var(--avatar-hair);
+  border-radius: 999px 0 999px 0;
+  content: "";
+  height: 82%;
+  left: var(--avatar-hairline);
+  position: absolute;
+  top: 45%;
+  width: 46%;
+}
+
+.driver-avatar__brows {
+  border-top: 2px solid rgba(20, 16, 15, var(--avatar-brow));
+  border-radius: 999px;
+  box-shadow: 10px 0 0 -1px rgba(20, 16, 15, var(--avatar-brow));
+  height: 4px;
+  left: calc(50% - 9px);
+  position: absolute;
+  top: 43%;
+  width: 7px;
+}
+
+.driver-avatar__eyes {
+  background: #101827;
+  border-radius: 50%;
+  box-shadow:
+    10px 0 0 #101827,
+    0 1px 0 rgba(255, 255, 255, 0.22),
+    10px 1px 0 rgba(255, 255, 255, 0.22);
+  height: 3px;
+  left: calc(50% - 7px);
+  position: absolute;
+  top: 47%;
+  width: 3px;
+}
+
+.driver-avatar__nose {
+  border-right: 2px solid rgba(76, 45, 31, 0.26);
+  border-bottom: 2px solid rgba(76, 45, 31, 0.2);
+  border-radius: 0 0 999px 0;
+  height: 10%;
+  left: 50%;
+  position: absolute;
+  top: 48%;
+  width: 6%;
+}
+
+.driver-avatar__smile {
+  border-bottom: 2px solid rgba(16, 24, 39, 0.62);
+  border-radius: 999px;
+  height: 7px;
+  left: 41%;
+  position: absolute;
+  top: 58%;
+  width: 18%;
+}
+
+.driver-avatar__beard {
+  background:
+    radial-gradient(circle at 50% -8%, transparent 40%, color-mix(in srgb, var(--avatar-hair) 82%, transparent) 42% 68%, transparent 70%);
+  border-radius: 0 0 999px 999px;
+  height: 24%;
+  left: 29%;
+  opacity: var(--avatar-beard);
+  position: absolute;
+  top: 52%;
+  transform: rotate(var(--avatar-tilt));
+  width: 42%;
+}
+
+.driver-avatar__code {
+  background: rgba(5, 7, 11, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  bottom: 3px;
+  color: #ffffff;
+  font-size: 0.58rem;
+  font-weight: 1000;
+  line-height: 1;
+  padding: 2px 4px;
+  position: absolute;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  z-index: 3;
+}
+
+.driver-avatar--picker {
+  --avatar-size: 56px;
+}
+
+.driver-avatar--mini {
+  --avatar-size: 30px;
+}
+
+.driver-avatar--mini .driver-avatar__code {
+  display: none;
+}
+
+.driver-avatar--mini .driver-avatar__eyes {
+  box-shadow: 7px 0 0 #101827;
+  height: 2px;
+  left: calc(50% - 5px);
+  width: 2px;
+}
+
+.driver-avatar--mini .driver-avatar__brows,
+.driver-avatar--mini .driver-avatar__nose,
+.driver-avatar--mini .driver-avatar__ear {
+  display: none;
+}
+
+.driver-avatar--mini .driver-avatar__smile {
+  border-bottom-width: 1px;
+  height: 5px;
+}
+
+.constructor-mark {
+  align-items: center;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--team-color) 86%, #ffffff), color-mix(in srgb, var(--team-color) 68%, #05070b));
+  border: 1px solid color-mix(in srgb, var(--team-color) 65%, #ffffff);
+  border-radius: 13px;
+  color: #05070b;
+  display: inline-flex;
+  font-size: 0.76rem;
+  font-weight: 1000;
+  height: 42px;
+  justify-content: center;
+  min-width: 48px;
+  padding: 0 8px;
+}
+
+.constructor-mark--picker {
+  height: 50px;
+  min-width: 58px;
+}
+
+.constructor-mark--mini {
+  border-radius: 9px;
+  font-size: 0.66rem;
+  height: 28px;
+  min-width: 36px;
+  padding: 0 6px;
+}
+
+.lineup-list {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 230px;
+  white-space: normal;
+}
+
+.lineup-token {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 900;
+  gap: 6px;
+  padding: 3px 8px 3px 3px;
+}
+
+.lineup-list--constructor {
+  min-width: 112px;
 }
 
 .transfer-card {
@@ -455,6 +758,15 @@ td {
   padding: 12px;
   text-align: left;
   width: 100%;
+}
+
+.picker-option > span:last-child {
+  min-width: 0;
+}
+
+.picker-option strong {
+  display: block;
+  line-height: 1.2;
 }
 
 .picker-option.selected {
@@ -646,5 +958,9 @@ td {
 
   .alternative-card dd {
     margin: 4px 0 0;
+  }
+
+  .alternative-card .lineup-list {
+    min-width: 0;
   }
 }

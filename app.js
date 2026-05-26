@@ -15,10 +15,36 @@ const TEAM_COLORS = {
   "Aston Martin": "#006f62",
 };
 
+const DRIVER_AVATAR_PROFILES = {
+  ANT: { skin: "#d9a071", hair: "#1c1714", hairline: 31, tilt: -2, beard: 0 },
+  RUS: { skin: "#e4b48f", hair: "#4a2f23", hairline: 34, tilt: 2, beard: 0 },
+  HAM: { skin: "#8a593f", hair: "#14100e", hairline: 36, tilt: -3, beard: 0.65 },
+  LEC: { skin: "#d99f76", hair: "#251915", hairline: 29, tilt: -1, beard: 0.35 },
+  PIA: { skin: "#e3b18c", hair: "#5d3d2d", hairline: 39, tilt: 1, beard: 0 },
+  NOR: { skin: "#e2ad83", hair: "#3e2a20", hairline: 26, tilt: -4, beard: 0.12 },
+  VER: { skin: "#e1b48e", hair: "#9b7043", hairline: 37, tilt: 3, beard: 0.18 },
+  BEA: { skin: "#dfaa80", hair: "#3b241a", hairline: 28, tilt: -2, beard: 0 },
+  GAS: { skin: "#d7a17a", hair: "#201612", hairline: 33, tilt: 2, beard: 0.45 },
+  HAD: { skin: "#c88b67", hair: "#17110f", hairline: 30, tilt: -3, beard: 0.18 },
+  ALO: { skin: "#c28a66", hair: "#261914", hairline: 35, tilt: 2, beard: 0.7 },
+  OCO: { skin: "#d4a17e", hair: "#1b1512", hairline: 32, tilt: -2, beard: 0.16 },
+  SAI: { skin: "#c78d68", hair: "#201512", hairline: 30, tilt: 1, beard: 0.55 },
+  LAW: { skin: "#d7a580", hair: "#4a3023", hairline: 33, tilt: -1, beard: 0.12 },
+  BOR: { skin: "#c89471", hair: "#2a1b16", hairline: 31, tilt: 2, beard: 0.12 },
+  HUL: { skin: "#e2b58d", hair: "#b68a50", hairline: 36, tilt: 1, beard: 0.22 },
+  BOT: { skin: "#d6a47d", hair: "#9b7a58", hairline: 38, tilt: -1, beard: 0.65 },
+  STR: { skin: "#d5a07a", hair: "#2d1e18", hairline: 29, tilt: 2, beard: 0.18 },
+  LIN: { skin: "#bd8765", hair: "#15110f", hairline: 27, tilt: -3, beard: 0 },
+  PER: { skin: "#b77957", hair: "#17110f", hairline: 34, tilt: 3, beard: 0.72 },
+  ALB: { skin: "#b98562", hair: "#15100e", hairline: 32, tilt: -1, beard: 0.22 },
+  COL: { skin: "#c88e68", hair: "#2b1b15", hairline: 29, tilt: 1, beard: 0.12 },
+};
+
 const state = {
   projections: [],
   drivers: [],
   constructors: [],
+  driverPhotos: new Set(),
   pickerType: null,
   pickerSelection: new Set(),
 };
@@ -193,6 +219,67 @@ function teamColor(team) {
   return TEAM_COLORS[team] || "#f0c84b";
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function hashKey(value) {
+  return String(value ?? "")
+    .split("")
+    .reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) % 997, 7);
+}
+
+function driverAvatar(row, size = "default") {
+  const hash = hashKey(row.key);
+  const skinTones = ["#f0c7a5", "#dca77d", "#b97857", "#8d5b42", "#f4d4b8", "#c68a64"];
+  const hairTones = ["#201713", "#4b3024", "#7b563b", "#c09a63", "#111827", "#5d4032"];
+  const profile = DRIVER_AVATAR_PROFILES[row.key] || {};
+  const skin = profile.skin || skinTones[hash % skinTones.length];
+  const hair = profile.hair || hairTones[Math.floor(hash / 7) % hairTones.length];
+  const hairline = profile.hairline || 28 + (hash % 15);
+  const tilt = profile.tilt ?? -7 + (hash % 15);
+  const beard = profile.beard ?? 0;
+  const brow = 0.38 + Math.min(0.38, beard * 0.26 + (hash % 4) * 0.035);
+  const hairHeight = 22 + (hash % 8);
+  const hairWidth = 52 + (hash % 8);
+  const photoKey = row.key.toLowerCase();
+  const hasPhoto = state.driverPhotos.has(photoKey);
+  const photoClass = hasPhoto ? "driver-avatar--photo" : "";
+  const photoMarkup = hasPhoto
+    ? `<img class="driver-avatar__photo" src="assets/drivers/${escapeHtml(photoKey)}.webp" alt="" loading="lazy" onerror="this.parentElement.classList.remove('driver-avatar--photo'); this.remove();" />`
+    : "";
+
+  return `
+    <span class="driver-avatar ${photoClass} driver-avatar--${size} driver-avatar--${escapeHtml(photoKey)}" style="--team-color:${teamColor(row.team)}; --avatar-skin:${skin}; --avatar-hair:${hair}; --avatar-hairline:${hairline}%; --avatar-tilt:${tilt}deg; --avatar-beard:${beard}; --avatar-brow:${brow}; --avatar-hair-height:${hairHeight}%; --avatar-hair-width:${hairWidth}%" aria-hidden="true">
+      ${photoMarkup}
+      <span class="driver-avatar__suit"></span>
+      <span class="driver-avatar__neck"></span>
+      <span class="driver-avatar__ear driver-avatar__ear--left"></span>
+      <span class="driver-avatar__ear driver-avatar__ear--right"></span>
+      <span class="driver-avatar__head"></span>
+      <span class="driver-avatar__hair"></span>
+      <span class="driver-avatar__brows"></span>
+      <span class="driver-avatar__eyes"></span>
+      <span class="driver-avatar__nose"></span>
+      <span class="driver-avatar__beard"></span>
+      <span class="driver-avatar__smile"></span>
+      <span class="driver-avatar__code">${escapeHtml(row.key)}</span>
+    </span>`;
+}
+
+function constructorMark(row, size = "default") {
+  return `<span class="constructor-mark constructor-mark--${size}" style="--team-color:${teamColor(row.team)}" aria-hidden="true">${escapeHtml(row.key)}</span>`;
+}
+
+function entityMark(row, size = "default") {
+  return row.entity_type === "driver" ? driverAvatar(row, size) : constructorMark(row, size);
+}
+
 function summarizeTeam(driverCombo, constructorCombo, inputs) {
   const entities = [...driverCombo, ...constructorCombo];
   const driverKeys = driverCombo.map((row) => row.key);
@@ -318,7 +405,14 @@ function runOptimization() {
 
 function chip(row) {
   const color = teamColor(row.team);
-  return `<span class="chip" style="--team-color:${color}"><strong>${row.key}</strong> ${row.name}</span>`;
+  return `
+    <span class="chip ${row.entity_type === "driver" ? "chip--driver" : "chip--constructor"}" style="--team-color:${color}">
+      ${entityMark(row, "chip")}
+      <span class="chip-copy">
+        <strong>${escapeHtml(row.key)}</strong>
+        <span>${escapeHtml(row.name)}</span>
+      </span>
+    </span>`;
 }
 
 function formatNumber(value, decimals = 1) {
@@ -349,8 +443,8 @@ function render(teams) {
       (team, index) => `
       <tr>
         <td>${index + 1}</td>
-        <td>${team.driverKeys.join(", ")}</td>
-        <td>${team.constructorKeys.join(", ")}</td>
+        <td>${lineupList(team.drivers, "driver")}</td>
+        <td>${lineupList(team.constructors, "constructor")}</td>
         <td>${formatNumber(team.totalCost, 1)}M</td>
         <td>${formatNumber(team.projectedPoints, 1)}</td>
         <td>${team.transferCount} (${team.paidTransfers} paid)</td>
@@ -369,11 +463,11 @@ function render(teams) {
         <dl>
           <div>
             <dt>Drivers</dt>
-            <dd>${team.driverKeys.join(", ")}</dd>
+            <dd>${lineupList(team.drivers, "driver")}</dd>
           </div>
           <div>
             <dt>Constructors</dt>
-            <dd>${team.constructorKeys.join(", ")}</dd>
+            <dd>${lineupList(team.constructors, "constructor")}</dd>
           </div>
           <div>
             <dt>Cost</dt>
@@ -392,6 +486,21 @@ function render(teams) {
 function boostLabel(team) {
   const driver = team.bestBoost;
   return driver ? `${driver.key} x2` : "--";
+}
+
+function lineupList(rows, type) {
+  return `
+    <span class="lineup-list lineup-list--${type}">
+      ${rows
+        .map(
+          (row) => `
+          <span class="lineup-token" title="${escapeHtml(row.name)}">
+            ${entityMark(row, "mini")}
+            <span>${escapeHtml(row.key)}</span>
+          </span>`
+        )
+        .join("")}
+    </span>`;
 }
 
 function updatePickerSummaries() {
@@ -424,10 +533,10 @@ function pickerOption(row, selected) {
   const color = teamColor(row.team);
   return `
     <button class="picker-option ${selected ? "selected" : ""}" type="button" data-key="${row.key}" style="--team-color:${color}">
-      <span class="option-key">${row.key}</span>
+      ${entityMark(row, "picker")}
       <span>
-        <strong>${row.name}</strong>
-        <small>${row.team} | ${formatNumber(toNumber(row.price_m), 1)}M</small>
+        <strong>${escapeHtml(row.name)}</strong>
+        <small>${escapeHtml(row.team)} | ${formatNumber(toNumber(row.price_m), 1)}M</small>
       </span>
     </button>`;
 }
@@ -453,7 +562,19 @@ function applyPicker() {
   closePicker();
 }
 
+async function loadDriverPhotoManifest() {
+  try {
+    const response = await fetch("assets/drivers/manifest.json", { cache: "no-store" });
+    if (!response.ok) return;
+    const manifest = await response.json();
+    state.driverPhotos = new Set((manifest.photos || []).map((key) => String(key).trim().toLowerCase()).filter(Boolean));
+  } catch {
+    state.driverPhotos = new Set();
+  }
+}
+
 async function init() {
+  await loadDriverPhotoManifest();
   const response = await fetch(DATA_PATH);
   if (!response.ok) throw new Error(`Could not load ${DATA_PATH}`);
   state.projections = parseCsv(await response.text());
