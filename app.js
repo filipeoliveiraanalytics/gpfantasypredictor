@@ -1,4 +1,5 @@
-const DATA_PATH = "data/fantasy_projections.csv";
+const ASSET_VERSION = "20260526-photos-prices";
+const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
 const TEAM_COLORS = {
@@ -566,7 +567,7 @@ function applyPicker() {
 async function loadDriverPhotoManifest() {
   for (const basePath of ["assets/drivers", "driver"]) {
     try {
-      const response = await fetch(`${basePath}/manifest.json`, { cache: "no-store" });
+      const response = await fetch(`${basePath}/manifest.json?v=${ASSET_VERSION}`, { cache: "no-store" });
       if (!response.ok) continue;
       const manifest = await response.json();
       state.driverPhotoBasePath = basePath;
