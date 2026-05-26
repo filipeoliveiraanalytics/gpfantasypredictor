@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260526-photos-prices";
+const ASSET_VERSION = "20260526-photos-prices-v2";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
@@ -570,8 +570,11 @@ async function loadDriverPhotoManifest() {
       const response = await fetch(`${basePath}/manifest.json?v=${ASSET_VERSION}`, { cache: "no-store" });
       if (!response.ok) continue;
       const manifest = await response.json();
+      const photoCodes = (manifest.photos?.length ? manifest.photos : manifest.expectedFiles || []).map((key) =>
+        String(key).trim().toLowerCase().replace(/\.webp$/, "")
+      );
       state.driverPhotoBasePath = basePath;
-      state.driverPhotos = new Set((manifest.photos || []).map((key) => String(key).trim().toLowerCase()).filter(Boolean));
+      state.driverPhotos = new Set(photoCodes.filter(Boolean));
       return;
     } catch {
       state.driverPhotos = new Set();
