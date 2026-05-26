@@ -45,6 +45,7 @@ const state = {
   drivers: [],
   constructors: [],
   driverPhotos: new Set(),
+  driverPhotoBasePath: "assets/drivers",
   pickerType: null,
   pickerSelection: new Set(),
 };
@@ -251,7 +252,7 @@ function driverAvatar(row, size = "default") {
   const hasPhoto = state.driverPhotos.has(photoKey);
   const photoClass = hasPhoto ? "driver-avatar--photo" : "";
   const photoMarkup = hasPhoto
-    ? `<img class="driver-avatar__photo" src="assets/drivers/${escapeHtml(photoKey)}.webp" alt="" loading="lazy" onerror="this.parentElement.classList.remove('driver-avatar--photo'); this.remove();" />`
+    ? `<img class="driver-avatar__photo" src="${escapeHtml(state.driverPhotoBasePath)}/${escapeHtml(photoKey)}.webp" alt="" loading="lazy" onerror="this.parentElement.classList.remove('driver-avatar--photo'); this.remove();" />`
     : "";
 
   return `
@@ -563,13 +564,17 @@ function applyPicker() {
 }
 
 async function loadDriverPhotoManifest() {
-  try {
-    const response = await fetch("assets/drivers/manifest.json", { cache: "no-store" });
-    if (!response.ok) return;
-    const manifest = await response.json();
-    state.driverPhotos = new Set((manifest.photos || []).map((key) => String(key).trim().toLowerCase()).filter(Boolean));
-  } catch {
-    state.driverPhotos = new Set();
+  for (const basePath of ["assets/drivers", "driver"]) {
+    try {
+      const response = await fetch(`${basePath}/manifest.json`, { cache: "no-store" });
+      if (!response.ok) continue;
+      const manifest = await response.json();
+      state.driverPhotoBasePath = basePath;
+      state.driverPhotos = new Set((manifest.photos || []).map((key) => String(key).trim().toLowerCase()).filter(Boolean));
+      return;
+    } catch {
+      state.driverPhotos = new Set();
+    }
   }
 }
 

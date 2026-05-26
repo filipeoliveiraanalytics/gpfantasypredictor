@@ -403,7 +403,8 @@ button:disabled {
 .driver-avatar--photo .driver-avatar__eyes,
 .driver-avatar--photo .driver-avatar__nose,
 .driver-avatar--photo .driver-avatar__beard,
-.driver-avatar--photo .driver-avatar__smile {
+.driver-avatar--photo .driver-avatar__smile,
+.driver-avatar--photo .driver-avatar__code {
   display: none;
 }
 
