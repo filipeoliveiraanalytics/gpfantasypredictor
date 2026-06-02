@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260602-alternatives";
+const ASSET_VERSION = "20260602-top5-aligned";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
@@ -457,7 +457,9 @@ function render(teams) {
   els.transfersOut.textContent = [...best.driversOut, ...best.constructorsOut].join(", ") || "None";
   els.transferPenalty.textContent = `${best.transferPenalty.toFixed(0)} pts`;
 
-  els.alternatives.innerHTML = teams
+  const displayTeams = teams.slice(0, 5);
+
+  els.alternatives.innerHTML = displayTeams
     .map(
       (team, index) => `
       <tr class="${index === 0 ? "is-best" : ""}">
@@ -493,7 +495,7 @@ function render(teams) {
     )
     .join("");
 
-  els.alternativeCards.innerHTML = teams
+  els.alternativeCards.innerHTML = displayTeams
     .map(
       (team, index) => `
       <article class="alternative-card ${index === 0 ? "is-best" : ""}">

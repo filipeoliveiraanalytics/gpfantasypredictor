@@ -872,13 +872,14 @@ tr.is-best td {
 
 .alt-lineup {
   display: grid;
-  gap: 9px;
+  gap: 10px;
 }
 
 .alt-lineup > div {
   align-items: center;
-  display: flex;
-  gap: 10px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 104px minmax(0, 1fr);
 }
 
 .alt-lineup > div > span {
@@ -886,7 +887,6 @@ tr.is-best td {
   font-size: 0.72rem;
   font-weight: 1000;
   letter-spacing: 0.08em;
-  min-width: 86px;
   text-transform: uppercase;
 }
 
@@ -1202,5 +1202,11 @@ tr.is-best td {
 
   .alternative-card .alt-tag {
     margin: 0 0 12px;
+  }
+
+  .alt-lineup > div {
+    align-items: start;
+    gap: 6px;
+    grid-template-columns: 1fr;
   }
 }
