@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260602-boost-driver";
+const ASSET_VERSION = "20260602-boost-clean";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
@@ -452,7 +452,7 @@ function boostDriverMarkup(team) {
   return `
     ${driverAvatar(driver, "boost")}
     <span>
-      <b>${escapeHtml(driver.key)} x2</b>
+      <b>${escapeHtml(driver.key)}</b>
       <small>${escapeHtml(driver.name)}</small>
     </span>`;
 }
