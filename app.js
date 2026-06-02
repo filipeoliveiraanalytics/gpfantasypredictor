@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260602-constructor-logos-v2";
+const ASSET_VERSION = "20260602-lineup-card";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
@@ -422,12 +422,14 @@ function runOptimization() {
 
 function chip(row) {
   const color = teamColor(row.team);
+  const price = `${formatNumber(toNumber(row.price_m), 1)}M`;
+  const points = `${formatNumber(toNumber(row.expected_fantasy_points), 1)} pts`;
   return `
     <span class="chip ${row.entity_type === "driver" ? "chip--driver" : "chip--constructor"}" style="--team-color:${color}">
       ${entityMark(row, "chip")}
       <span class="chip-copy">
-        <strong>${escapeHtml(row.key)}</strong>
-        <span>${escapeHtml(row.name)}</span>
+        <strong>${escapeHtml(row.name)}</strong>
+        <span>${escapeHtml(row.team)} | ${price} | ${points}</span>
       </span>
     </span>`;
 }
