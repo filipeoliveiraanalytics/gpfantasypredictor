@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260602-context-lineup";
+const ASSET_VERSION = "20260602-boost-driver";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
@@ -445,6 +445,18 @@ function transferSummary(team) {
   return `${team.transferCount} moves | ${team.paidTransfers} paid`;
 }
 
+function boostDriverMarkup(team) {
+  const driver = team.bestBoost;
+  if (!driver) return "--";
+
+  return `
+    ${driverAvatar(driver, "boost")}
+    <span>
+      <b>${escapeHtml(driver.key)} x2</b>
+      <small>${escapeHtml(driver.name)}</small>
+    </span>`;
+}
+
 function constructorContext(team) {
   const constructorNames = team.constructors.map((row) => row.name).join(" + ");
   const constructorKeys = new Set(team.constructorKeys);
@@ -536,7 +548,7 @@ function render(teams) {
   els.status.textContent = `${best.drivers[0]?.next_gp ?? "Next GP"} | ${best.drivers[0]?.mode ?? "Projection"}`;
   els.netPoints.textContent = formatNumber(best.projectedPoints, 1);
   els.teamCost.textContent = `${formatNumber(best.totalCost, 1)}M`;
-  els.boostDriver.textContent = boostLabel(best);
+  els.boostDriver.innerHTML = boostDriverMarkup(best);
   els.driverList.innerHTML = best.drivers.map(chip).join("");
   els.constructorList.innerHTML = best.constructors.map(chip).join("");
   els.transfersIn.textContent = [...best.driversIn, ...best.constructorsIn].join(", ") || "None";
