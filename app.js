@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260602-lineup-card";
+const ASSET_VERSION = "20260602-alternatives";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
@@ -460,13 +460,35 @@ function render(teams) {
   els.alternatives.innerHTML = teams
     .map(
       (team, index) => `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${lineupList(team.drivers, "driver")}</td>
-        <td>${lineupList(team.constructors, "constructor")}</td>
-        <td>${formatNumber(team.totalCost, 1)}M</td>
-        <td>${formatNumber(team.projectedPoints, 1)}</td>
-        <td>${team.transferCount} (${team.paidTransfers} paid)</td>
+      <tr class="${index === 0 ? "is-best" : ""}">
+        <td>
+          <span class="rank-badge">#${index + 1}</span>
+          ${index === 0 ? `<span class="alt-tag">Recommended</span>` : ""}
+        </td>
+        <td>
+          <div class="alt-lineup">
+            <div>
+              <span>Drivers</span>
+              ${lineupList(team.drivers, "driver")}
+            </div>
+            <div>
+              <span>Constructors</span>
+              ${lineupList(team.constructors, "constructor")}
+            </div>
+          </div>
+        </td>
+        <td>
+          <strong class="alt-score">${formatNumber(team.projectedPoints, 1)}</strong>
+          <span class="alt-sub">Boost ${boostLabel(team)}</span>
+        </td>
+        <td>
+          <strong>${formatNumber(team.totalCost, 1)}M</strong>
+          <span class="alt-sub">${formatNumber(team.budgetRemaining, 1)}M left</span>
+        </td>
+        <td>
+          <span class="transfer-pill ${team.paidTransfers ? "transfer-pill--paid" : ""}">${team.transferCount} moves</span>
+          <span class="alt-sub">${team.paidTransfers ? `${team.paidTransfers} paid` : "Free only"}</span>
+        </td>
       </tr>`
     )
     .join("");
@@ -474,11 +496,12 @@ function render(teams) {
   els.alternativeCards.innerHTML = teams
     .map(
       (team, index) => `
-      <article class="alternative-card">
+      <article class="alternative-card ${index === 0 ? "is-best" : ""}">
         <header>
-          <span>Lineup #${index + 1}</span>
+          <span class="rank-badge">#${index + 1}</span>
           <strong>${formatNumber(team.projectedPoints, 1)} pts</strong>
         </header>
+        ${index === 0 ? `<span class="alt-tag">Recommended</span>` : ""}
         <dl>
           <div>
             <dt>Drivers</dt>
@@ -493,8 +516,12 @@ function render(teams) {
             <dd>${formatNumber(team.totalCost, 1)}M</dd>
           </div>
           <div>
+            <dt>Boost</dt>
+            <dd>${boostLabel(team)}</dd>
+          </div>
+          <div>
             <dt>Transfers</dt>
-            <dd>${team.transferCount} (${team.paidTransfers} paid)</dd>
+            <dd>${team.transferCount} moves | ${team.paidTransfers ? `${team.paidTransfers} paid` : "free only"}</dd>
           </div>
         </dl>
       </article>`
