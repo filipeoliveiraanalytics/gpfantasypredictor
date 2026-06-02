@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260526-photos-prices-v2";
+const ASSET_VERSION = "20260602-constructor-badges";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
@@ -14,6 +14,20 @@ const TEAM_COLORS = {
   Cadillac: "#9b8f80",
   Audi: "#c9ccd1",
   "Aston Martin": "#006f62",
+};
+
+const CONSTRUCTOR_BADGES = {
+  MER: { accent: "#ffffff", ink: "#021512" },
+  FER: { accent: "#ffd700", ink: "#2a050a" },
+  MCL: { accent: "#111827", ink: "#1d0d00" },
+  RBR: { accent: "#ffcc00", ink: "#07142d" },
+  HAA: { accent: "#ed1b2f", ink: "#151719" },
+  ALP: { accent: "#ff8bd5", ink: "#061827" },
+  RBL: { accent: "#f5f7ff", ink: "#09172d" },
+  WIL: { accent: "#ffffff", ink: "#061827" },
+  CAD: { accent: "#d8cbb8", ink: "#17130f" },
+  AUD: { accent: "#f5f7ff", ink: "#111418" },
+  AMR: { accent: "#d7fff4", ink: "#001f1c" },
 };
 
 const DRIVER_AVATAR_PROFILES = {
@@ -275,7 +289,15 @@ function driverAvatar(row, size = "default") {
 }
 
 function constructorMark(row, size = "default") {
-  return `<span class="constructor-mark constructor-mark--${size}" style="--team-color:${teamColor(row.team)}" aria-hidden="true">${escapeHtml(row.key)}</span>`;
+  const key = row.key.toUpperCase();
+  const badge = CONSTRUCTOR_BADGES[key] || { accent: "#ffffff", ink: "#05070b" };
+  return `
+    <span class="constructor-mark constructor-mark--${size} constructor-mark--${escapeHtml(key.toLowerCase())}" style="--team-color:${teamColor(row.team)}; --badge-accent:${badge.accent}; --badge-ink:${badge.ink}" aria-hidden="true">
+      <span class="constructor-mark__field">
+        <span class="constructor-mark__glyph"></span>
+      </span>
+      <span class="constructor-mark__code">${escapeHtml(key)}</span>
+    </span>`;
 }
 
 function entityMark(row, size = "default") {
