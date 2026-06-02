@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260602-chip-colors";
+const ASSET_VERSION = "20260602-x3-card-fix";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 const AVAILABLE_CHIPS_KEY = "gp_fantasy_predictor_available_chips";
@@ -368,8 +368,9 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
   const transferPenalty = paidTransfers * -10;
   const bestBoost = [...driverCombo].sort((a, b) => toNumber(b.expected_fantasy_points) - toNumber(a.expected_fantasy_points))[0];
   const boostBase = toNumber(bestBoost?.expected_fantasy_points);
-  const boostMultiplier = inputs.activeChip === "x3" ? 3 : 2;
-  const boostExtraPoints = boostBase * (boostMultiplier - 1);
+  const boostMultiplier = 2;
+  const chipExtraPoints = inputs.activeChip === "x3" ? boostBase : 0;
+  const boostExtraPoints = boostBase + chipExtraPoints;
   const noNegativeProtection =
     inputs.activeChip === "no_negative"
       ? entities.reduce((sum, row) => sum + Math.abs(Math.min(0, toNumber(row.dnf_penalty_points_est))), 0)
@@ -394,6 +395,7 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
     paidTransfers,
     transferPenalty,
     boostMultiplier,
+    chipExtraPoints,
     boostExtraPoints,
     noNegativeProtection,
     driversIn,
@@ -457,9 +459,10 @@ function trackProfile(team) {
 function applyChipToTeam(team, chip, strategy) {
   if (!team) return team;
   const entities = [...team.drivers, ...team.constructors];
-  const boostMultiplier = chip === "x3" ? 3 : 2;
+  const boostMultiplier = 2;
   const boostBase = toNumber(team.bestBoost?.expected_fantasy_points);
-  const boostExtraPoints = boostBase * (boostMultiplier - 1);
+  const chipExtraPoints = chip === "x3" ? boostBase : 0;
+  const boostExtraPoints = boostBase + chipExtraPoints;
   const noNegativeProtection =
     chip === "no_negative"
       ? entities.reduce((sum, row) => sum + Math.abs(Math.min(0, toNumber(row.dnf_penalty_points_est))), 0)
@@ -473,6 +476,7 @@ function applyChipToTeam(team, chip, strategy) {
     paidTransfers,
     transferPenalty,
     boostMultiplier,
+    chipExtraPoints,
     boostExtraPoints,
     noNegativeProtection,
     projectedPoints,
@@ -649,13 +653,11 @@ function boostDriverMarkup(team) {
   const driver = team.bestBoost;
   if (!driver) return "--";
 
-  const multiplier = team.boostMultiplier === 3 ? "x3" : "";
-
   return `
     ${driverAvatar(driver, "boost")}
     <span>
       <b>${escapeHtml(driver.key)}</b>
-      <small>${escapeHtml([driver.name, multiplier].filter(Boolean).join(" | "))}</small>
+      <small>${escapeHtml(driver.name)}</small>
     </span>`;
 }
 
@@ -781,7 +783,7 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
   els.status.textContent = `${best.drivers[0]?.next_gp ?? "Next GP"} | ${best.drivers[0]?.mode ?? "Projection"}`;
   els.netPoints.textContent = formatNumber(best.projectedPoints, 1);
   els.teamCost.textContent = `${formatNumber(best.totalCost, 1)}M`;
-  els.boostCardLabel.textContent = best.boostMultiplier === 3 ? "x3 boost driver" : "2x boost driver";
+  els.boostCardLabel.textContent = "2x boost driver";
   els.boostDriver.innerHTML = boostDriverMarkup(best);
   els.driverList.innerHTML = best.drivers.map(chip).join("");
   els.constructorList.innerHTML = best.constructors.map(chip).join("");
@@ -870,7 +872,7 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
 
 function boostLabel(team) {
   const driver = team.bestBoost;
-  return driver ? `${driver.key} x${team.boostMultiplier ?? 2}` : "--";
+  return driver ? `${driver.key} x2` : "--";
 }
 
 function lineupList(rows, type) {
