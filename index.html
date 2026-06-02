@@ -32,7 +32,7 @@
   <meta name="twitter:description"
     content="A fan-made F1 Fantasy optimizer powered by GP prediction modelling." />
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png" />
-  <link rel="stylesheet" href="style.css?v=20260602-boost-clean" />
+  <link rel="stylesheet" href="style.css?v=20260602-chip-colors" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -130,8 +130,48 @@
             <option value="max_points">Max Points</option>
             <option value="current_friendly">Transfer Friendly</option>
           </select>
-          <span class="field-note">Max Points ignores transfers when ranking. Transfer Friendly only uses free transfers.</span>
+          <span class="field-note">Max Points ignores transfers when ranking. Transfer Friendly only uses free transfers unless a chip changes the rule.</span>
         </label>
+
+        <div class="chip-controls" aria-label="Available chip controls">
+          <div class="chip-section-heading">
+            <span>Available chips</span>
+            <small>Uncheck chips already used.</small>
+          </div>
+          <div class="fantasy-chip-grid" id="available-chip-options">
+            <label class="fantasy-chip fantasy-chip--limitless">
+              <input type="checkbox" value="limitless" checked />
+              <span>LIM</span>
+              <strong>Limitless</strong>
+            </label>
+            <label class="fantasy-chip fantasy-chip--wildcard">
+              <input type="checkbox" value="wildcard" checked />
+              <span>WC</span>
+              <strong>Wildcard</strong>
+            </label>
+            <label class="fantasy-chip fantasy-chip--final-fix">
+              <input type="checkbox" value="final_fix" checked />
+              <span>FIX</span>
+              <strong>Final Fix</strong>
+            </label>
+            <label class="fantasy-chip fantasy-chip--auto-pilot">
+              <input type="checkbox" value="auto_pilot" checked />
+              <span>AP</span>
+              <strong>Auto Pilot</strong>
+            </label>
+            <label class="fantasy-chip fantasy-chip--no-negative">
+              <input type="checkbox" value="no_negative" checked />
+              <span>NN</span>
+              <strong>No Negative</strong>
+            </label>
+            <label class="fantasy-chip fantasy-chip--x3">
+              <input type="checkbox" value="x3" checked />
+              <span>x3</span>
+              <strong>x3 Boost</strong>
+            </label>
+          </div>
+          <p class="field-note" id="chip-status">All chips available. The model will recommend whether to use one.</p>
+        </div>
 
         <button id="optimize-button" type="submit">Optimize Team</button>
         <p class="disclaimer">Not affiliated with Formula 1. Projections are model estimates, not guarantees.</p>
@@ -156,7 +196,7 @@
             <strong id="team-cost">--</strong>
           </div>
           <div class="score-card boost-card">
-            <span>2x boost driver</span>
+            <span id="boost-card-label">2x boost driver</span>
             <strong class="boost-driver-display" id="boost-driver">--</strong>
           </div>
         </div>
@@ -253,7 +293,7 @@
   <script>
     window.GA_MEASUREMENT_ID = "G-0GCZQDW467";
   </script>
-  <script src="app.js?v=20260602-boost-clean"></script>
+  <script src="app.js?v=20260602-chip-colors"></script>
 </body>
 
 </html>

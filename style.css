@@ -291,6 +291,125 @@ select:focus {
   line-height: 1.4;
 }
 
+.chip-controls {
+  display: grid;
+  gap: 10px;
+  margin: 4px 0 18px;
+}
+
+.chip-section-heading {
+  align-items: end;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.chip-section-heading span {
+  font-weight: 900;
+}
+
+.chip-section-heading small {
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.fantasy-chip-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fantasy-chip {
+  align-items: center;
+  background: color-mix(in srgb, var(--chip-bg) 24%, #090e1a);
+  border: 1px solid color-mix(in srgb, var(--chip-icon) 38%, rgba(255, 255, 255, 0.12));
+  border-radius: 10px;
+  color: var(--text);
+  cursor: pointer;
+  display: grid;
+  gap: 7px;
+  grid-template-columns: 36px minmax(0, 1fr);
+  margin: 0;
+  min-height: 54px;
+  padding: 8px;
+  position: relative;
+}
+
+.fantasy-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fantasy-chip > span {
+  align-items: center;
+  background: var(--chip-icon);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 1000;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.fantasy-chip strong {
+  font-size: 0.82rem;
+  line-height: 1.1;
+}
+
+.fantasy-chip:has(input:checked) {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--chip-bg) 54%, transparent), rgba(255, 255, 255, 0.02)),
+    #101727;
+  border-color: color-mix(in srgb, var(--chip-icon) 72%, #ffffff);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--chip-icon) 16%, transparent),
+    0 12px 26px color-mix(in srgb, var(--chip-icon) 18%, transparent);
+}
+
+.fantasy-chip:has(input:checked) > span {
+  background: var(--chip-icon);
+  color: #ffffff;
+}
+
+.fantasy-chip.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.fantasy-chip--limitless {
+  --chip-bg: #cbd9ee;
+  --chip-icon: #075ac8;
+}
+
+.fantasy-chip--wildcard {
+  --chip-bg: #e9d0cc;
+  --chip-icon: #aa1a12;
+}
+
+.fantasy-chip--final-fix {
+  --chip-bg: #efddc4;
+  --chip-icon: #d07700;
+}
+
+.fantasy-chip--auto-pilot {
+  --chip-bg: #cdebe0;
+  --chip-icon: #00a989;
+}
+
+.fantasy-chip--no-negative {
+  --chip-bg: #ded2ef;
+  --chip-icon: #6644d8;
+}
+
+.fantasy-chip--x3 {
+  --chip-bg: #dce8c9;
+  --chip-icon: #56a70e;
+}
+
 button {
   font-size: 1rem;
   margin-top: 4px;
@@ -398,6 +517,18 @@ button:disabled {
   letter-spacing: 0.12em;
   margin-bottom: 5px;
   text-transform: uppercase;
+}
+
+.chip-recommendation-badge {
+  background: rgba(240, 200, 75, 0.12);
+  border: 1px solid rgba(240, 200, 75, 0.34);
+  border-radius: 999px;
+  color: var(--text);
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 900;
+  margin: 0 0 9px;
+  padding: 6px 10px;
 }
 
 .why-lineup > div > strong {

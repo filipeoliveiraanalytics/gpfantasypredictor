@@ -1,6 +1,17 @@
-const ASSET_VERSION = "20260602-boost-clean";
+const ASSET_VERSION = "20260602-chip-colors";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
+const AVAILABLE_CHIPS_KEY = "gp_fantasy_predictor_available_chips";
+
+const CHIP_CONFIG = {
+  none: { label: "No chip" },
+  limitless: { label: "Limitless" },
+  wildcard: { label: "Wildcard" },
+  final_fix: { label: "Final Fix" },
+  auto_pilot: { label: "Auto Pilot" },
+  no_negative: { label: "No Negative" },
+  x3: { label: "x3 Boost" },
+};
 
 const TEAM_COLORS = {
   Mercedes: "#00d2be",
@@ -63,6 +74,8 @@ const els = {
   drivers: document.querySelector("#drivers"),
   constructors: document.querySelector("#constructors"),
   strategy: document.querySelector("#strategy"),
+  availableChipInputs: [...document.querySelectorAll("#available-chip-options input[type='checkbox']")],
+  chipStatus: document.querySelector("#chip-status"),
   openDriverPicker: document.querySelector("#open-driver-picker"),
   openConstructorPicker: document.querySelector("#open-constructor-picker"),
   driverPickerSummary: document.querySelector("#driver-picker-summary"),
@@ -75,6 +88,7 @@ const els = {
   applyPicker: document.querySelector("#apply-picker"),
   netPoints: document.querySelector("#net-points"),
   teamCost: document.querySelector("#team-cost"),
+  boostCardLabel: document.querySelector("#boost-card-label"),
   boostDriver: document.querySelector("#boost-driver"),
   whyLineup: document.querySelector("#why-lineup"),
   driverList: document.querySelector("#driver-list"),
@@ -221,6 +235,44 @@ function strategyScore(team, strategy) {
   return team.projectedPoints;
 }
 
+function chipLabel(value) {
+  return CHIP_CONFIG[value]?.label ?? "No chip";
+}
+
+function getAvailableChips() {
+  return new Set(els.availableChipInputs.filter((input) => input.checked).map((input) => input.value));
+}
+
+function loadAvailableChips() {
+  const saved = localStorage.getItem(AVAILABLE_CHIPS_KEY);
+  if (saved === null) return;
+
+  const available = parseKeys(saved);
+  els.availableChipInputs.forEach((input) => {
+    input.checked = available.has(input.value.toUpperCase());
+  });
+}
+
+function saveAvailableChips() {
+  localStorage.setItem(AVAILABLE_CHIPS_KEY, [...getAvailableChips()].join(","));
+}
+
+function syncChipAvailability() {
+  const available = getAvailableChips();
+  els.chipStatus.textContent =
+    available.size === 0
+      ? "No chips available. The model will keep standard rules."
+      : `${available.size} ${available.size === 1 ? "chip" : "chips"} available. The model will recommend whether to use one.`;
+}
+
+function hasUnlimitedTransfers(chip) {
+  return chip === "limitless" || chip === "wildcard";
+}
+
+function ignoresBudget(chip) {
+  return chip === "limitless";
+}
+
 function teamColor(team) {
   return TEAM_COLORS[team] || "#f0c84b";
 }
@@ -312,12 +364,17 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
   const constructorsIn = [...newConstructors].filter((key) => !inputs.currentConstructors.has(key));
   const constructorsOut = [...inputs.currentConstructors].filter((key) => !newConstructors.has(key));
   const transferCount = driversIn.length + constructorsIn.length;
-  const paidTransfers = Math.max(0, transferCount - inputs.freeTransfers);
+  const paidTransfers = hasUnlimitedTransfers(inputs.activeChip) ? 0 : Math.max(0, transferCount - inputs.freeTransfers);
   const transferPenalty = paidTransfers * -10;
   const bestBoost = [...driverCombo].sort((a, b) => toNumber(b.expected_fantasy_points) - toNumber(a.expected_fantasy_points))[0];
   const boostBase = toNumber(bestBoost?.expected_fantasy_points);
-  const boostExtraPoints = boostBase;
-  const projectedPoints = expectedPoints + boostExtraPoints;
+  const boostMultiplier = inputs.activeChip === "x3" ? 3 : 2;
+  const boostExtraPoints = boostBase * (boostMultiplier - 1);
+  const noNegativeProtection =
+    inputs.activeChip === "no_negative"
+      ? entities.reduce((sum, row) => sum + Math.abs(Math.min(0, toNumber(row.dnf_penalty_points_est))), 0)
+      : 0;
+  const projectedPoints = expectedPoints + boostExtraPoints + noNegativeProtection;
   const netExpectedPoints = projectedPoints + transferPenalty;
 
   return {
@@ -327,6 +384,7 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
     constructorKeys,
     totalCost,
     budgetRemaining: inputs.budget - totalCost,
+    activeChip: inputs.activeChip,
     expectedPoints,
     projectedPoints,
     netExpectedPoints,
@@ -335,7 +393,9 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
     transferCount,
     paidTransfers,
     transferPenalty,
+    boostMultiplier,
     boostExtraPoints,
+    noNegativeProtection,
     driversIn,
     driversOut,
     constructorsIn,
@@ -344,50 +404,185 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
   };
 }
 
-function optimize() {
-  const inputs = {
+function currentInputs(activeChip = "none") {
+  return {
     budget: toNumber(els.budget.value),
     freeTransfers: Math.max(0, Math.floor(toNumber(els.freeTransfers.value))),
     currentDrivers: parseKeys(els.drivers.value),
     currentConstructors: parseKeys(els.constructors.value),
     strategy: els.strategy.value,
+    activeChip,
   };
+}
 
+function findTopTeams(inputs) {
   const driverCombos = combinations(state.drivers, 5);
   const constructorCombos = combinations(state.constructors, 2);
   const teams = [];
+  const budgetLimit = ignoresBudget(inputs.activeChip) ? Number.POSITIVE_INFINITY : inputs.budget;
 
   for (const driverCombo of driverCombos) {
     const driverCost = driverCombo.reduce((sum, row) => sum + toNumber(row.price_m), 0);
-    if (driverCost > inputs.budget) continue;
+    if (driverCost > budgetLimit) continue;
 
     for (const constructorCombo of constructorCombos) {
       const team = summarizeTeam(driverCombo, constructorCombo, inputs);
-      if (team.totalCost > inputs.budget) continue;
-      if (inputs.strategy === "current_friendly" && team.transferCount > inputs.freeTransfers) continue;
+      if (team.totalCost > budgetLimit) continue;
+      if (inputs.strategy === "current_friendly" && !hasUnlimitedTransfers(inputs.activeChip) && team.transferCount > inputs.freeTransfers) continue;
       team.strategyScore = strategyScore(team, inputs.strategy);
       teams.push(team);
     }
   }
 
   teams.sort((a, b) => b.strategyScore - a.strategyScore || b.projectedPoints - a.projectedPoints);
-  const topTeams = teams.slice(0, 10);
-  render(topTeams);
+  return teams.slice(0, 10);
+}
+
+function topDriverGap(team) {
+  if (!team?.drivers?.length) return 0;
+  const sorted = [...team.drivers].sort((a, b) => toNumber(b.expected_fantasy_points) - toNumber(a.expected_fantasy_points));
+  return toNumber(sorted[0]?.expected_fantasy_points) - toNumber(sorted[1]?.expected_fantasy_points);
+}
+
+function trackProfile(team) {
+  const gp = (team?.drivers?.[0]?.next_gp ?? "").toLowerCase();
+  return {
+    gp,
+    isMonaco: gp.includes("monaco"),
+    isStreet: ["monaco", "singapore", "baku", "jeddah", "las vegas"].some((name) => gp.includes(name)),
+    isSprint: gp.includes("sprint"),
+  };
+}
+
+function applyChipToTeam(team, chip, strategy) {
+  if (!team) return team;
+  const entities = [...team.drivers, ...team.constructors];
+  const boostMultiplier = chip === "x3" ? 3 : 2;
+  const boostBase = toNumber(team.bestBoost?.expected_fantasy_points);
+  const boostExtraPoints = boostBase * (boostMultiplier - 1);
+  const noNegativeProtection =
+    chip === "no_negative"
+      ? entities.reduce((sum, row) => sum + Math.abs(Math.min(0, toNumber(row.dnf_penalty_points_est))), 0)
+      : 0;
+  const paidTransfers = hasUnlimitedTransfers(chip) ? 0 : team.paidTransfers;
+  const transferPenalty = paidTransfers * -10;
+  const projectedPoints = team.expectedPoints + boostExtraPoints + noNegativeProtection;
+  const updatedTeam = {
+    ...team,
+    activeChip: chip,
+    paidTransfers,
+    transferPenalty,
+    boostMultiplier,
+    boostExtraPoints,
+    noNegativeProtection,
+    projectedPoints,
+    netExpectedPoints: projectedPoints + transferPenalty,
+  };
+
+  return {
+    ...updatedTeam,
+    strategyScore: strategyScore(updatedTeam, strategy),
+  };
+}
+
+function recommendChip(base, availableChips) {
+  if (!base || availableChips.size === 0) {
+    return { chip: "none", confidence: "Hold", reason: "No available chip creates a strong enough edge this week." };
+  }
+
+  const profile = trackProfile(base);
+  const result = { chip: "none", confidence: "Hold", reason: "No available chip creates a strong enough edge this week." };
+  const transferPressure = base.paidTransfers > 0 || base.transferCount >= 4;
+  const boostGap = topDriverGap(base);
+  const riskProtection = applyChipToTeam(base, "no_negative", "max_points").noNegativeProtection;
+
+  const candidates = [];
+  if (availableChips.has("final_fix") && (profile.isMonaco || profile.isStreet)) {
+    candidates.push({
+      chip: "final_fix",
+      score: profile.isMonaco ? 12 : 9,
+      confidence: "Strong",
+      reason: `${chipLabel("final_fix")} fits ${base.drivers[0]?.next_gp ?? "this GP"} because qualifying and track position are unusually important. Hold it until after qualifying, then fix one weak grid result.`,
+    });
+  }
+
+  if (availableChips.has("limitless") && (profile.isSprint || (profile.isMonaco && base.budgetRemaining < 0.7 && transferPressure))) {
+    candidates.push({
+      chip: "limitless",
+      score: profile.isSprint ? 13 : 8,
+      confidence: profile.isSprint ? "Strong" : "Medium",
+      reason: `${chipLabel("limitless")} can work as a one-week attack when the best lineup is budget squeezed, especially if premium constructors are important.`,
+    });
+  }
+
+  if (availableChips.has("wildcard") && transferPressure) {
+    candidates.push({
+      chip: "wildcard",
+      score: base.paidTransfers > 0 ? 11 + base.paidTransfers : 7 + base.transferCount,
+      confidence: base.transferCount >= 5 ? "Strong" : "Medium",
+      reason: `${chipLabel("wildcard")} fits because the optimizer wants ${base.transferCount} moves and the free-transfer limit is holding the rebuild back.`,
+    });
+  }
+
+  if (availableChips.has("x3") && boostGap >= 7) {
+    candidates.push({
+      chip: "x3",
+      score: boostGap + (profile.isSprint ? 5 : 0),
+      confidence: boostGap >= 10 ? "Strong" : "Medium",
+      reason: `${chipLabel("x3")} fits because ${base.bestBoost?.key ?? "the top driver"} is clearly ahead of the next boost option by about ${formatNumber(boostGap, 1)} pts.`,
+    });
+  }
+
+  if (availableChips.has("auto_pilot") && boostGap <= 3 && base.drivers.length) {
+    candidates.push({
+      chip: "auto_pilot",
+      score: 7 - boostGap + (profile.isSprint ? 2 : 0),
+      confidence: "Medium",
+      reason: `${chipLabel("auto_pilot")} fits because the best 2x choice is close; letting the game pick after the weekend reduces manual boost risk.`,
+    });
+  }
+
+  if (availableChips.has("no_negative") && (riskProtection >= 8 || profile.isStreet)) {
+    candidates.push({
+      chip: "no_negative",
+      score: riskProtection + (profile.isStreet ? 4 : 0),
+      confidence: riskProtection >= 10 ? "Strong" : "Medium",
+      reason: `${chipLabel("no_negative")} protects about ${formatNumber(riskProtection, 1)} pts of modelled downside, useful on street or chaotic weekends.`,
+    });
+  }
+
+  candidates.sort((a, b) => b.score - a.score);
+  return candidates[0] ?? result;
+}
+
+function optimize() {
+  const baseInputs = currentInputs("none");
+  const availableChips = getAvailableChips();
+  const baseTeams = findTopTeams(baseInputs);
+  const chipRecommendation = recommendChip(baseTeams[0], availableChips);
+  const topTeams = baseTeams
+    .map((team) => applyChipToTeam(team, chipRecommendation.chip, baseInputs.strategy))
+    .sort((a, b) => b.strategyScore - a.strategyScore || b.projectedPoints - a.projectedPoints)
+    .slice(0, 10);
+
+  render(topTeams, chipRecommendation);
 
   if (topTeams[0]) {
-    const currentDriverKeys = [...inputs.currentDrivers];
-    const currentConstructorKeys = [...inputs.currentConstructors];
+    const currentDriverKeys = [...baseInputs.currentDrivers];
+    const currentConstructorKeys = [...baseInputs.currentConstructors];
     const recommended = topTeams[0];
     const modelContext = {
-      strategy: inputs.strategy,
+      strategy: baseInputs.strategy,
       next_gp: recommended.drivers[0]?.next_gp ?? "",
       model_mode: recommended.drivers[0]?.mode ?? "",
     };
 
     trackEvent("optimize_team", {
-      strategy: inputs.strategy,
-      free_transfers: inputs.freeTransfers,
-      budget: inputs.budget,
+      strategy: baseInputs.strategy,
+      free_transfers: baseInputs.freeTransfers,
+      recommended_chip: chipRecommendation.chip,
+      available_chips: [...availableChips].join("|"),
+      budget: baseInputs.budget,
       current_drivers: currentDriverKeys.join("|"),
       current_constructors: currentConstructorKeys.join("|"),
       recommended_drivers: recommended.driverKeys.join("|"),
@@ -439,6 +634,11 @@ function formatNumber(value, decimals = 1) {
   return value.toLocaleString(undefined, { maximumFractionDigits: decimals, minimumFractionDigits: decimals });
 }
 
+function budgetLeftLabel(team) {
+  if (team.activeChip === "limitless") return "Limitless";
+  return `${formatNumber(team.budgetRemaining, 1)}M left`;
+}
+
 function transferSummary(team) {
   if (team.transferCount === 0) return "No transfers needed";
   if (team.paidTransfers === 0) return `${team.transferCount} free ${team.transferCount === 1 ? "move" : "moves"}`;
@@ -449,12 +649,38 @@ function boostDriverMarkup(team) {
   const driver = team.bestBoost;
   if (!driver) return "--";
 
+  const multiplier = team.boostMultiplier === 3 ? "x3" : "";
+
   return `
     ${driverAvatar(driver, "boost")}
     <span>
       <b>${escapeHtml(driver.key)}</b>
-      <small>${escapeHtml(driver.name)}</small>
+      <small>${escapeHtml([driver.name, multiplier].filter(Boolean).join(" | "))}</small>
     </span>`;
+}
+
+function chipContext(team, recommendation) {
+  const chip = recommendation?.chip ?? team.activeChip;
+  if (recommendation?.reason) return recommendation.reason;
+  if (chip === "limitless") {
+    return "Limitless ignores budget and transfer penalties, so this is treated as a one-week points attack rather than a permanent squad.";
+  }
+  if (chip === "wildcard") {
+    return "Wildcard removes transfer penalties while staying under budget, so the recommendation can reshape the team without move costs.";
+  }
+  if (chip === "final_fix") {
+    return "Final Fix is best judged after qualifying; use this lineup as the baseline, then repair one weak grid result before the race.";
+  }
+  if (chip === "auto_pilot") {
+    return `Auto Pilot fits if you do not want to manually choose the 2x driver; the model currently expects ${team.bestBoost?.key ?? "the top driver"} to lead this lineup.`;
+  }
+  if (chip === "no_negative") {
+    return `No Negative adds about ${formatNumber(team.noNegativeProtection, 1)} pts of downside protection from the model's negative-risk estimates.`;
+  }
+  if (chip === "x3") {
+    return `x3 Boost makes ${team.bestBoost?.key ?? "the top driver"} the chip focus, lifting the projected boost from 2x to 3x.`;
+  }
+  return "No chip recommended, so the result keeps standard budget and transfer rules.";
 }
 
 function constructorContext(team) {
@@ -478,13 +704,16 @@ function budgetContext(team) {
   if (team.paidTransfers > 0) {
     return `${transferSummary(team)} with ${budgetLeft} left. The projection still clears the transfer hit, but it is a more aggressive play.`;
   }
+  if (team.activeChip === "limitless") {
+    return `${transferSummary(team)} and no budget cap for this GP. The displayed cost shows what this one-week lineup would normally cost.`;
+  }
   if (team.budgetRemaining < 0.3) {
     return `${transferSummary(team)} and nearly all budget used. That is acceptable here because Monaco rewards concentrated qualifying strength.`;
   }
   return `${transferSummary(team)} with ${budgetLeft} left, so the lineup improves projection without spending paid transfers.`;
 }
 
-function trackContext(team) {
+function trackContext(team, recommendation) {
   const gp = team.drivers[0]?.next_gp ?? "this GP";
   if (gp.toLowerCase().includes("monaco")) {
     return {
@@ -494,6 +723,7 @@ function trackContext(team) {
       insights: [
         ["Track logic", "Clean qualifying matters because race recovery is limited and position-change upside is harder to find."],
         ["Constructor logic", constructorContext(team)],
+        ["Chip logic", chipContext(team, recommendation)],
         ["Budget logic", budgetContext(team)],
       ],
     };
@@ -506,18 +736,21 @@ function trackContext(team) {
     insights: [
       ["Track logic", "The model weights qualifying, race finish, position-change and reliability estimates for this GP."],
       ["Constructor logic", constructorContext(team)],
+      ["Chip logic", chipContext(team, recommendation)],
       ["Budget logic", budgetContext(team)],
     ],
   };
 }
 
-function renderWhyLineup(team) {
-  const context = trackContext(team);
+function renderWhyLineup(team, recommendation) {
+  const context = trackContext(team, recommendation);
+  const recommendationLabel = recommendation?.chip === "none" ? "Save chips" : `Use ${chipLabel(recommendation?.chip)}`;
 
   els.whyLineup.hidden = false;
   els.whyLineup.innerHTML = `
     <div>
       <span class="why-lineup__kicker">Race context</span>
+      <span class="chip-recommendation-badge">${escapeHtml(recommendationLabel)} · ${escapeHtml(recommendation?.confidence ?? "Hold")}</span>
       <strong>${escapeHtml(context.title)}</strong>
       <p>${escapeHtml(context.summary)}</p>
     </div>
@@ -534,7 +767,7 @@ function renderWhyLineup(team) {
     </ul>`;
 }
 
-function render(teams) {
+function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", reason: "No chip recommended." }) {
   const best = teams[0];
   if (!best) {
     els.status.textContent = "No valid team found for this budget.";
@@ -548,13 +781,14 @@ function render(teams) {
   els.status.textContent = `${best.drivers[0]?.next_gp ?? "Next GP"} | ${best.drivers[0]?.mode ?? "Projection"}`;
   els.netPoints.textContent = formatNumber(best.projectedPoints, 1);
   els.teamCost.textContent = `${formatNumber(best.totalCost, 1)}M`;
+  els.boostCardLabel.textContent = best.boostMultiplier === 3 ? "x3 boost driver" : "2x boost driver";
   els.boostDriver.innerHTML = boostDriverMarkup(best);
   els.driverList.innerHTML = best.drivers.map(chip).join("");
   els.constructorList.innerHTML = best.constructors.map(chip).join("");
   els.transfersIn.textContent = [...best.driversIn, ...best.constructorsIn].join(", ") || "None";
   els.transfersOut.textContent = [...best.driversOut, ...best.constructorsOut].join(", ") || "None";
   els.transferPenalty.textContent = `${best.transferPenalty.toFixed(0)} pts`;
-  renderWhyLineup(best);
+  renderWhyLineup(best, chipRecommendation);
 
   const displayTeams = teams.slice(0, 5);
 
@@ -580,11 +814,11 @@ function render(teams) {
         </td>
         <td>
           <strong class="alt-score">${formatNumber(team.projectedPoints, 1)}</strong>
-          <span class="alt-sub">Boost ${boostLabel(team)}</span>
+          <span class="alt-sub">Boost ${boostLabel(team)}${team.activeChip !== "none" ? ` | ${chipLabel(team.activeChip)}` : ""}</span>
         </td>
         <td>
           <strong>${formatNumber(team.totalCost, 1)}M</strong>
-          <span class="alt-sub">${formatNumber(team.budgetRemaining, 1)}M left</span>
+          <span class="alt-sub">${budgetLeftLabel(team)}</span>
         </td>
         <td>
           <span class="transfer-pill ${team.paidTransfers ? "transfer-pill--paid" : ""}">${team.transferCount} moves</span>
@@ -621,6 +855,10 @@ function render(teams) {
             <dd>${boostLabel(team)}</dd>
           </div>
           <div>
+            <dt>Chip</dt>
+            <dd>${chipLabel(team.activeChip)}</dd>
+          </div>
+          <div>
             <dt>Transfers</dt>
             <dd>${team.transferCount} moves | ${team.paidTransfers ? `${team.paidTransfers} paid` : "free only"}</dd>
           </div>
@@ -632,7 +870,7 @@ function render(teams) {
 
 function boostLabel(team) {
   const driver = team.bestBoost;
-  return driver ? `${driver.key} x2` : "--";
+  return driver ? `${driver.key} x${team.boostMultiplier ?? 2}` : "--";
 }
 
 function lineupList(rows, type) {
@@ -771,6 +1009,8 @@ async function init() {
   const sample = state.projections[0];
   els.status.textContent = `${sample?.next_gp ?? "Next GP"} ${sample?.mode ? `| ${sample.mode}` : ""} model ready. Click Optimize Team to run it.`;
   updatePickerSummaries();
+  loadAvailableChips();
+  syncChipAvailability();
 }
 
 els.form.addEventListener("submit", (event) => {
@@ -780,6 +1020,12 @@ els.form.addEventListener("submit", (event) => {
 
 els.openDriverPicker.addEventListener("click", () => openPicker("driver"));
 els.openConstructorPicker.addEventListener("click", () => openPicker("constructor"));
+els.availableChipInputs.forEach((input) =>
+  input.addEventListener("change", () => {
+    saveAvailableChips();
+    syncChipAvailability();
+  })
+);
 els.closePicker.addEventListener("click", closePicker);
 els.applyPicker.addEventListener("click", applyPicker);
 els.acceptAnalytics.addEventListener("click", () => {
