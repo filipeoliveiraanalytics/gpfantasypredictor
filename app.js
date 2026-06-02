@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260602-top5-aligned";
+const ASSET_VERSION = "20260602-why-lineup";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
@@ -76,6 +76,7 @@ const els = {
   netPoints: document.querySelector("#net-points"),
   teamCost: document.querySelector("#team-cost"),
   boostDriver: document.querySelector("#boost-driver"),
+  whyLineup: document.querySelector("#why-lineup"),
   driverList: document.querySelector("#driver-list"),
   constructorList: document.querySelector("#constructor-list"),
   transfersIn: document.querySelector("#transfers-in"),
@@ -438,12 +439,62 @@ function formatNumber(value, decimals = 1) {
   return value.toLocaleString(undefined, { maximumFractionDigits: decimals, minimumFractionDigits: decimals });
 }
 
+function budgetTone(value) {
+  if (value >= 1) return "positive";
+  if (value >= 0.3) return "watch";
+  return "tight";
+}
+
+function transferSummary(team) {
+  if (team.transferCount === 0) return "No transfers needed";
+  if (team.paidTransfers === 0) return `${team.transferCount} free ${team.transferCount === 1 ? "move" : "moves"}`;
+  return `${team.transferCount} moves | ${team.paidTransfers} paid`;
+}
+
+function tradeoffSummary(team) {
+  const keepsConstructors = team.constructorKeys.length ? `keeps ${team.constructorKeys.join(" + ")} constructors` : "balances constructors";
+  if (team.paidTransfers > 0) return `${keepsConstructors}, but takes a ${Math.abs(team.transferPenalty).toFixed(0)} pt transfer hit`;
+  if (team.budgetRemaining < 0.3) return `${keepsConstructors}, with almost no budget spare`;
+  return `${keepsConstructors}, while staying inside the free transfer plan`;
+}
+
+function renderWhyLineup(team) {
+  const tone = budgetTone(team.budgetRemaining);
+  const items = [
+    ["Projection", "Highest ranked lineup from the current model run"],
+    ["Boost", boostLabel(team)],
+    ["Transfers", transferSummary(team)],
+    ["Budget left", `${formatNumber(team.budgetRemaining, 1)}M`],
+    ["Tradeoff", tradeoffSummary(team)],
+  ];
+
+  els.whyLineup.hidden = false;
+  els.whyLineup.innerHTML = `
+    <div>
+      <span class="why-lineup__kicker">Why this lineup?</span>
+      <strong>${formatNumber(team.projectedPoints, 1)} projected points before any paid transfer hit</strong>
+    </div>
+    <ul>
+      ${items
+        .map(
+          ([label, value]) => `
+          <li class="${label === "Budget left" ? `budget-${tone}` : ""}">
+            <span>${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value)}</strong>
+          </li>`
+        )
+        .join("")}
+    </ul>`;
+}
+
 function render(teams) {
   const best = teams[0];
   if (!best) {
     els.status.textContent = "No valid team found for this budget.";
     els.alternatives.innerHTML = "";
     els.alternativeCards.innerHTML = "";
+    els.whyLineup.hidden = true;
+    els.whyLineup.innerHTML = "";
     return;
   }
 
@@ -456,6 +507,7 @@ function render(teams) {
   els.transfersIn.textContent = [...best.driversIn, ...best.constructorsIn].join(", ") || "None";
   els.transfersOut.textContent = [...best.driversOut, ...best.constructorsOut].join(", ") || "None";
   els.transferPenalty.textContent = `${best.transferPenalty.toFixed(0)} pts`;
+  renderWhyLineup(best);
 
   const displayTeams = teams.slice(0, 5);
 
