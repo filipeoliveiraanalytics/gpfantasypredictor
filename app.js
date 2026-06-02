@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260602-constructor-logos";
+const ASSET_VERSION = "20260602-constructor-logos-v2";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
@@ -598,7 +598,7 @@ async function loadDriverPhotoManifest() {
 }
 
 async function loadConstructorLogoManifest() {
-  for (const basePath of ["assets/constructors", "constructor"]) {
+  for (const basePath of ["assets/constructors", "constructors", "constructor"]) {
     try {
       const response = await fetch(`${basePath}/manifest.json?v=${ASSET_VERSION}`, { cache: "no-store" });
       if (!response.ok) continue;
