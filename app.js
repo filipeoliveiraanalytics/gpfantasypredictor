@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260602-why-lineup";
+const ASSET_VERSION = "20260602-context-lineup";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
@@ -439,46 +439,81 @@ function formatNumber(value, decimals = 1) {
   return value.toLocaleString(undefined, { maximumFractionDigits: decimals, minimumFractionDigits: decimals });
 }
 
-function budgetTone(value) {
-  if (value >= 1) return "positive";
-  if (value >= 0.3) return "watch";
-  return "tight";
-}
-
 function transferSummary(team) {
   if (team.transferCount === 0) return "No transfers needed";
   if (team.paidTransfers === 0) return `${team.transferCount} free ${team.transferCount === 1 ? "move" : "moves"}`;
   return `${team.transferCount} moves | ${team.paidTransfers} paid`;
 }
 
-function tradeoffSummary(team) {
-  const keepsConstructors = team.constructorKeys.length ? `keeps ${team.constructorKeys.join(" + ")} constructors` : "balances constructors";
-  if (team.paidTransfers > 0) return `${keepsConstructors}, but takes a ${Math.abs(team.transferPenalty).toFixed(0)} pt transfer hit`;
-  if (team.budgetRemaining < 0.3) return `${keepsConstructors}, with almost no budget spare`;
-  return `${keepsConstructors}, while staying inside the free transfer plan`;
+function constructorContext(team) {
+  const constructorNames = team.constructors.map((row) => row.name).join(" + ");
+  const constructorKeys = new Set(team.constructorKeys);
+
+  if (constructorKeys.has("MER") && constructorKeys.has("FER")) {
+    return `${constructorNames} is expensive, but it fits Monaco: Mercedes leads the model's constructor projection and Ferrari is also strong on qualifying-heavy weekends.`;
+  }
+  if (constructorKeys.has("MER")) {
+    return `${constructorNames} keeps Mercedes exposure, which is useful at Monaco because constructor qualifying points can be hard to recover elsewhere.`;
+  }
+  if (constructorKeys.has("FER")) {
+    return `${constructorNames} leans into Ferrari's Monaco profile, where track position and clean qualifying tend to matter more than race overtakes.`;
+  }
+  return `${constructorNames} gives the model the best points-per-budget balance for this track and the selected transfer limit.`;
+}
+
+function budgetContext(team) {
+  const budgetLeft = `${formatNumber(team.budgetRemaining, 1)}M`;
+  if (team.paidTransfers > 0) {
+    return `${transferSummary(team)} with ${budgetLeft} left. The projection still clears the transfer hit, but it is a more aggressive play.`;
+  }
+  if (team.budgetRemaining < 0.3) {
+    return `${transferSummary(team)} and nearly all budget used. That is acceptable here because Monaco rewards concentrated qualifying strength.`;
+  }
+  return `${transferSummary(team)} with ${budgetLeft} left, so the lineup improves projection without spending paid transfers.`;
+}
+
+function trackContext(team) {
+  const gp = team.drivers[0]?.next_gp ?? "this GP";
+  if (gp.toLowerCase().includes("monaco")) {
+    return {
+      title: "Monaco context: qualifying and track position carry extra weight",
+      summary:
+        "Monaco is usually low-overtake, so the optimizer is leaning into teams and drivers expected to qualify well rather than chasing comeback points.",
+      insights: [
+        ["Track logic", "Clean qualifying matters because race recovery is limited and position-change upside is harder to find."],
+        ["Constructor logic", constructorContext(team)],
+        ["Budget logic", budgetContext(team)],
+      ],
+    };
+  }
+
+  return {
+    title: `${gp} context: model fit and transfer value`,
+    summary:
+      "The recommendation balances expected fantasy points with the cost of changing your current team.",
+    insights: [
+      ["Track logic", "The model weights qualifying, race finish, position-change and reliability estimates for this GP."],
+      ["Constructor logic", constructorContext(team)],
+      ["Budget logic", budgetContext(team)],
+    ],
+  };
 }
 
 function renderWhyLineup(team) {
-  const tone = budgetTone(team.budgetRemaining);
-  const items = [
-    ["Projection", "Highest ranked lineup from the current model run"],
-    ["Boost", boostLabel(team)],
-    ["Transfers", transferSummary(team)],
-    ["Budget left", `${formatNumber(team.budgetRemaining, 1)}M`],
-    ["Tradeoff", tradeoffSummary(team)],
-  ];
+  const context = trackContext(team);
 
   els.whyLineup.hidden = false;
   els.whyLineup.innerHTML = `
     <div>
-      <span class="why-lineup__kicker">Why this lineup?</span>
-      <strong>${formatNumber(team.projectedPoints, 1)} projected points before any paid transfer hit</strong>
+      <span class="why-lineup__kicker">Race context</span>
+      <strong>${escapeHtml(context.title)}</strong>
+      <p>${escapeHtml(context.summary)}</p>
     </div>
     <ul>
-      ${items
+      ${context.insights
         .map(
           ([label, value]) => `
-          <li class="${label === "Budget left" ? `budget-${tone}` : ""}">
+          <li>
             <span>${escapeHtml(label)}</span>
             <strong>${escapeHtml(value)}</strong>
           </li>`
