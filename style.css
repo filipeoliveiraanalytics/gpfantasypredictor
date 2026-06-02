@@ -592,295 +592,132 @@ button:disabled {
 }
 
 .constructor-mark {
+  --constructor-size: 46px;
+  --logo-padding: 2px;
+  --logo-scale: 1;
   align-items: center;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--team-color) 34%, #111827), #111827 74%);
-  border: 1px solid color-mix(in srgb, var(--team-color) 58%, rgba(255, 255, 255, 0.18));
-  border-radius: 14px;
+  background: var(--team-color);
+  border: 1px solid color-mix(in srgb, var(--team-color) 32%, rgba(255, 255, 255, 0.82));
+  border-radius: 50%;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--team-color) 32%, transparent);
   color: var(--text);
   display: inline-flex;
-  gap: 7px;
-  height: 46px;
-  justify-content: center;
-  min-width: 70px;
-  overflow: hidden;
-  padding: 5px 9px 5px 6px;
-  position: relative;
-}
-
-.constructor-mark::after {
-  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.26), transparent);
-  content: "";
-  height: 140%;
-  left: -54%;
-  opacity: 0.42;
-  position: absolute;
-  top: -20%;
-  transform: rotate(18deg);
-  width: 42%;
-}
-
-.constructor-mark__field {
-  align-items: center;
-  background:
-    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.38), transparent 0.5rem),
-    linear-gradient(145deg, color-mix(in srgb, var(--team-color) 92%, #ffffff), color-mix(in srgb, var(--team-color) 68%, #05070b));
-  border: 1px solid color-mix(in srgb, var(--badge-accent) 62%, rgba(255, 255, 255, 0.2));
-  border-radius: 11px;
-  box-shadow: inset 0 -7px 12px rgba(0, 0, 0, 0.22);
-  display: inline-flex;
-  flex: 0 0 auto;
-  height: 34px;
+  height: var(--constructor-size);
   justify-content: center;
   overflow: hidden;
+  padding: 5px;
   position: relative;
-  width: 34px;
+  width: var(--constructor-size);
 }
 
-.constructor-mark__field::before {
-  background: var(--badge-accent);
+.constructor-mark::before {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
   content: "";
-  opacity: 0.95;
+  inset: 3px;
   position: absolute;
 }
 
-.constructor-mark__field::after {
-  background: var(--badge-ink);
-  content: "";
-  opacity: 0.9;
-  position: absolute;
+.constructor-mark--logo {
+  background: var(--team-color);
 }
 
-.constructor-mark__glyph {
+.constructor-mark__logo {
+  border-radius: 0;
   display: block;
-  height: 20px;
+  height: 100%;
+  object-fit: contain;
+  padding: var(--logo-padding);
   position: relative;
-  width: 20px;
+  transform: scale(var(--logo-scale));
+  width: 100%;
   z-index: 1;
 }
 
-.constructor-mark__glyph::before,
-.constructor-mark__glyph::after {
-  content: "";
-  position: absolute;
-}
-
-.constructor-mark__code {
+.constructor-mark__fallback {
   color: var(--text);
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-weight: 1000;
+  letter-spacing: 0.02em;
   line-height: 1;
   position: relative;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.48);
   z-index: 1;
+}
+
+.constructor-mark--logo .constructor-mark__fallback {
+  display: none;
 }
 
 .constructor-mark--picker {
-  height: 56px;
-  min-width: 88px;
+  --constructor-size: 56px;
+  --logo-padding: 2px;
+  padding: 5px;
 }
 
-.constructor-mark--picker .constructor-mark__field {
-  height: 42px;
-  width: 42px;
-}
-
-.constructor-mark--picker .constructor-mark__glyph {
-  height: 25px;
-  width: 25px;
-}
-
-.constructor-mark--picker .constructor-mark__code {
-  font-size: 0.82rem;
+.constructor-mark--picker .constructor-mark__logo {
+  padding: var(--logo-padding);
 }
 
 .constructor-mark--mini {
-  border-radius: 9px;
-  gap: 4px;
-  height: 30px;
-  min-width: 52px;
-  padding: 3px 6px 3px 3px;
+  --constructor-size: 30px;
+  --logo-padding: 1px;
+  padding: 3px;
 }
 
-.constructor-mark--mini .constructor-mark__field {
-  border-radius: 7px;
-  height: 24px;
-  width: 24px;
+.constructor-mark--mini .constructor-mark__logo {
+  padding: var(--logo-padding);
 }
 
-.constructor-mark--mini .constructor-mark__glyph {
-  height: 14px;
-  width: 14px;
-}
-
-.constructor-mark--mini .constructor-mark__code {
+.constructor-mark--mini .constructor-mark__fallback {
   font-size: 0.66rem;
 }
 
-.constructor-mark--mer .constructor-mark__field::before {
-  border-radius: 999px;
-  height: 7px;
-  left: 8px;
-  top: 8px;
-  transform: rotate(-35deg);
-  width: 22px;
+.constructor-mark--alp {
+  --logo-scale: 1.42;
 }
 
-.constructor-mark--mer .constructor-mark__field::after {
-  border-radius: 999px;
-  bottom: 9px;
-  height: 7px;
-  left: 8px;
-  transform: rotate(35deg);
-  width: 22px;
+.constructor-mark--amr {
+  --logo-scale: 1.68;
 }
 
-.constructor-mark--mer .constructor-mark__glyph::before {
-  background: var(--badge-accent);
-  border-radius: 999px;
-  height: 24px;
-  left: 8px;
-  top: -2px;
-  width: 5px;
+.constructor-mark--aud {
+  --logo-padding: 0;
+  --logo-scale: 1.12;
 }
 
-.constructor-mark--fer .constructor-mark__field {
-  border-radius: 8px 8px 13px 13px;
+.constructor-mark--cad {
+  --logo-scale: 1.42;
 }
 
-.constructor-mark--fer .constructor-mark__field::before {
-  height: 130%;
-  left: 13px;
-  top: -5px;
-  transform: rotate(22deg);
-  width: 8px;
+.constructor-mark--fer {
+  --logo-scale: 1.32;
 }
 
-.constructor-mark--fer .constructor-mark__field::after {
-  bottom: 7px;
-  height: 4px;
-  left: 6px;
-  transform: skewX(-20deg);
-  width: 22px;
+.constructor-mark--haa {
+  --logo-scale: 1.62;
 }
 
-.constructor-mark--mcl .constructor-mark__field::before,
-.constructor-mark--rbr .constructor-mark__field::before,
-.constructor-mark--rbl .constructor-mark__field::before,
-.constructor-mark--wil .constructor-mark__field::before {
-  clip-path: polygon(0 25%, 72% 25%, 100% 50%, 72% 75%, 0 75%, 22% 50%);
-  height: 24px;
-  left: 5px;
-  top: 5px;
-  width: 26px;
+.constructor-mark--mcl {
+  --logo-scale: 1.55;
 }
 
-.constructor-mark--mcl .constructor-mark__field::after {
-  clip-path: polygon(0 28%, 64% 28%, 100% 50%, 64% 72%, 0 72%, 18% 50%);
-  height: 14px;
-  left: 9px;
-  top: 10px;
-  width: 18px;
+.constructor-mark--mer {
+  --logo-padding: 0;
+  --logo-scale: 1.1;
 }
 
-.constructor-mark--rbr .constructor-mark__field::before {
-  transform: rotate(-8deg);
+.constructor-mark--rbl {
+  --logo-scale: 1.54;
 }
 
-.constructor-mark--rbr .constructor-mark__field::after {
-  border-radius: 999px;
-  height: 6px;
-  left: 7px;
-  top: 17px;
-  width: 23px;
+.constructor-mark--rbr {
+  --logo-padding: 0;
+  --logo-scale: 1.08;
 }
 
-.constructor-mark--haa .constructor-mark__field::before,
-.constructor-mark--aud .constructor-mark__field::before {
-  height: 23px;
-  left: 9px;
-  top: 6px;
-  transform: skewX(-15deg);
-  width: 6px;
-}
-
-.constructor-mark--haa .constructor-mark__field::after,
-.constructor-mark--aud .constructor-mark__field::after {
-  height: 23px;
-  right: 9px;
-  top: 6px;
-  transform: skewX(15deg);
-  width: 6px;
-}
-
-.constructor-mark--haa .constructor-mark__glyph::before,
-.constructor-mark--aud .constructor-mark__glyph::before {
-  background: var(--badge-accent);
-  height: 5px;
-  left: 2px;
-  top: 9px;
-  width: 16px;
-}
-
-.constructor-mark--alp .constructor-mark__field::before {
-  clip-path: polygon(50% 0, 94% 88%, 66% 88%, 50% 50%, 34% 88%, 6% 88%);
-  height: 25px;
-  left: 5px;
-  top: 5px;
-  width: 24px;
-}
-
-.constructor-mark--alp .constructor-mark__field::after {
-  border-radius: 999px;
-  height: 5px;
-  left: 8px;
-  top: 20px;
-  width: 18px;
-}
-
-.constructor-mark--rbl .constructor-mark__field::after,
-.constructor-mark--wil .constructor-mark__field::after {
-  border-radius: 999px;
-  height: 5px;
-  left: 8px;
-  top: 12px;
-  transform: rotate(-24deg);
-  width: 22px;
-}
-
-.constructor-mark--cad .constructor-mark__field {
-  border-radius: 7px 7px 15px 15px;
-}
-
-.constructor-mark--cad .constructor-mark__field::before {
-  border-radius: 999px;
-  height: 5px;
-  left: 7px;
-  top: 10px;
-  width: 20px;
-}
-
-.constructor-mark--cad .constructor-mark__field::after {
-  bottom: 8px;
-  height: 8px;
-  left: 9px;
-  transform: skewX(-18deg);
-  width: 16px;
-}
-
-.constructor-mark--amr .constructor-mark__field::before {
-  clip-path: polygon(0 45%, 42% 24%, 50% 38%, 58% 24%, 100% 45%, 58% 62%, 50% 52%, 42% 62%);
-  height: 24px;
-  left: 3px;
-  top: 8px;
-  width: 28px;
-}
-
-.constructor-mark--amr .constructor-mark__field::after {
-  border-radius: 999px;
-  height: 5px;
-  left: 12px;
-  top: 17px;
-  width: 11px;
+.constructor-mark--wil {
+  --logo-padding: 0;
+  --logo-scale: 1.1;
 }
 
 .lineup-list {

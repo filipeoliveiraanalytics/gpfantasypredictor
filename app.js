@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260602-constructor-badges";
+const ASSET_VERSION = "20260602-constructor-logos";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
@@ -14,20 +14,6 @@ const TEAM_COLORS = {
   Cadillac: "#9b8f80",
   Audi: "#c9ccd1",
   "Aston Martin": "#006f62",
-};
-
-const CONSTRUCTOR_BADGES = {
-  MER: { accent: "#ffffff", ink: "#021512" },
-  FER: { accent: "#ffd700", ink: "#2a050a" },
-  MCL: { accent: "#111827", ink: "#1d0d00" },
-  RBR: { accent: "#ffcc00", ink: "#07142d" },
-  HAA: { accent: "#ed1b2f", ink: "#151719" },
-  ALP: { accent: "#ff8bd5", ink: "#061827" },
-  RBL: { accent: "#f5f7ff", ink: "#09172d" },
-  WIL: { accent: "#ffffff", ink: "#061827" },
-  CAD: { accent: "#d8cbb8", ink: "#17130f" },
-  AUD: { accent: "#f5f7ff", ink: "#111418" },
-  AMR: { accent: "#d7fff4", ink: "#001f1c" },
 };
 
 const DRIVER_AVATAR_PROFILES = {
@@ -61,6 +47,9 @@ const state = {
   constructors: [],
   driverPhotos: new Set(),
   driverPhotoBasePath: "assets/drivers",
+  constructorLogos: new Set(),
+  constructorLogoFiles: new Map(),
+  constructorLogoBasePath: "assets/constructors",
   pickerType: null,
   pickerSelection: new Set(),
 };
@@ -290,13 +279,17 @@ function driverAvatar(row, size = "default") {
 
 function constructorMark(row, size = "default") {
   const key = row.key.toUpperCase();
-  const badge = CONSTRUCTOR_BADGES[key] || { accent: "#ffffff", ink: "#05070b" };
+  const logoKey = key.toLowerCase();
+  const hasLogo = state.constructorLogos.has(logoKey);
+  const logoClass = hasLogo ? "constructor-mark--logo" : "";
+  const logoFile = state.constructorLogoFiles.get(logoKey) || `${logoKey}.webp`;
+  const logoMarkup = hasLogo
+    ? `<img class="constructor-mark__logo" src="${escapeHtml(state.constructorLogoBasePath)}/${escapeHtml(logoFile)}" alt="" loading="lazy" onerror="this.parentElement.classList.remove('constructor-mark--logo'); this.remove();" />`
+    : "";
   return `
-    <span class="constructor-mark constructor-mark--${size} constructor-mark--${escapeHtml(key.toLowerCase())}" style="--team-color:${teamColor(row.team)}; --badge-accent:${badge.accent}; --badge-ink:${badge.ink}" aria-hidden="true">
-      <span class="constructor-mark__field">
-        <span class="constructor-mark__glyph"></span>
-      </span>
-      <span class="constructor-mark__code">${escapeHtml(key)}</span>
+    <span class="constructor-mark ${logoClass} constructor-mark--${size} constructor-mark--${escapeHtml(logoKey)}" style="--team-color:${teamColor(row.team)}" aria-hidden="true">
+      ${logoMarkup}
+      <span class="constructor-mark__fallback">${escapeHtml(key)}</span>
     </span>`;
 }
 
@@ -604,8 +597,42 @@ async function loadDriverPhotoManifest() {
   }
 }
 
+async function loadConstructorLogoManifest() {
+  for (const basePath of ["assets/constructors", "constructor"]) {
+    try {
+      const response = await fetch(`${basePath}/manifest.json?v=${ASSET_VERSION}`, { cache: "no-store" });
+      if (!response.ok) continue;
+      const manifest = await response.json();
+      const logoFiles = new Map();
+      const logoPattern = /\.(webp|png|jpe?g|svg)$/;
+
+      if (manifest.files && typeof manifest.files === "object") {
+        Object.entries(manifest.files).forEach(([code, file]) => {
+          const logoCode = String(code).trim().toLowerCase();
+          const logoFile = String(file).trim();
+          if (logoCode && logoFile) logoFiles.set(logoCode, logoFile);
+        });
+      } else {
+        (manifest.logos?.length ? manifest.logos : manifest.expectedFiles || []).forEach((item) => {
+          const logoFile = String(item).trim().toLowerCase();
+          const logoCode = logoFile.replace(logoPattern, "");
+          if (logoCode) logoFiles.set(logoCode, logoPattern.test(logoFile) ? logoFile : `${logoCode}.webp`);
+        });
+      }
+
+      state.constructorLogoBasePath = basePath;
+      state.constructorLogoFiles = logoFiles;
+      state.constructorLogos = new Set(logoFiles.keys());
+      return;
+    } catch {
+      state.constructorLogos = new Set();
+      state.constructorLogoFiles = new Map();
+    }
+  }
+}
+
 async function init() {
-  await loadDriverPhotoManifest();
+  await Promise.all([loadDriverPhotoManifest(), loadConstructorLogoManifest()]);
   const response = await fetch(DATA_PATH);
   if (!response.ok) throw new Error(`Could not load ${DATA_PATH}`);
   state.projections = parseCsv(await response.text());
