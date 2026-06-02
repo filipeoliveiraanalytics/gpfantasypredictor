@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Mercedes-AMG Petronas">
+  <circle cx="60" cy="60" r="43" fill="none" stroke="#0c1418" stroke-width="7"/>
+  <circle cx="60" cy="60" r="7" fill="#0c1418"/>
+  <path d="M60 18 67 61 60 67 53 61Z" fill="#0c1418"/>
+  <path d="M22 82 56 56 65 59 67 68Z" fill="#0c1418"/>
+  <path d="M98 82 53 68 55 59 64 56Z" fill="#0c1418"/>
+</svg>

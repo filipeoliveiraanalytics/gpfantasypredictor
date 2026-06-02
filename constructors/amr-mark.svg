@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Aston Martin">
+  <path d="M13 47h32l15 14 15-14h32L78 76H22Z" fill="#eef7f4"/>
+  <path d="M20 53h28l12 11 12-11h28L76 69H24Z" fill="#006f62"/>
+  <path d="M30 58h19l11 10 11-10h19L74 73H26Z" fill="#eef7f4"/>
+  <text x="60" y="92" fill="#eef7f4" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="900" text-anchor="middle">AMR</text>
+</svg>

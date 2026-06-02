@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Red Bull Racing">
+  <circle cx="60" cy="55" r="25" fill="#fcd700"/>
+  <path d="M14 62c11-15 27-21 43-17 7 2 13 6 17 13-15-4-28-1-39 8-8 6-18 8-27 3 2-2 4-4 6-7Z" fill="#ea1d2d"/>
+  <path d="M106 62c-11-15-27-21-43-17-7 2-13 6-17 13 15-4 28-1 39 8 8 6 18 8 27 3-2-2-4-4-6-7Z" fill="#ea1d2d"/>
+  <path d="M24 50c6-8 16-11 26-8l11 8-15 3c-10 2-18 6-26 13 0-6 1-11 4-16Z" fill="#f33a2f"/>
+  <path d="M96 50c-6-8-16-11-26-8l-11 8 15 3c10 2 18 6 26 13 0-6-1-11-4-16Z" fill="#f33a2f"/>
+  <path d="M34 75h52" stroke="#fcd700" stroke-linecap="round" stroke-width="6"/>
+  <text x="60" y="94" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="900" text-anchor="middle">RBR</text>
+</svg>
