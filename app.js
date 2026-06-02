@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260602-x3-card-fix";
+const ASSET_VERSION = "20260602-value-order";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 const AVAILABLE_CHIPS_KEY = "gp_fantasy_predictor_available_chips";
@@ -634,6 +634,22 @@ function chip(row) {
     </span>`;
 }
 
+function rowValue(row) {
+  const explicitValue = toNumber(row.value_per_million, Number.NaN);
+  if (Number.isFinite(explicitValue)) return explicitValue;
+  const price = toNumber(row.price_m);
+  return price ? toNumber(row.expected_fantasy_points) / price : 0;
+}
+
+function sortByValue(rows) {
+  return [...rows].sort(
+    (a, b) =>
+      rowValue(b) - rowValue(a) ||
+      toNumber(b.expected_fantasy_points) - toNumber(a.expected_fantasy_points) ||
+      a.name.localeCompare(b.name)
+  );
+}
+
 function formatNumber(value, decimals = 1) {
   return value.toLocaleString(undefined, { maximumFractionDigits: decimals, minimumFractionDigits: decimals });
 }
@@ -785,8 +801,8 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
   els.teamCost.textContent = `${formatNumber(best.totalCost, 1)}M`;
   els.boostCardLabel.textContent = "2x boost driver";
   els.boostDriver.innerHTML = boostDriverMarkup(best);
-  els.driverList.innerHTML = best.drivers.map(chip).join("");
-  els.constructorList.innerHTML = best.constructors.map(chip).join("");
+  els.driverList.innerHTML = sortByValue(best.drivers).map(chip).join("");
+  els.constructorList.innerHTML = sortByValue(best.constructors).map(chip).join("");
   els.transfersIn.textContent = [...best.driversIn, ...best.constructorsIn].join(", ") || "None";
   els.transfersOut.textContent = [...best.driversOut, ...best.constructorsOut].join(", ") || "None";
   els.transferPenalty.textContent = `${best.transferPenalty.toFixed(0)} pts`;
@@ -878,10 +894,10 @@ function boostLabel(team) {
 function lineupList(rows, type) {
   return `
     <span class="lineup-list lineup-list--${type}">
-      ${rows
+      ${sortByValue(rows)
         .map(
           (row) => `
-          <span class="lineup-token" title="${escapeHtml(row.name)}">
+          <span class="lineup-token" title="${escapeHtml(`${row.name} | ${formatNumber(rowValue(row), 2)} value/million`)}">
             ${entityMark(row, "mini")}
             <span>${escapeHtml(row.key)}</span>
           </span>`
