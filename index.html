@@ -32,7 +32,7 @@
   <meta name="twitter:description"
     content="A fan-made F1 Fantasy optimizer powered by GP prediction modelling." />
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png" />
-  <link rel="stylesheet" href="style.css?v=20260602-value-order" />
+  <link rel="stylesheet" href="style.css?v=20260603-price-momentum" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -129,8 +129,9 @@
           <select id="strategy">
             <option value="max_points">Max Points</option>
             <option value="current_friendly">Transfer Friendly</option>
+            <option value="budget_growth">Budget Growth</option>
           </select>
-          <span class="field-note">Max Points ignores transfers when ranking. Transfer Friendly only uses free transfers unless a chip changes the rule.</span>
+          <span class="field-note">Budget Growth favors lineups with strong price-rise momentum when points are close.</span>
         </label>
 
         <div class="chip-controls" aria-label="Available chip controls">
@@ -198,6 +199,10 @@
           <div class="score-card boost-card">
             <span id="boost-card-label">2x boost driver</span>
             <strong class="boost-driver-display" id="boost-driver">--</strong>
+          </div>
+          <div class="score-card price-card">
+            <span>Budget outlook</span>
+            <strong id="price-delta">--</strong>
           </div>
         </div>
 
@@ -293,7 +298,7 @@
   <script>
     window.GA_MEASUREMENT_ID = "G-0GCZQDW467";
   </script>
-  <script src="app.js?v=20260602-value-order"></script>
+  <script src="app.js?v=20260603-price-momentum"></script>
 </body>
 
 </html>

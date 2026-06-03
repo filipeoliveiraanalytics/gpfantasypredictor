@@ -1,5 +1,6 @@
-const ASSET_VERSION = "20260602-value-order";
+const ASSET_VERSION = "20260603-price-momentum";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
+const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 const AVAILABLE_CHIPS_KEY = "gp_fantasy_predictor_available_chips";
 
@@ -58,6 +59,7 @@ const state = {
   constructors: [],
   driverPhotos: new Set(),
   driverPhotoBasePath: "assets/drivers",
+  priceMovements: new Map(),
   constructorLogos: new Set(),
   constructorLogoFiles: new Map(),
   constructorLogoBasePath: "assets/constructors",
@@ -90,6 +92,7 @@ const els = {
   teamCost: document.querySelector("#team-cost"),
   boostCardLabel: document.querySelector("#boost-card-label"),
   boostDriver: document.querySelector("#boost-driver"),
+  priceDelta: document.querySelector("#price-delta"),
   whyLineup: document.querySelector("#why-lineup"),
   driverList: document.querySelector("#driver-list"),
   constructorList: document.querySelector("#constructor-list"),
@@ -232,6 +235,7 @@ function combinations(items, size) {
 
 function strategyScore(team, strategy) {
   if (strategy === "current_friendly") return team.netExpectedPoints;
+  if (strategy === "budget_growth") return team.netExpectedPoints + team.projectedBudgetDelta * 8;
   return team.projectedPoints;
 }
 
@@ -377,6 +381,7 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
       : 0;
   const projectedPoints = expectedPoints + boostExtraPoints + noNegativeProtection;
   const netExpectedPoints = projectedPoints + transferPenalty;
+  const projectedBudgetDelta = teamBudgetDelta(entities);
 
   return {
     drivers: driverCombo,
@@ -389,6 +394,7 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
     expectedPoints,
     projectedPoints,
     netExpectedPoints,
+    projectedBudgetDelta,
     valuePerMillion: expectedPoints / totalCost,
     avgRiskScore,
     transferCount,
@@ -481,6 +487,7 @@ function applyChipToTeam(team, chip, strategy) {
     noNegativeProtection,
     projectedPoints,
     netExpectedPoints: projectedPoints + transferPenalty,
+    projectedBudgetDelta: team.projectedBudgetDelta,
   };
 
   return {
@@ -624,6 +631,7 @@ function chip(row) {
   const color = teamColor(row.team);
   const price = `${formatNumber(toNumber(row.price_m), 1)}M`;
   const points = `${formatNumber(toNumber(row.expected_fantasy_points), 1)} pts`;
+  const priceSignal = priceMomentum(row);
   return `
     <span class="chip ${row.entity_type === "driver" ? "chip--driver" : "chip--constructor"}" style="--team-color:${color}">
       ${entityMark(row, "chip")}
@@ -631,6 +639,7 @@ function chip(row) {
         <strong>${escapeHtml(row.name)}</strong>
         <span>${escapeHtml(row.team)} | ${price} | ${points}</span>
       </span>
+      <span class="price-signal price-signal--${priceSignal.tone}" title="${escapeHtml(priceSignal.reason)}">${escapeHtml(priceSignal.label)}</span>
     </span>`;
 }
 
@@ -648,6 +657,69 @@ function sortByValue(rows) {
       toNumber(b.expected_fantasy_points) - toNumber(a.expected_fantasy_points) ||
       a.name.localeCompare(b.name)
   );
+}
+
+function priceMoveKey(row) {
+  return `${row.entity_type}:${row.key}`;
+}
+
+function latestPriceMove(row) {
+  return state.priceMovements.get(priceMoveKey(row)) || null;
+}
+
+function priceStep(row) {
+  return toNumber(row.price_m) < 18 ? 0.6 : 0.3;
+}
+
+function projectedPriceChange(row) {
+  const ppm = rowValue(row);
+  const step = priceStep(row);
+  const recentMove = toNumber(latestPriceMove(row)?.price_delta_m, 0);
+
+  if (ppm >= 1.2) return step;
+  if (ppm >= 0.9) return Math.max(0.1, step / 2);
+  if (ppm <= 0.55) return -step;
+  if (ppm <= 0.75) return -Math.max(0.1, step / 2);
+  if (recentMove > 0 && ppm >= 0.78) return Math.max(0.1, step / 2);
+  if (recentMove < 0 && ppm <= 0.82) return -Math.max(0.1, step / 2);
+  return 0;
+}
+
+function priceMomentum(row) {
+  const delta = projectedPriceChange(row);
+  const ppm = rowValue(row);
+  if (delta > 0) {
+    return {
+      delta,
+      tone: "rise",
+      label: `+${formatNumber(delta, 1)}M`,
+      reason: `${formatNumber(ppm, 2)} projected pts/M suggests price-rise momentum.`,
+    };
+  }
+  if (delta < 0) {
+    return {
+      delta,
+      tone: "fall",
+      label: `${formatNumber(delta, 1)}M`,
+      reason: `${formatNumber(ppm, 2)} projected pts/M suggests price-fall risk.`,
+    };
+  }
+  return {
+    delta,
+    tone: "stable",
+    label: "Stable",
+    reason: `${formatNumber(ppm, 2)} projected pts/M looks close to stable.`,
+  };
+}
+
+function teamBudgetDelta(rows) {
+  return rows.reduce((sum, row) => sum + projectedPriceChange(row), 0);
+}
+
+function formatSignedMoney(value) {
+  if (value > 0) return `+${formatNumber(value, 1)}M`;
+  if (value < 0) return `${formatNumber(value, 1)}M`;
+  return "Stable";
 }
 
 function formatNumber(value, decimals = 1) {
@@ -731,6 +803,16 @@ function budgetContext(team) {
   return `${transferSummary(team)} with ${budgetLeft} left, so the lineup improves projection without spending paid transfers.`;
 }
 
+function priceContext(team) {
+  if (team.projectedBudgetDelta > 0.4) {
+    return `This lineup has ${formatSignedMoney(team.projectedBudgetDelta)} estimated price momentum, useful if you want to grow budget for future GPs.`;
+  }
+  if (team.projectedBudgetDelta < -0.4) {
+    return `This lineup has ${formatSignedMoney(team.projectedBudgetDelta)} estimated price risk, so it may cost future budget if the price model is right.`;
+  }
+  return "Price outlook looks fairly stable, so this recommendation is mostly about points and transfer efficiency.";
+}
+
 function trackContext(team, recommendation) {
   const gp = team.drivers[0]?.next_gp ?? "this GP";
   if (gp.toLowerCase().includes("monaco")) {
@@ -742,6 +824,7 @@ function trackContext(team, recommendation) {
         ["Track logic", "Clean qualifying matters because race recovery is limited and position-change upside is harder to find."],
         ["Constructor logic", constructorContext(team)],
         ["Chip logic", chipContext(team, recommendation)],
+        ["Price logic", priceContext(team)],
         ["Budget logic", budgetContext(team)],
       ],
     };
@@ -755,6 +838,7 @@ function trackContext(team, recommendation) {
       ["Track logic", "The model weights qualifying, race finish, position-change and reliability estimates for this GP."],
       ["Constructor logic", constructorContext(team)],
       ["Chip logic", chipContext(team, recommendation)],
+      ["Price logic", priceContext(team)],
       ["Budget logic", budgetContext(team)],
     ],
   };
@@ -768,7 +852,7 @@ function renderWhyLineup(team, recommendation) {
   els.whyLineup.innerHTML = `
     <div>
       <span class="why-lineup__kicker">Race context</span>
-      <span class="chip-recommendation-badge">${escapeHtml(recommendationLabel)} · ${escapeHtml(recommendation?.confidence ?? "Hold")}</span>
+      <span class="chip-recommendation-badge">${escapeHtml(recommendationLabel)} | ${escapeHtml(recommendation?.confidence ?? "Hold")}</span>
       <strong>${escapeHtml(context.title)}</strong>
       <p>${escapeHtml(context.summary)}</p>
     </div>
@@ -801,6 +885,8 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
   els.teamCost.textContent = `${formatNumber(best.totalCost, 1)}M`;
   els.boostCardLabel.textContent = "2x boost driver";
   els.boostDriver.innerHTML = boostDriverMarkup(best);
+  els.priceDelta.textContent = formatSignedMoney(best.projectedBudgetDelta);
+  els.priceDelta.className = best.projectedBudgetDelta > 0 ? "price-positive" : best.projectedBudgetDelta < 0 ? "price-negative" : "";
   els.driverList.innerHTML = sortByValue(best.drivers).map(chip).join("");
   els.constructorList.innerHTML = sortByValue(best.constructors).map(chip).join("");
   els.transfersIn.textContent = [...best.driversIn, ...best.constructorsIn].join(", ") || "None";
@@ -836,7 +922,7 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
         </td>
         <td>
           <strong>${formatNumber(team.totalCost, 1)}M</strong>
-          <span class="alt-sub">${budgetLeftLabel(team)}</span>
+          <span class="alt-sub">${budgetLeftLabel(team)} | ${formatSignedMoney(team.projectedBudgetDelta)} outlook</span>
         </td>
         <td>
           <span class="transfer-pill ${team.paidTransfers ? "transfer-pill--paid" : ""}">${team.transferCount} moves</span>
@@ -866,7 +952,7 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
           </div>
           <div>
             <dt>Cost</dt>
-            <dd>${formatNumber(team.totalCost, 1)}M</dd>
+            <dd>${formatNumber(team.totalCost, 1)}M | ${formatSignedMoney(team.projectedBudgetDelta)} outlook</dd>
           </div>
           <div>
             <dt>Boost</dt>
@@ -1017,8 +1103,19 @@ async function loadConstructorLogoManifest() {
   }
 }
 
+async function loadPriceMovements() {
+  try {
+    const response = await fetch(PRICE_MOVEMENTS_PATH, { cache: "no-store" });
+    if (!response.ok) return;
+    const rows = parseCsv(await response.text());
+    state.priceMovements = new Map(rows.map((row) => [priceMoveKey(row), row]));
+  } catch {
+    state.priceMovements = new Map();
+  }
+}
+
 async function init() {
-  await Promise.all([loadDriverPhotoManifest(), loadConstructorLogoManifest()]);
+  await Promise.all([loadDriverPhotoManifest(), loadConstructorLogoManifest(), loadPriceMovements()]);
   const response = await fetch(DATA_PATH);
   if (!response.ok) throw new Error(`Could not load ${DATA_PATH}`);
   state.projections = parseCsv(await response.text());
