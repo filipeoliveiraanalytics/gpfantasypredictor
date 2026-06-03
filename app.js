@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260603-price-momentum";
+const ASSET_VERSION = "20260603-growth-transfers";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -235,7 +235,7 @@ function combinations(items, size) {
 
 function strategyScore(team, strategy) {
   if (strategy === "current_friendly") return team.netExpectedPoints;
-  if (strategy === "budget_growth") return team.netExpectedPoints + team.projectedBudgetDelta * 8;
+  if (strategy === "budget_growth") return team.netExpectedPoints + team.projectedBudgetDelta * 35 + incomingBudgetDelta(team) * 20;
   return team.projectedPoints;
 }
 
@@ -437,6 +437,7 @@ function findTopTeams(inputs) {
       const team = summarizeTeam(driverCombo, constructorCombo, inputs);
       if (team.totalCost > budgetLimit) continue;
       if (inputs.strategy === "current_friendly" && !hasUnlimitedTransfers(inputs.activeChip) && team.transferCount > inputs.freeTransfers) continue;
+      if (inputs.strategy === "budget_growth" && !hasOnlyGrowthTransfers(team)) continue;
       team.strategyScore = strategyScore(team, inputs.strategy);
       teams.push(team);
     }
@@ -716,6 +717,25 @@ function teamBudgetDelta(rows) {
   return rows.reduce((sum, row) => sum + projectedPriceChange(row), 0);
 }
 
+function rowsByKey(type, keys) {
+  const source = type === "driver" ? state.drivers : state.constructors;
+  const lookup = new Map(source.map((row) => [row.key, row]));
+  return keys.map((key) => lookup.get(key)).filter(Boolean);
+}
+
+function transferInRows(team) {
+  return [...rowsByKey("driver", team.driversIn), ...rowsByKey("constructor", team.constructorsIn)];
+}
+
+function incomingBudgetDelta(team) {
+  return teamBudgetDelta(transferInRows(team));
+}
+
+function hasOnlyGrowthTransfers(team) {
+  const incoming = transferInRows(team);
+  return incoming.length === 0 || incoming.every((row) => projectedPriceChange(row) > 0);
+}
+
 function formatSignedMoney(value) {
   if (value > 0) return `+${formatNumber(value, 1)}M`;
   if (value < 0) return `${formatNumber(value, 1)}M`;
@@ -804,6 +824,13 @@ function budgetContext(team) {
 }
 
 function priceContext(team) {
+  if (els.strategy.value === "budget_growth") {
+    const incoming = transferInRows(team);
+    const names = incoming.map((row) => `${row.key} ${priceMomentum(row).label}`).join(", ");
+    return incoming.length
+      ? `Budget Growth only bought rise candidates: ${names}. Existing fall-risk assets may stay if replacing them would hurt points or budget.`
+      : "Budget Growth found no positive-momentum transfer that improved the lineup enough, so it kept the current structure.";
+  }
   if (team.projectedBudgetDelta > 0.4) {
     return `This lineup has ${formatSignedMoney(team.projectedBudgetDelta)} estimated price momentum, useful if you want to grow budget for future GPs.`;
   }
