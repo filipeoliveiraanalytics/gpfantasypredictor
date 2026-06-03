@@ -434,7 +434,7 @@ button:disabled {
 }
 
 .score-strip {
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1.05fr) minmax(0, 0.9fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .transfer-card {
@@ -1080,7 +1080,33 @@ button:disabled {
 }
 
 .table-panel table {
-  min-width: 920px;
+  min-width: 1040px;
+  table-layout: fixed;
+}
+
+.table-panel th:nth-child(1),
+.table-panel td:nth-child(1) {
+  width: 150px;
+}
+
+.table-panel th:nth-child(2),
+.table-panel td:nth-child(2) {
+  width: 500px;
+}
+
+.table-panel th:nth-child(3),
+.table-panel td:nth-child(3) {
+  width: 150px;
+}
+
+.table-panel th:nth-child(4),
+.table-panel td:nth-child(4) {
+  width: 160px;
+}
+
+.table-panel th:nth-child(5),
+.table-panel td:nth-child(5) {
+  width: 120px;
 }
 
 .alternative-cards {
@@ -1150,8 +1176,9 @@ tr.is-best td {
 .alt-lineup > div {
   align-items: center;
   display: grid;
-  gap: 12px;
-  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 10px;
+  grid-template-columns: 96px minmax(0, 1fr);
+  min-height: 36px;
 }
 
 .alt-lineup > div > span {
@@ -1174,6 +1201,26 @@ tr.is-best td {
   font-size: 0.76rem;
   font-weight: 800;
   margin-top: 5px;
+}
+
+.alt-lineup .lineup-list {
+  flex-wrap: nowrap;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.alt-lineup .lineup-token {
+  flex: 0 0 auto;
+  font-size: 0.74rem;
+  gap: 5px;
+  padding-right: 7px;
+}
+
+.alt-lineup .driver-avatar--mini,
+.alt-lineup .constructor-mark--mini {
+  --avatar-size: 28px;
+  --constructor-size: 28px;
 }
 
 .transfer-pill {
@@ -1481,7 +1528,9 @@ tr.is-best td {
   }
 
   .alternative-card .lineup-list {
+    flex-wrap: wrap;
     min-width: 0;
+    white-space: normal;
   }
 
   .alternative-card .alt-tag {
