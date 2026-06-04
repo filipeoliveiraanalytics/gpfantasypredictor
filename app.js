@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260604-alt-cost-nowrap";
+const ASSET_VERSION = "20260604-budget-copy";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -1013,7 +1013,8 @@ function constructorContext(team) {
 function budgetContext(team) {
   const budgetLeft = `${formatNumber(team.budgetRemaining, 1)}M`;
   if (team.paidTransfers > 0) {
-    return `${transferSummary(team)} with ${budgetLeft} left. The projection still clears the transfer hit, but it is a more aggressive play.`;
+    const penalty = Math.abs(team.transferPenalty);
+    return `${transferSummary(team)} with ${budgetLeft} left. The score shown already subtracts the ${penalty}-point paid-transfer penalty, so the model still prefers this higher-upside lineup.`;
   }
   if (team.activeChip === "limitless") {
     return `${transferSummary(team)} and no budget cap for this GP. The displayed cost shows what this one-week lineup would normally cost.`;
