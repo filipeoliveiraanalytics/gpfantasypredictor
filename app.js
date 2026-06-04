@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260604-strategy-notes";
+const ASSET_VERSION = "20260604-price-thresholds";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -17,7 +17,13 @@ const CHIP_CONFIG = {
 const STRATEGY_NOTES = {
   max_points: "Max Points ranks the strongest projected lineup, even if it uses paid transfers.",
   current_friendly: "Transfer Friendly avoids paid transfers unless a selected chip changes the transfer rules.",
-  budget_growth: "Budget Growth only transfers in assets projected to rise, then ranks by points plus price momentum.",
+  budget_growth: "Budget Growth buys assets with a realistic path to a price rise, then ranks by points plus price upside.",
+};
+
+const PRICE_RISE_TARGETS = {
+  "driver:ALO": { pointsNeeded: 26, source: "community threshold read" },
+  "driver:COL": { pointsNeeded: 0, source: "community threshold read" },
+  "driver:STR": { pointsNeeded: 0, source: "community threshold read" },
 };
 
 const TEAM_COLORS = {
@@ -683,7 +689,50 @@ function priceStep(row) {
   return toNumber(row.price_m) < 18 ? 0.6 : 0.3;
 }
 
-function projectedPriceChange(row) {
+function priceRiseTarget(row) {
+  return PRICE_RISE_TARGETS[priceMoveKey(row)] || null;
+}
+
+function thresholdPriceSignal(row) {
+  const target = priceRiseTarget(row);
+  if (!target) return null;
+
+  const expected = toNumber(row.expected_fantasy_points);
+  const pointsNeeded = toNumber(target.pointsNeeded);
+  const edge = expected - pointsNeeded;
+  const step = priceStep(row);
+  const easyRiseBuffer = pointsNeeded <= 1 && edge >= -1;
+
+  if (edge >= 0 || easyRiseBuffer) {
+    return {
+      delta: step,
+      tone: "rise",
+      label: `+${formatNumber(step, 1)}M`,
+      reason:
+        edge >= 0
+          ? `${formatNumber(expected, 1)} projected pts vs ${formatNumber(pointsNeeded, 1)} needed for a likely price rise (${target.source}).`
+          : `${formatNumber(pointsNeeded, 1)} pts appears enough for a price rise; ${formatNumber(expected, 1)} projected pts is close enough to keep as budget upside (${target.source}).`,
+    };
+  }
+
+  if (edge <= -8) {
+    return {
+      delta: -step,
+      tone: "fall",
+      label: `${formatNumber(-step, 1)}M`,
+      reason: `${formatNumber(expected, 1)} projected pts is well short of the ${formatNumber(pointsNeeded, 1)} pts likely needed for a price rise (${target.source}).`,
+    };
+  }
+
+  return {
+    delta: 0,
+    tone: "stable",
+    label: "Stable",
+    reason: `${formatNumber(expected, 1)} projected pts is close to the ${formatNumber(pointsNeeded, 1)} pts price-rise target (${target.source}).`,
+  };
+}
+
+function inferredPriceChange(row) {
   const ppm = rowValue(row);
   const step = priceStep(row);
   const recentMove = toNumber(latestPriceMove(row)?.price_delta_m, 0);
@@ -697,7 +746,14 @@ function projectedPriceChange(row) {
   return 0;
 }
 
+function projectedPriceChange(row) {
+  return thresholdPriceSignal(row)?.delta ?? inferredPriceChange(row);
+}
+
 function priceMomentum(row) {
+  const thresholdSignal = thresholdPriceSignal(row);
+  if (thresholdSignal) return thresholdSignal;
+
   const delta = projectedPriceChange(row);
   const ppm = rowValue(row);
   if (delta > 0) {
