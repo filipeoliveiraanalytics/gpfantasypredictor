@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260604-price-thresholds";
+const ASSET_VERSION = "20260604-price-step-185";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -686,7 +686,7 @@ function latestPriceMove(row) {
 }
 
 function priceStep(row) {
-  return toNumber(row.price_m) < 18 ? 0.6 : 0.3;
+  return toNumber(row.price_m) < 18.5 ? 0.6 : 0.3;
 }
 
 function priceRiseTarget(row) {
