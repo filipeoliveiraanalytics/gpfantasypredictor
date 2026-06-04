@@ -1,7 +1,7 @@
 {
-  "name": "GP Fantasy Predictor",
+  "name": "F1 Fantasy Predictor",
   "short_name": "GP Fantasy",
-  "description": "Fan-made F1 Fantasy optimizer powered by GP prediction modelling.",
+  "description": "Fan-made F1 Fantasy predictor and team optimizer powered by GP prediction modelling.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
