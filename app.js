@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260603-alt-alignment";
+const ASSET_VERSION = "20260604-strategy-notes";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -12,6 +12,12 @@ const CHIP_CONFIG = {
   auto_pilot: { label: "Auto Pilot" },
   no_negative: { label: "No Negative" },
   x3: { label: "x3 Boost" },
+};
+
+const STRATEGY_NOTES = {
+  max_points: "Max Points ranks the strongest projected lineup, even if it uses paid transfers.",
+  current_friendly: "Transfer Friendly avoids paid transfers unless a selected chip changes the transfer rules.",
+  budget_growth: "Budget Growth only transfers in assets projected to rise, then ranks by points plus price momentum.",
 };
 
 const TEAM_COLORS = {
@@ -76,6 +82,7 @@ const els = {
   drivers: document.querySelector("#drivers"),
   constructors: document.querySelector("#constructors"),
   strategy: document.querySelector("#strategy"),
+  strategyNote: document.querySelector("#strategy-note"),
   availableChipInputs: [...document.querySelectorAll("#available-chip-options input[type='checkbox']")],
   chipStatus: document.querySelector("#chip-status"),
   openDriverPicker: document.querySelector("#open-driver-picker"),
@@ -237,6 +244,10 @@ function strategyScore(team, strategy) {
   if (strategy === "current_friendly") return team.netExpectedPoints;
   if (strategy === "budget_growth") return team.netExpectedPoints + team.projectedBudgetDelta * 35 + incomingBudgetDelta(team) * 20;
   return team.projectedPoints;
+}
+
+function updateStrategyNote() {
+  els.strategyNote.textContent = STRATEGY_NOTES[els.strategy.value] || STRATEGY_NOTES.max_points;
 }
 
 function chipLabel(value) {
@@ -1142,6 +1153,7 @@ async function loadPriceMovements() {
 }
 
 async function init() {
+  updateStrategyNote();
   await Promise.all([loadDriverPhotoManifest(), loadConstructorLogoManifest(), loadPriceMovements()]);
   const response = await fetch(DATA_PATH);
   if (!response.ok) throw new Error(`Could not load ${DATA_PATH}`);
@@ -1162,6 +1174,7 @@ els.form.addEventListener("submit", (event) => {
 
 els.openDriverPicker.addEventListener("click", () => openPicker("driver"));
 els.openConstructorPicker.addEventListener("click", () => openPicker("constructor"));
+els.strategy.addEventListener("change", updateStrategyNote);
 els.availableChipInputs.forEach((input) =>
   input.addEventListener("change", () => {
     saveAvailableChips();
