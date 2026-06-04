@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260604-price-step-185";
+const ASSET_VERSION = "20260604-fast-top-teams-v2";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -248,8 +248,31 @@ function combinations(items, size) {
 
 function strategyScore(team, strategy) {
   if (strategy === "current_friendly") return team.netExpectedPoints;
-  if (strategy === "budget_growth") return team.netExpectedPoints + team.projectedBudgetDelta * 35 + incomingBudgetDelta(team) * 20;
+  if (strategy === "budget_growth") {
+    const transferBudgetDelta = Number.isFinite(team.incomingBudgetDeltaValue)
+      ? team.incomingBudgetDeltaValue
+      : incomingBudgetDelta(team);
+    return team.netExpectedPoints + team.projectedBudgetDelta * 35 + transferBudgetDelta * 20;
+  }
   return team.projectedPoints;
+}
+
+function compareTeams(a, b) {
+  return b.strategyScore - a.strategyScore || b.projectedPoints - a.projectedPoints;
+}
+
+function keepTopTeam(topTeams, team, limit = 10) {
+  if (topTeams.length < limit) {
+    topTeams.push(team);
+    topTeams.sort(compareTeams);
+    return;
+  }
+
+  const weakest = topTeams[topTeams.length - 1];
+  if (compareTeams(team, weakest) >= 0) return;
+
+  topTeams[topTeams.length - 1] = team;
+  topTeams.sort(compareTeams);
 }
 
 function updateStrategyNote() {
@@ -440,28 +463,86 @@ function currentInputs(activeChip = "none") {
   };
 }
 
+function comboSummary(rows, type, inputs) {
+  const currentKeys = type === "driver" ? inputs.currentDrivers : inputs.currentConstructors;
+  const keys = rows.map((row) => row.key);
+  const newKeys = new Set(keys);
+  const inKeys = keys.filter((key) => !currentKeys.has(key));
+  const outKeys = [...currentKeys].filter((key) => !newKeys.has(key));
+  const incomingRows = rows.filter((row) => inKeys.includes(row.key));
+
+  return {
+    rows,
+    keys,
+    cost: rows.reduce((sum, row) => sum + toNumber(row.price_m), 0),
+    expectedPoints: rows.reduce((sum, row) => sum + toNumber(row.expected_fantasy_points), 0),
+    budgetDelta: teamBudgetDelta(rows),
+    noNegativeProtection: rows.reduce((sum, row) => sum + Math.abs(Math.min(0, toNumber(row.dnf_penalty_points_est))), 0),
+    bestBoost:
+      type === "driver"
+        ? [...rows].sort((a, b) => toNumber(b.expected_fantasy_points) - toNumber(a.expected_fantasy_points))[0]
+        : null,
+    inKeys,
+    outKeys,
+    incomingBudgetDelta: teamBudgetDelta(incomingRows),
+    hasOnlyGrowthTransfers: incomingRows.length === 0 || incomingRows.every((row) => projectedPriceChange(row) > 0),
+  };
+}
+
 function findTopTeams(inputs) {
-  const driverCombos = combinations(state.drivers, 5);
-  const constructorCombos = combinations(state.constructors, 2);
-  const teams = [];
+  const driverCombos = combinations(state.drivers, 5).map((rows) => comboSummary(rows, "driver", inputs));
+  const constructorCombos = combinations(state.constructors, 2).map((rows) => comboSummary(rows, "constructor", inputs));
+  const topTeams = [];
   const budgetLimit = ignoresBudget(inputs.activeChip) ? Number.POSITIVE_INFINITY : inputs.budget;
 
   for (const driverCombo of driverCombos) {
-    const driverCost = driverCombo.reduce((sum, row) => sum + toNumber(row.price_m), 0);
-    if (driverCost > budgetLimit) continue;
+    if (driverCombo.cost > budgetLimit) continue;
 
     for (const constructorCombo of constructorCombos) {
-      const team = summarizeTeam(driverCombo, constructorCombo, inputs);
-      if (team.totalCost > budgetLimit) continue;
-      if (inputs.strategy === "current_friendly" && !hasUnlimitedTransfers(inputs.activeChip) && team.transferCount > inputs.freeTransfers) continue;
-      if (inputs.strategy === "budget_growth" && !hasOnlyGrowthTransfers(team)) continue;
-      team.strategyScore = strategyScore(team, inputs.strategy);
-      teams.push(team);
+      const totalCost = driverCombo.cost + constructorCombo.cost;
+      if (totalCost > budgetLimit) continue;
+
+      const transferCount = driverCombo.inKeys.length + constructorCombo.inKeys.length;
+      if (inputs.strategy === "current_friendly" && !hasUnlimitedTransfers(inputs.activeChip) && transferCount > inputs.freeTransfers) continue;
+      if (inputs.strategy === "budget_growth" && (!driverCombo.hasOnlyGrowthTransfers || !constructorCombo.hasOnlyGrowthTransfers)) continue;
+
+      const expectedPoints = driverCombo.expectedPoints + constructorCombo.expectedPoints;
+      const boostBase = toNumber(driverCombo.bestBoost?.expected_fantasy_points);
+      const chipExtraPoints = inputs.activeChip === "x3" ? boostBase : 0;
+      const noNegativeProtection =
+        inputs.activeChip === "no_negative" ? driverCombo.noNegativeProtection + constructorCombo.noNegativeProtection : 0;
+      const projectedPoints = expectedPoints + boostBase + chipExtraPoints + noNegativeProtection;
+      const paidTransfers = hasUnlimitedTransfers(inputs.activeChip) ? 0 : Math.max(0, transferCount - inputs.freeTransfers);
+      const transferPenalty = paidTransfers * -10;
+      const projectedBudgetDelta = driverCombo.budgetDelta + constructorCombo.budgetDelta;
+      const incomingBudgetDeltaValue = driverCombo.incomingBudgetDelta + constructorCombo.incomingBudgetDelta;
+      const candidate = {
+        projectedPoints,
+        netExpectedPoints: projectedPoints + transferPenalty,
+        projectedBudgetDelta,
+        incomingBudgetDeltaValue,
+        strategyScore: strategyScore(
+          {
+            projectedPoints,
+            netExpectedPoints: projectedPoints + transferPenalty,
+            projectedBudgetDelta,
+            incomingBudgetDeltaValue,
+          },
+          inputs.strategy
+        ),
+      };
+
+      const weakest = topTeams[topTeams.length - 1];
+      if (topTeams.length === 10 && compareTeams(candidate, weakest) >= 0) continue;
+
+      const team = summarizeTeam(driverCombo.rows, constructorCombo.rows, inputs);
+      team.incomingBudgetDeltaValue = incomingBudgetDeltaValue;
+      team.strategyScore = candidate.strategyScore;
+      keepTopTeam(topTeams, team);
     }
   }
 
-  teams.sort((a, b) => b.strategyScore - a.strategyScore || b.projectedPoints - a.projectedPoints);
-  return teams.slice(0, 10);
+  return topTeams;
 }
 
 function topDriverGap(team) {
@@ -591,7 +672,7 @@ function optimize() {
   const chipRecommendation = recommendChip(baseTeams[0], availableChips);
   const topTeams = baseTeams
     .map((team) => applyChipToTeam(team, chipRecommendation.chip, baseInputs.strategy))
-    .sort((a, b) => b.strategyScore - a.strategyScore || b.projectedPoints - a.projectedPoints)
+    .sort(compareTeams)
     .slice(0, 10);
 
   render(topTeams, chipRecommendation);
