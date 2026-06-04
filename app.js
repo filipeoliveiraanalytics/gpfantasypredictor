@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260604-x3-predictability";
+const ASSET_VERSION = "20260604-alt-chip-wrap";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -1146,7 +1146,7 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
         </td>
         <td>
           <strong class="alt-score">${formatNumber(team.projectedPoints, 1)}</strong>
-          <span class="alt-sub">Boost ${boostLabel(team)}${team.activeChip !== "none" ? ` | ${chipLabel(team.activeChip)}` : ""}</span>
+          <span class="alt-sub">${compactBoostLabel(team)}${team.activeChip !== "none" ? ` | ${chipLabel(team.activeChip)}` : ""}</span>
         </td>
         <td>
           <strong>${formatNumber(team.totalCost, 1)}M</strong>
@@ -1203,6 +1203,11 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
 function boostLabel(team) {
   const driver = team.bestBoost;
   return driver ? `${driver.key} x2` : "--";
+}
+
+function compactBoostLabel(team) {
+  const driver = team.bestBoost;
+  return driver ? `2x ${driver.key}` : "--";
 }
 
 function lineupList(rows, type) {

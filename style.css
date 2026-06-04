@@ -1091,17 +1091,17 @@ button:disabled {
 
 .table-panel th:nth-child(2),
 .table-panel td:nth-child(2) {
-  width: 500px;
+  width: 450px;
 }
 
 .table-panel th:nth-child(3),
 .table-panel td:nth-child(3) {
-  width: 150px;
+  width: 185px;
 }
 
 .table-panel th:nth-child(4),
 .table-panel td:nth-child(4) {
-  width: 160px;
+  width: 185px;
 }
 
 .table-panel th:nth-child(5),
@@ -1200,7 +1200,10 @@ tr.is-best td {
   display: block;
   font-size: 0.76rem;
   font-weight: 800;
+  line-height: 1.25;
   margin-top: 5px;
+  max-width: 100%;
+  white-space: normal;
 }
 
 .alt-lineup .lineup-list {
