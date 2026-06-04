@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260604-fast-top-teams-v2";
+const ASSET_VERSION = "20260604-x3-predictability";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -561,6 +561,58 @@ function trackProfile(team) {
   };
 }
 
+function x3Predictability(team) {
+  const profile = trackProfile(team);
+  const driver = team?.bestBoost;
+  if (!driver) return { score: 0, confidence: "Hold", reason: "No clear boost driver found." };
+
+  const qualifying = toNumber(driver.qualifying_points_est);
+  const finish = toNumber(driver.race_finish_points_est);
+  const positionChange = Math.abs(toNumber(driver.position_change_points_est));
+  const dnfRisk = Math.abs(Math.min(0, toNumber(driver.dnf_penalty_points_est)));
+  const driverPoints = toNumber(driver.expected_fantasy_points);
+  const lineupShare = team.expectedPoints ? driverPoints / team.expectedPoints : 0;
+
+  let score = 0;
+  const reasons = [];
+
+  if (profile.isMonaco) {
+    score += 7;
+    reasons.push("Monaco turns qualifying and track position into unusually predictable race points");
+  } else if (profile.isStreet) {
+    score += 4;
+    reasons.push("street-track position makes the top-driver outcome more stable");
+  }
+
+  if (qualifying >= 8) {
+    score += 4;
+    reasons.push(`${driver.key} has strong qualifying projection`);
+  } else if (qualifying >= 5) {
+    score += 2;
+    reasons.push(`${driver.key} has usable qualifying projection`);
+  }
+
+  if (finish >= 18) {
+    score += 4;
+    reasons.push("race-finish projection is high");
+  } else if (finish >= 12) {
+    score += 2;
+    reasons.push("race-finish projection is solid");
+  }
+
+  if (positionChange <= 1.5) score += 2;
+  if (dnfRisk <= 1.5) score += 2;
+  if (lineupShare >= 0.17) score += 2;
+  if (profile.isSprint) score += 2;
+
+  const confidence = score >= 13 ? "Strong" : score >= 9 ? "Medium" : "Hold";
+  return {
+    score,
+    confidence,
+    reason: reasons.length ? reasons.join("; ") : `${driver.key} is the best boost driver, but the top-driver outcome is not especially predictable.`,
+  };
+}
+
 function applyChipToTeam(team, chip, strategy) {
   if (!team) return team;
   const entities = [...team.drivers, ...team.constructors];
@@ -604,6 +656,7 @@ function recommendChip(base, availableChips) {
   const result = { chip: "none", confidence: "Hold", reason: "No available chip creates a strong enough edge this week." };
   const transferPressure = base.paidTransfers > 0 || base.transferCount >= 4;
   const boostGap = topDriverGap(base);
+  const x3Read = x3Predictability(base);
   const riskProtection = applyChipToTeam(base, "no_negative", "max_points").noNegativeProtection;
 
   const candidates = [];
@@ -634,12 +687,12 @@ function recommendChip(base, availableChips) {
     });
   }
 
-  if (availableChips.has("x3") && boostGap >= 7) {
+  if (availableChips.has("x3") && x3Read.score >= 9) {
     candidates.push({
       chip: "x3",
-      score: boostGap + (profile.isSprint ? 5 : 0),
-      confidence: boostGap >= 10 ? "Strong" : "Medium",
-      reason: `${chipLabel("x3")} fits because ${base.bestBoost?.key ?? "the top driver"} is clearly ahead of the next boost option by about ${formatNumber(boostGap, 1)} pts.`,
+      score: x3Read.score,
+      confidence: x3Read.confidence,
+      reason: `${chipLabel("x3")} fits because ${base.bestBoost?.key ?? "the top driver"} has a predictable high-upside path: ${x3Read.reason}.`,
     });
   }
 
