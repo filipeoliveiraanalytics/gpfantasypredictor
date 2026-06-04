@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260604-alt-lineup-width";
+const ASSET_VERSION = "20260604-alt-cost-nowrap";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -1150,7 +1150,7 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
         </td>
         <td>
           <strong>${formatNumber(team.totalCost, 1)}M</strong>
-          <span class="alt-sub">${budgetLeftLabel(team)} | ${formatSignedMoney(team.projectedBudgetDelta)} outlook</span>
+          <span class="alt-sub alt-sub--cost">${budgetLeftLabel(team)} | ${formatSignedMoney(team.projectedBudgetDelta)}</span>
         </td>
         <td>
           <span class="transfer-pill ${team.paidTransfers ? "transfer-pill--paid" : ""}">${team.transferCount} moves</span>
