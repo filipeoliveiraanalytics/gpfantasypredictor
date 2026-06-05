@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260604-alt-left-spacing";
+const ASSET_VERSION = "20260605-monaco-fp2-fantasy";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
