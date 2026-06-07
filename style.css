@@ -105,19 +105,6 @@ h1 {
   width: 8px;
 }
 
-.session-note {
-  background: rgba(240, 200, 75, 0.1);
-  border: 1px solid rgba(240, 200, 75, 0.28);
-  border-radius: 12px;
-  color: #f5e9bd;
-  font-size: 0.84rem;
-  font-weight: 700;
-  line-height: 1.45;
-  margin: 0;
-  max-width: 660px;
-  padding: 9px 12px;
-}
-
 .analysis-link,
 button {
   background: var(--text);
@@ -1097,37 +1084,38 @@ button:disabled {
 }
 
 .table-wrap {
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 .table-panel table {
-  min-width: 1130px;
+  min-width: 0;
   table-layout: fixed;
+  width: 100%;
 }
 
 .table-panel th:nth-child(1),
 .table-panel td:nth-child(1) {
-  width: 155px;
+  width: 15%;
 }
 
 .table-panel th:nth-child(2),
 .table-panel td:nth-child(2) {
-  width: 535px;
+  width: 49%;
 }
 
 .table-panel th:nth-child(3),
 .table-panel td:nth-child(3) {
-  width: 145px;
+  width: 13%;
 }
 
 .table-panel th:nth-child(4),
 .table-panel td:nth-child(4) {
-  width: 180px;
+  width: 13%;
 }
 
 .table-panel th:nth-child(5),
 .table-panel td:nth-child(5) {
-  width: 120px;
+  width: 10%;
 }
 
 .alternative-cards {
