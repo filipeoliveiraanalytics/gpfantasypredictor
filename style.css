@@ -74,6 +74,14 @@ h1 {
   max-width: 680px;
 }
 
+.update-stack {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 18px 0 0;
+}
+
 .model-update-pill {
   align-items: center;
   background: rgba(20, 200, 189, 0.12);
@@ -84,7 +92,7 @@ h1 {
   font-size: 0.88rem;
   font-weight: 800;
   gap: 8px;
-  margin: 18px 0 0;
+  margin: 0;
   padding: 8px 12px;
 }
 
@@ -95,6 +103,19 @@ h1 {
   content: "";
   height: 8px;
   width: 8px;
+}
+
+.session-note {
+  background: rgba(240, 200, 75, 0.1);
+  border: 1px solid rgba(240, 200, 75, 0.28);
+  border-radius: 12px;
+  color: #f5e9bd;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.45;
+  margin: 0;
+  max-width: 660px;
+  padding: 9px 12px;
 }
 
 .analysis-link,

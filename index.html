@@ -32,7 +32,7 @@
   <meta name="twitter:description"
     content="A fan-made F1 Fantasy predictor powered by GP prediction modelling." />
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png" />
-  <link rel="stylesheet" href="style.css?v=20260605-monaco-fp2-fantasy" />
+  <link rel="stylesheet" href="style.css?v=20260607-monaco-post-quali-tuned" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -64,7 +64,10 @@
           Turn GP predictions into F1 Fantasy picks. Enter your current team and budget, then let the model search every
           valid 5-driver + 2-constructor lineup.
         </p>
-        <p class="model-update-pill">Monaco model updated after FP1 + FP2</p>
+        <div class="update-stack" aria-label="Model freshness">
+          <p class="model-update-pill">Monaco model updated after qualifying</p>
+          <p class="session-note">Post-quali model uses the official qualifying order; FP3 timing data was still unavailable in FastF1.</p>
+        </div>
       </div>
       <aside class="forecast-cta" aria-label="Full GP Predictor">
         <span>Want the race context?</span>
@@ -82,7 +85,7 @@
         <p>
           The optimizer combines the latest GP prediction model, F1 Fantasy prices, expected qualifying/race points,
           transfer penalties and the recommended mandatory driver boost. It is built for lineup decisions before team lock, with deeper race
-          context available in the full GP Predictor.
+          context available in the full GP Predictor. FP3 context is monitored separately until timing data is available for a clean rerun.
         </p>
       </div>
     </section>
@@ -299,7 +302,7 @@
   <script>
     window.GA_MEASUREMENT_ID = "G-0GCZQDW467";
   </script>
-  <script src="app.js?v=20260605-monaco-fp2-fantasy"></script>
+  <script src="app.js?v=20260607-monaco-post-quali-tuned"></script>
 </body>
 
 </html>
