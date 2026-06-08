@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260608-barcelona-reliable-optimizer";
+const ASSET_VERSION = "20260608-barcelona-context";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -1101,6 +1101,7 @@ function priceContext(team) {
 
 function trackContext(team, recommendation) {
   const gp = team.drivers[0]?.next_gp ?? "this GP";
+  const gpKey = gp.toLowerCase();
   if (gp.toLowerCase().includes("monaco")) {
     return {
       title: "Monaco context: qualifying and track position carry extra weight",
@@ -1108,6 +1109,24 @@ function trackContext(team, recommendation) {
         "Monaco is usually low-overtake, so the optimizer is leaning into teams and drivers expected to qualify well rather than chasing comeback points.",
       insights: [
         ["Track logic", "Clean qualifying matters because race recovery is limited and position-change upside is harder to find."],
+        ["Constructor logic", constructorContext(team)],
+        ["Chip logic", chipContext(team, recommendation)],
+        ["Price logic", priceContext(team)],
+        ["Budget logic", budgetContext(team)],
+      ],
+    };
+  }
+
+  if (gpKey.includes("barcelona")) {
+    return {
+      title: "Barcelona-Catalunya context: aero balance and tyre management",
+      summary:
+        "Barcelona rewards efficient aero, high-speed corner confidence and keeping the tyres alive through long loaded corners, so the optimizer leans into teams with broad pace rather than pure street-track qualifying upside.",
+      insights: [
+        [
+          "Track logic",
+          "High-speed corners, traction zones and tyre degradation matter together here, so strong race pace and stable two-car constructor scoring carry extra weight.",
+        ],
         ["Constructor logic", constructorContext(team)],
         ["Chip logic", chipContext(team, recommendation)],
         ["Price logic", priceContext(team)],
