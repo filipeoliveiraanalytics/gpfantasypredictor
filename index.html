@@ -32,7 +32,7 @@
   <meta name="twitter:description"
     content="A fan-made F1 Fantasy predictor powered by GP prediction modelling." />
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png" />
-  <link rel="stylesheet" href="style.css?v=20260608-budget-enablers-fast" />
+  <link rel="stylesheet" href="style.css?v=20260608-protected-near-current" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -101,28 +101,28 @@
 
         <label>
           Budget available
-          <input id="budget" type="number" min="0" step="0.1" value="103.6" />
+          <input id="budget" type="number" min="0" step="0.1" placeholder="e.g. 100.0" />
         </label>
 
         <label>
           Free transfers
-          <input id="free-transfers" type="number" min="0" step="1" value="3" />
+          <input id="free-transfers" type="number" min="0" step="1" placeholder="e.g. 2" />
         </label>
 
         <label>
           Current drivers
-          <input id="drivers" type="hidden" value="LEC, ANT, COL, PER, BOT" />
+          <input id="drivers" type="hidden" value="" />
           <button class="picker-trigger" id="open-driver-picker" type="button">
-            <span id="driver-picker-summary">LEC, ANT, COL, PER, BOT</span>
+            <span id="driver-picker-summary">Choose drivers</span>
             <span>Choose 5</span>
           </button>
         </label>
 
         <label>
           Current constructors
-          <input id="constructors" type="hidden" value="MER, AUD" />
+          <input id="constructors" type="hidden" value="" />
           <button class="picker-trigger" id="open-constructor-picker" type="button">
-            <span id="constructor-picker-summary">MER, AUD</span>
+            <span id="constructor-picker-summary">Choose constructors</span>
             <span>Choose 2</span>
           </button>
         </label>
@@ -301,7 +301,7 @@
   <script>
     window.GA_MEASUREMENT_ID = "G-0GCZQDW467";
   </script>
-  <script src="app.js?v=20260608-budget-enablers-fast"></script>
+  <script src="app.js?v=20260608-protected-near-current"></script>
 </body>
 
 </html>

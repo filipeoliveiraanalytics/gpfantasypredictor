@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260608-budget-enablers-fast";
+const ASSET_VERSION = "20260608-protected-near-current";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -513,6 +513,29 @@ function pickDriverPool(inputs) {
   return [...selected.values()];
 }
 
+function currentNearbyDriverCombos(inputs) {
+  if (inputs.currentDrivers.size !== 5) return [];
+
+  const byKey = new Map(state.drivers.map((row) => [row.key, row]));
+  const currentRows = [...inputs.currentDrivers].map((key) => byKey.get(key)).filter(Boolean);
+  if (currentRows.length !== 5) return [];
+
+  const currentKeys = new Set(currentRows.map((row) => row.key));
+  const alternatives = state.drivers.filter((row) => !currentKeys.has(row.key));
+  const maxDriverChanges = Math.min(3, Math.max(1, inputs.freeTransfers));
+  const combos = [];
+
+  for (let changes = 0; changes <= maxDriverChanges; changes += 1) {
+    for (const keepRows of combinations(currentRows, 5 - changes)) {
+      for (const addRows of combinations(alternatives, changes)) {
+        combos.push([...keepRows, ...addRows]);
+      }
+    }
+  }
+
+  return combos;
+}
+
 function comboPoolScore(combo, inputs) {
   const transferCost = combo.inKeys.length * (inputs.strategy === "current_friendly" ? 14 : 6);
   const growthBonus = combo.budgetDelta * (inputs.strategy === "budget_growth" ? 40 : 18);
@@ -521,7 +544,7 @@ function comboPoolScore(combo, inputs) {
 }
 
 function trimComboPool(combos, inputs, limit) {
-  const protectedCombos = combos.filter((combo) => combo.inKeys.length === 0);
+  const protectedCombos = combos.filter((combo) => combo.isProtected || combo.inKeys.length === 0);
   const ranked = [...combos].sort((a, b) => comboPoolScore(b, inputs) - comboPoolScore(a, inputs));
   const seen = new Set();
   const output = [];
@@ -537,10 +560,24 @@ function trimComboPool(combos, inputs, limit) {
 }
 
 function findTopTeams(inputs) {
+  const driverComboMap = new Map();
+  currentNearbyDriverCombos(inputs).forEach((rows) => {
+    const id = rows.map((row) => row.key).sort().join("|");
+    if (!driverComboMap.has(id)) {
+      const summary = comboSummary(rows, "driver", inputs);
+      summary.isProtected = true;
+      driverComboMap.set(id, summary);
+    }
+  });
+  combinations(pickDriverPool(inputs), 5).forEach((rows) => {
+    const id = rows.map((row) => row.key).sort().join("|");
+    if (!driverComboMap.has(id)) driverComboMap.set(id, comboSummary(rows, "driver", inputs));
+  });
+
   const driverCombos = trimComboPool(
-    combinations(pickDriverPool(inputs), 5).map((rows) => comboSummary(rows, "driver", inputs)),
+    [...driverComboMap.values()],
     inputs,
-    180
+    1400
   );
   const constructorCombos = trimComboPool(
     combinations(state.constructors, 2).map((rows) => comboSummary(rows, "constructor", inputs)),
@@ -775,6 +812,15 @@ function recommendChip(base, availableChips) {
 
 function optimize() {
   const baseInputs = currentInputs("none");
+  if (baseInputs.budget <= 0 || baseInputs.currentDrivers.size !== 5 || baseInputs.currentConstructors.size !== 2) {
+    els.status.textContent = "Enter your budget and choose exactly 5 drivers + 2 constructors first.";
+    els.whyLineup.hidden = true;
+    els.whyLineup.innerHTML = "";
+    els.alternatives.innerHTML = "";
+    els.alternativeCards.innerHTML = "";
+    return;
+  }
+
   const availableChips = getAvailableChips();
   const baseTeams = findTopTeams(baseInputs);
   const chipRecommendation = recommendChip(baseTeams[0], availableChips);
