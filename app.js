@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260608-barcelona-preweekend-price-ppm";
+const ASSET_VERSION = "20260608-barcelona-reliable-optimizer";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -483,6 +483,33 @@ function comboSummary(rows, type, inputs) {
   };
 }
 
+function entityPoolScore(row, inputs) {
+  const points = toNumber(row.expected_fantasy_points);
+  const price = toNumber(row.price_m);
+  const value = price ? points / price : 0;
+  const priceDelta = projectedPriceChange(row);
+  const growthWeight = inputs.strategy === "budget_growth" ? 26 : 10;
+  return points + value * 3 + priceDelta * growthWeight;
+}
+
+function pickDriverPool(inputs) {
+  const currentKeys = inputs.currentDrivers;
+  const byKey = new Map(state.drivers.map((row) => [row.key, row]));
+  const selected = new Map();
+
+  currentKeys.forEach((key) => {
+    const row = byKey.get(key);
+    if (row) selected.set(key, row);
+  });
+
+  const ranked = [...state.drivers].sort((a, b) => entityPoolScore(b, inputs) - entityPoolScore(a, inputs));
+  ranked.forEach((row) => {
+    if (selected.size < 14 || projectedPriceChange(row) > 0) selected.set(row.key, row);
+  });
+
+  return [...selected.values()];
+}
+
 function comboPoolScore(combo, inputs) {
   const transferCost = combo.inKeys.length * (inputs.strategy === "current_friendly" ? 14 : 6);
   const growthBonus = combo.budgetDelta * (inputs.strategy === "budget_growth" ? 40 : 18);
@@ -508,9 +535,9 @@ function trimComboPool(combos, inputs, limit) {
 
 function findTopTeams(inputs) {
   const driverCombos = trimComboPool(
-    combinations(state.drivers, 5).map((rows) => comboSummary(rows, "driver", inputs)),
+    combinations(pickDriverPool(inputs), 5).map((rows) => comboSummary(rows, "driver", inputs)),
     inputs,
-    900
+    260
   );
   const constructorCombos = trimComboPool(
     combinations(state.constructors, 2).map((rows) => comboSummary(rows, "constructor", inputs)),
@@ -793,7 +820,7 @@ function runOptimization() {
   els.optimizeButton.textContent = "Optimizing...";
   els.status.textContent = "Calculating the best lineup...";
 
-  requestAnimationFrame(() => {
+  setTimeout(() => {
     try {
       optimize();
     } finally {
@@ -801,7 +828,7 @@ function runOptimization() {
       els.optimizeButton.disabled = false;
       els.optimizeButton.textContent = "Optimize Team";
     }
-  });
+  }, 0);
 }
 
 function chip(row) {
@@ -1037,6 +1064,8 @@ function constructorContext(team) {
 }
 
 function budgetContext(team) {
+  const gp = team.drivers[0]?.next_gp ?? "this GP";
+  const isMonaco = gp.toLowerCase().includes("monaco");
   const budgetLeft = `${formatNumber(team.budgetRemaining, 1)}M`;
   if (team.paidTransfers > 0) {
     const penalty = Math.abs(team.transferPenalty);
@@ -1046,7 +1075,9 @@ function budgetContext(team) {
     return `${transferSummary(team)} and no budget cap for this GP. The displayed cost shows what this one-week lineup would normally cost.`;
   }
   if (team.budgetRemaining < 0.3) {
-    return `${transferSummary(team)} and nearly all budget used. That is acceptable here because Monaco rewards concentrated qualifying strength.`;
+    return isMonaco
+      ? `${transferSummary(team)} and nearly all budget used. That is acceptable here because Monaco rewards concentrated qualifying strength.`
+      : `${transferSummary(team)} and nearly all budget used. That is acceptable if the extra spend improves the projected lineup for ${gp}.`;
   }
   return `${transferSummary(team)} with ${budgetLeft} left, so the lineup improves projection without spending paid transfers.`;
 }
