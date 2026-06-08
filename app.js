@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260607-monaco-post-quali-tuned";
+const ASSET_VERSION = "20260608-barcelona-preweekend-price-ppm";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -18,12 +18,6 @@ const STRATEGY_NOTES = {
   max_points: "Max Points ranks the strongest projected lineup, even if it uses paid transfers.",
   current_friendly: "Transfer Friendly avoids paid transfers unless a selected chip changes the transfer rules.",
   budget_growth: "Budget Growth buys assets with a realistic path to a price rise, then ranks by points plus price upside.",
-};
-
-const PRICE_RISE_TARGETS = {
-  "driver:ALO": { pointsNeeded: 26, source: "community threshold read" },
-  "driver:COL": { pointsNeeded: 0, source: "community threshold read" },
-  "driver:STR": { pointsNeeded: 0, source: "community threshold read" },
 };
 
 const TEAM_COLORS = {
@@ -489,9 +483,40 @@ function comboSummary(rows, type, inputs) {
   };
 }
 
+function comboPoolScore(combo, inputs) {
+  const transferCost = combo.inKeys.length * (inputs.strategy === "current_friendly" ? 14 : 6);
+  const growthBonus = combo.budgetDelta * (inputs.strategy === "budget_growth" ? 40 : 18);
+  const valueBonus = combo.cost ? (combo.expectedPoints / combo.cost) * 4 : 0;
+  return combo.expectedPoints + growthBonus + valueBonus - transferCost;
+}
+
+function trimComboPool(combos, inputs, limit) {
+  const protectedCombos = combos.filter((combo) => combo.inKeys.length === 0);
+  const ranked = [...combos].sort((a, b) => comboPoolScore(b, inputs) - comboPoolScore(a, inputs));
+  const seen = new Set();
+  const output = [];
+
+  [...protectedCombos, ...ranked].forEach((combo) => {
+    const id = combo.keys.join("|");
+    if (seen.has(id) || output.length >= limit) return;
+    seen.add(id);
+    output.push(combo);
+  });
+
+  return output;
+}
+
 function findTopTeams(inputs) {
-  const driverCombos = combinations(state.drivers, 5).map((rows) => comboSummary(rows, "driver", inputs));
-  const constructorCombos = combinations(state.constructors, 2).map((rows) => comboSummary(rows, "constructor", inputs));
+  const driverCombos = trimComboPool(
+    combinations(state.drivers, 5).map((rows) => comboSummary(rows, "driver", inputs)),
+    inputs,
+    900
+  );
+  const constructorCombos = trimComboPool(
+    combinations(state.constructors, 2).map((rows) => comboSummary(rows, "constructor", inputs)),
+    inputs,
+    60
+  );
   const topTeams = [];
   const budgetLimit = ignoresBudget(inputs.activeChip) ? Number.POSITIVE_INFINITY : inputs.budget;
 
@@ -823,46 +848,39 @@ function priceStep(row) {
   return toNumber(row.price_m) < 18.5 ? 0.6 : 0.3;
 }
 
-function priceRiseTarget(row) {
-  return PRICE_RISE_TARGETS[priceMoveKey(row)] || null;
+function hasModeledPriceChange(row) {
+  return String(row.projected_price_delta_m ?? "").trim() !== "";
 }
 
-function thresholdPriceSignal(row) {
-  const target = priceRiseTarget(row);
-  if (!target) return null;
+function modeledPriceSignal(row) {
+  if (!hasModeledPriceChange(row)) return null;
 
+  const delta = toNumber(row.projected_price_delta_m);
   const expected = toNumber(row.expected_fantasy_points);
-  const pointsNeeded = toNumber(target.pointsNeeded);
-  const edge = expected - pointsNeeded;
-  const step = priceStep(row);
-  const easyRiseBuffer = pointsNeeded <= 1 && edge >= -1;
-
-  if (edge >= 0 || easyRiseBuffer) {
-    return {
-      delta: step,
-      tone: "rise",
-      label: `+${formatNumber(step, 1)}M`,
-      reason:
-        edge >= 0
-          ? `${formatNumber(expected, 1)} projected pts vs ${formatNumber(pointsNeeded, 1)} needed for a likely price rise (${target.source}).`
-          : `${formatNumber(pointsNeeded, 1)} pts appears enough for a price rise; ${formatNumber(expected, 1)} projected pts is close enough to keep as budget upside (${target.source}).`,
-    };
-  }
-
-  if (edge <= -8) {
-    return {
-      delta: -step,
-      tone: "fall",
-      label: `${formatNumber(-step, 1)}M`,
-      reason: `${formatNumber(expected, 1)} projected pts is well short of the ${formatNumber(pointsNeeded, 1)} pts likely needed for a price rise (${target.source}).`,
-    };
+  const knownPoints = toNumber(row.price_last_two_points);
+  const ppm = toNumber(row.price_projected_rolling_ppm);
+  const neededGood = toNumber(row.price_points_needed_good);
+  const neededGreat = toNumber(row.price_points_needed_great);
+  const bucket = row.projected_price_bucket || "estimated";
+  const tone = delta > 0 ? "rise" : delta < 0 ? "fall" : "stable";
+  const label = delta > 0 ? `+${formatNumber(delta, 1)}M` : delta < 0 ? `${formatNumber(delta, 1)}M` : "Stable";
+  let thresholdCopy;
+  if (delta > 0 && neededGreat <= expected) {
+    thresholdCopy = "already projects inside max-rise territory";
+  } else if (delta > 0) {
+    thresholdCopy =
+      neededGood <= expected
+        ? `already projects inside a rise bucket; ${formatNumber(neededGreat, 1)} pts would point to max-rise territory`
+        : `needs ${formatNumber(neededGood, 1)} pts for a rise bucket`;
+  } else {
+    thresholdCopy = `needs ${formatNumber(neededGood, 1)} pts to reach a rise bucket`;
   }
 
   return {
-    delta: 0,
-    tone: "stable",
-    label: "Stable",
-    reason: `${formatNumber(expected, 1)} projected pts is close to the ${formatNumber(pointsNeeded, 1)} pts price-rise target (${target.source}).`,
+    delta,
+    tone,
+    label,
+    reason: `${formatNumber(knownPoints, 1)} pts already banked from the previous two races + ${formatNumber(expected, 1)} projected here gives ${formatNumber(ppm, 2)} rolling pts/M (${bucket}); ${thresholdCopy}.`,
   };
 }
 
@@ -881,12 +899,12 @@ function inferredPriceChange(row) {
 }
 
 function projectedPriceChange(row) {
-  return thresholdPriceSignal(row)?.delta ?? inferredPriceChange(row);
+  return modeledPriceSignal(row)?.delta ?? inferredPriceChange(row);
 }
 
 function priceMomentum(row) {
-  const thresholdSignal = thresholdPriceSignal(row);
-  if (thresholdSignal) return thresholdSignal;
+  const modelSignal = modeledPriceSignal(row);
+  if (modelSignal) return modelSignal;
 
   const delta = projectedPriceChange(row);
   const ppm = rowValue(row);
@@ -995,17 +1013,25 @@ function chipContext(team, recommendation) {
 }
 
 function constructorContext(team) {
+  const gp = team.drivers[0]?.next_gp ?? "this GP";
+  const isMonaco = gp.toLowerCase().includes("monaco");
   const constructorNames = team.constructors.map((row) => row.name).join(" + ");
   const constructorKeys = new Set(team.constructorKeys);
 
   if (constructorKeys.has("MER") && constructorKeys.has("FER")) {
-    return `${constructorNames} is expensive, but it fits Monaco: Mercedes leads the model's constructor projection and Ferrari is also strong on qualifying-heavy weekends.`;
+    return isMonaco
+      ? `${constructorNames} is expensive, but it fits Monaco: Mercedes leads the model's constructor projection and Ferrari is also strong on qualifying-heavy weekends.`
+      : `${constructorNames} is expensive, but both teams sit near the top of the model's constructor projection for ${gp}.`;
   }
   if (constructorKeys.has("MER")) {
-    return `${constructorNames} keeps Mercedes exposure, which is useful at Monaco because constructor qualifying points can be hard to recover elsewhere.`;
+    return isMonaco
+      ? `${constructorNames} keeps Mercedes exposure, which is useful at Monaco because constructor qualifying points can be hard to recover elsewhere.`
+      : `${constructorNames} keeps Mercedes exposure, which the model rates strongly for ${gp}.`;
   }
   if (constructorKeys.has("FER")) {
-    return `${constructorNames} leans into Ferrari's Monaco profile, where track position and clean qualifying tend to matter more than race overtakes.`;
+    return isMonaco
+      ? `${constructorNames} leans into Ferrari's Monaco profile, where track position and clean qualifying tend to matter more than race overtakes.`
+      : `${constructorNames} keeps Ferrari exposure, which the model still rates as useful for ${gp}.`;
   }
   return `${constructorNames} gives the model the best points-per-budget balance for this track and the selected transfer limit.`;
 }
