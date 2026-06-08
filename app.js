@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260608-protected-near-current";
+const ASSET_VERSION = "20260608-fast-numeric-search";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -560,31 +560,9 @@ function trimComboPool(combos, inputs, limit) {
 }
 
 function findTopTeams(inputs) {
-  const driverComboMap = new Map();
-  currentNearbyDriverCombos(inputs).forEach((rows) => {
-    const id = rows.map((row) => row.key).sort().join("|");
-    if (!driverComboMap.has(id)) {
-      const summary = comboSummary(rows, "driver", inputs);
-      summary.isProtected = true;
-      driverComboMap.set(id, summary);
-    }
-  });
-  combinations(pickDriverPool(inputs), 5).forEach((rows) => {
-    const id = rows.map((row) => row.key).sort().join("|");
-    if (!driverComboMap.has(id)) driverComboMap.set(id, comboSummary(rows, "driver", inputs));
-  });
-
-  const driverCombos = trimComboPool(
-    [...driverComboMap.values()],
-    inputs,
-    1400
-  );
-  const constructorCombos = trimComboPool(
-    combinations(state.constructors, 2).map((rows) => comboSummary(rows, "constructor", inputs)),
-    inputs,
-    60
-  );
-  const topTeams = [];
+  const driverCombos = combinations(state.drivers, 5).map((rows) => comboSummary(rows, "driver", inputs));
+  const constructorCombos = combinations(state.constructors, 2).map((rows) => comboSummary(rows, "constructor", inputs));
+  const topCandidates = [];
   const budgetLimit = ignoresBudget(inputs.activeChip) ? Number.POSITIVE_INFINITY : inputs.budget;
 
   for (const driverCombo of driverCombos) {
@@ -609,6 +587,8 @@ function findTopTeams(inputs) {
       const projectedBudgetDelta = driverCombo.budgetDelta + constructorCombo.budgetDelta;
       const incomingBudgetDeltaValue = driverCombo.incomingBudgetDelta + constructorCombo.incomingBudgetDelta;
       const candidate = {
+        driverCombo,
+        constructorCombo,
         projectedPoints,
         netExpectedPoints: projectedPoints + transferPenalty,
         projectedBudgetDelta,
@@ -624,17 +604,19 @@ function findTopTeams(inputs) {
         ),
       };
 
-      const weakest = topTeams[topTeams.length - 1];
-      if (topTeams.length === 10 && compareTeams(candidate, weakest) >= 0) continue;
+      const weakest = topCandidates[topCandidates.length - 1];
+      if (topCandidates.length === 10 && compareTeams(candidate, weakest) >= 0) continue;
 
-      const team = summarizeTeam(driverCombo.rows, constructorCombo.rows, inputs);
-      team.incomingBudgetDeltaValue = incomingBudgetDeltaValue;
-      team.strategyScore = candidate.strategyScore;
-      keepTopTeam(topTeams, team);
+      keepTopTeam(topCandidates, candidate);
     }
   }
 
-  return topTeams;
+  return topCandidates.map((candidate) => {
+    const team = summarizeTeam(candidate.driverCombo.rows, candidate.constructorCombo.rows, inputs);
+    team.incomingBudgetDeltaValue = candidate.incomingBudgetDeltaValue;
+    team.strategyScore = candidate.strategyScore;
+    return team;
+  });
 }
 
 function topDriverGap(team) {
