@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260608-barcelona-context";
+const ASSET_VERSION = "20260608-budget-enablers-fast";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -503,9 +503,12 @@ function pickDriverPool(inputs) {
   });
 
   const ranked = [...state.drivers].sort((a, b) => entityPoolScore(b, inputs) - entityPoolScore(a, inputs));
+  const cheapest = [...state.drivers].sort((a, b) => toNumber(a.price_m) - toNumber(b.price_m));
   ranked.forEach((row) => {
-    if (selected.size < 14 || projectedPriceChange(row) > 0) selected.set(row.key, row);
+    if (selected.size < 13) selected.set(row.key, row);
+    else if (inputs.strategy === "budget_growth" && selected.size < 16 && projectedPriceChange(row) > 0) selected.set(row.key, row);
   });
+  cheapest.slice(0, 5).forEach((row) => selected.set(row.key, row));
 
   return [...selected.values()];
 }
@@ -537,7 +540,7 @@ function findTopTeams(inputs) {
   const driverCombos = trimComboPool(
     combinations(pickDriverPool(inputs), 5).map((rows) => comboSummary(rows, "driver", inputs)),
     inputs,
-    260
+    180
   );
   const constructorCombos = trimComboPool(
     combinations(state.constructors, 2).map((rows) => comboSummary(rows, "constructor", inputs)),
