@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260608-fast-numeric-search";
+const ASSET_VERSION = "20260608-fast-combo-masks";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -63,6 +63,10 @@ const state = {
   projections: [],
   drivers: [],
   constructors: [],
+  driverCombos: [],
+  constructorCombos: [],
+  driverKeyBits: new Map(),
+  constructorKeyBits: new Map(),
   driverPhotos: new Set(),
   driverPhotoBasePath: "assets/drivers",
   priceMovements: new Map(),
@@ -388,6 +392,96 @@ function entityMark(row, size = "default") {
   return row.entity_type === "driver" ? driverAvatar(row, size) : constructorMark(row, size);
 }
 
+function cacheProjectionNumbers(row) {
+  row._cost = toNumber(row.price_m);
+  row._points = toNumber(row.expected_fantasy_points);
+  row._risk = toNumber(row.risk_score);
+  row._priceDelta = projectedPriceChange(row);
+  row._dnfProtection = Math.abs(Math.min(0, toNumber(row.dnf_penalty_points_est)));
+}
+
+function comboFromRows(rows, type) {
+  const keys = rows.map((row) => row.key);
+  const cost = rows.reduce((sum, row) => sum + row._cost, 0);
+  const expectedPoints = rows.reduce((sum, row) => sum + row._points, 0);
+  const budgetDelta = rows.reduce((sum, row) => sum + row._priceDelta, 0);
+  const noNegativeProtection = rows.reduce((sum, row) => sum + row._dnfProtection, 0);
+  const riskSum = rows.reduce((sum, row) => sum + row._risk, 0);
+  const mask = rows.reduce((bits, row) => bits | row._bit, 0);
+  const nonGrowthMask = rows.reduce((bits, row) => (row._priceDelta > 0 ? bits : bits | row._bit), 0);
+  const bestBoost =
+    type === "driver"
+      ? [...rows].sort((a, b) => b._points - a._points)[0]
+      : null;
+
+  return {
+    rows,
+    keys,
+    keyText: keys.join("|"),
+    size: rows.length,
+    mask,
+    nonGrowthMask,
+    cost,
+    expectedPoints,
+    budgetDelta,
+    noNegativeProtection,
+    riskSum,
+    bestBoost,
+  };
+}
+
+function buildComboCaches() {
+  state.projections.forEach(cacheProjectionNumbers);
+  state.driverKeyBits = new Map();
+  state.constructorKeyBits = new Map();
+  state.drivers.forEach((row, index) => {
+    row._bit = 1 << index;
+    state.driverKeyBits.set(row.key, row._bit);
+  });
+  state.constructors.forEach((row, index) => {
+    row._bit = 1 << index;
+    state.constructorKeyBits.set(row.key, row._bit);
+  });
+  state.driverCombos = combinations(state.drivers, 5).map((rows) => comboFromRows(rows, "driver"));
+  state.constructorCombos = combinations(state.constructors, 2).map((rows) => comboFromRows(rows, "constructor"));
+}
+
+function popCount(value) {
+  let bits = value >>> 0;
+  let count = 0;
+  while (bits) {
+    bits &= bits - 1;
+    count += 1;
+  }
+  return count;
+}
+
+function maskFromKeys(keys, keyBits) {
+  let mask = 0;
+  keys.forEach((key) => {
+    mask |= keyBits.get(key) || 0;
+  });
+  return mask;
+}
+
+function comboIncomingBudgetDelta(combo, currentMask) {
+  let total = 0;
+  for (const row of combo.rows) {
+    if ((row._bit & currentMask) === 0) total += row._priceDelta;
+  }
+  return total;
+}
+
+function comboRunMeta(combo, currentMask) {
+  const keptCount = popCount(combo.mask & currentMask);
+  return {
+    combo,
+    transferCount: combo.size - keptCount,
+    incomingBudgetDeltaValue: comboIncomingBudgetDelta(combo, currentMask),
+    growthEligible: (combo.nonGrowthMask & currentMask) === combo.nonGrowthMask,
+  };
+}
+
 function summarizeTeam(driverCombo, constructorCombo, inputs) {
   const entities = [...driverCombo, ...constructorCombo];
   const driverKeys = driverCombo.map((row) => row.key);
@@ -560,24 +654,34 @@ function trimComboPool(combos, inputs, limit) {
 }
 
 function findTopTeams(inputs) {
-  const driverCombos = combinations(state.drivers, 5).map((rows) => comboSummary(rows, "driver", inputs));
-  const constructorCombos = combinations(state.constructors, 2).map((rows) => comboSummary(rows, "constructor", inputs));
   const topCandidates = [];
   const budgetLimit = ignoresBudget(inputs.activeChip) ? Number.POSITIVE_INFINITY : inputs.budget;
+  const currentDriverMask = maskFromKeys(inputs.currentDrivers, state.driverKeyBits);
+  const currentConstructorMask = maskFromKeys(inputs.currentConstructors, state.constructorKeyBits);
+  const budgetGrowth = inputs.strategy === "budget_growth";
+  const transferFriendly = inputs.strategy === "current_friendly" && !hasUnlimitedTransfers(inputs.activeChip);
+  const driverCandidates = state.driverCombos
+    .map((combo) => comboRunMeta(combo, currentDriverMask))
+    .filter((meta) => meta.combo.cost <= budgetLimit && (!budgetGrowth || meta.growthEligible));
+  const constructorCandidates = state.constructorCombos
+    .map((combo) => comboRunMeta(combo, currentConstructorMask))
+    .filter((meta) => !budgetGrowth || meta.growthEligible);
 
-  for (const driverCombo of driverCombos) {
+  for (const driverMeta of driverCandidates) {
+    const driverCombo = driverMeta.combo;
     if (driverCombo.cost > budgetLimit) continue;
+    if (transferFriendly && driverMeta.transferCount > inputs.freeTransfers) continue;
 
-    for (const constructorCombo of constructorCombos) {
+    for (const constructorMeta of constructorCandidates) {
+      const constructorCombo = constructorMeta.combo;
       const totalCost = driverCombo.cost + constructorCombo.cost;
       if (totalCost > budgetLimit) continue;
 
-      const transferCount = driverCombo.inKeys.length + constructorCombo.inKeys.length;
-      if (inputs.strategy === "current_friendly" && !hasUnlimitedTransfers(inputs.activeChip) && transferCount > inputs.freeTransfers) continue;
-      if (inputs.strategy === "budget_growth" && (!driverCombo.hasOnlyGrowthTransfers || !constructorCombo.hasOnlyGrowthTransfers)) continue;
+      const transferCount = driverMeta.transferCount + constructorMeta.transferCount;
+      if (transferFriendly && transferCount > inputs.freeTransfers) continue;
 
       const expectedPoints = driverCombo.expectedPoints + constructorCombo.expectedPoints;
-      const boostBase = toNumber(driverCombo.bestBoost?.expected_fantasy_points);
+      const boostBase = driverCombo.bestBoost?._points ?? 0;
       const chipExtraPoints = inputs.activeChip === "x3" ? boostBase : 0;
       const noNegativeProtection =
         inputs.activeChip === "no_negative" ? driverCombo.noNegativeProtection + constructorCombo.noNegativeProtection : 0;
@@ -585,7 +689,7 @@ function findTopTeams(inputs) {
       const paidTransfers = hasUnlimitedTransfers(inputs.activeChip) ? 0 : Math.max(0, transferCount - inputs.freeTransfers);
       const transferPenalty = paidTransfers * -10;
       const projectedBudgetDelta = driverCombo.budgetDelta + constructorCombo.budgetDelta;
-      const incomingBudgetDeltaValue = driverCombo.incomingBudgetDelta + constructorCombo.incomingBudgetDelta;
+      const incomingBudgetDeltaValue = driverMeta.incomingBudgetDeltaValue + constructorMeta.incomingBudgetDeltaValue;
       const candidate = {
         driverCombo,
         constructorCombo,
@@ -1463,6 +1567,7 @@ async function init() {
   state.projections = parseCsv(await response.text());
   state.drivers = state.projections.filter((row) => row.entity_type === "driver");
   state.constructors = state.projections.filter((row) => row.entity_type === "constructor");
+  buildComboCaches();
   const sample = state.projections[0];
   els.status.textContent = `${sample?.next_gp ?? "Next GP"} ${sample?.mode ? `| ${sample.mode}` : ""} model ready. Click Optimize Team to run it.`;
   updatePickerSummaries();
