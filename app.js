@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260611-hul-32";
+const ASSET_VERSION = "20260612-budget-growth-net";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -17,7 +17,7 @@ const CHIP_CONFIG = {
 const STRATEGY_NOTES = {
   max_points: "Max Points ranks the strongest projected lineup, even if it uses paid transfers.",
   current_friendly: "Transfer Friendly avoids paid transfers unless a selected chip changes the transfer rules.",
-  budget_growth: "Budget Growth buys assets projected into price-rise bands, but only gives up points when the tradeoff stays close.",
+  budget_growth: "Budget Growth looks for a better total price outlook while keeping projected points close.",
 };
 
 const TEAM_COLORS = {
@@ -661,6 +661,7 @@ function findTopTeams(inputs) {
   const budgetGrowth = inputs.strategy === "budget_growth";
   const transferFriendly = inputs.strategy === "current_friendly" && !hasUnlimitedTransfers(inputs.activeChip);
   let budgetGrowthPointFloor = Number.NEGATIVE_INFINITY;
+  let currentBudgetGrowthDelta = Number.NEGATIVE_INFINITY;
 
   if (budgetGrowth) {
     const currentDriverCombo = state.driverCombos.find((combo) => combo.mask === currentDriverMask);
@@ -671,15 +672,15 @@ function findTopTeams(inputs) {
         currentConstructorCombo.expectedPoints +
         (currentDriverCombo.bestBoost?._points ?? 0);
       budgetGrowthPointFloor = currentProjectedPoints - 10;
+      currentBudgetGrowthDelta = currentDriverCombo.budgetDelta + currentConstructorCombo.budgetDelta;
     }
   }
 
   const driverCandidates = state.driverCombos
     .map((combo) => comboRunMeta(combo, currentDriverMask))
-    .filter((meta) => meta.combo.cost <= budgetLimit && (!budgetGrowth || meta.growthEligible));
+    .filter((meta) => meta.combo.cost <= budgetLimit);
   const constructorCandidates = state.constructorCombos
-    .map((combo) => comboRunMeta(combo, currentConstructorMask))
-    .filter((meta) => !budgetGrowth || meta.growthEligible);
+    .map((combo) => comboRunMeta(combo, currentConstructorMask));
 
   for (const driverMeta of driverCandidates) {
     const driverCombo = driverMeta.combo;
@@ -706,6 +707,8 @@ function findTopTeams(inputs) {
       const transferPenalty = paidTransfers * -10;
       const projectedBudgetDelta = driverCombo.budgetDelta + constructorCombo.budgetDelta;
       const incomingBudgetDeltaValue = driverMeta.incomingBudgetDeltaValue + constructorMeta.incomingBudgetDeltaValue;
+      if (budgetGrowth && transferCount > 0 && projectedBudgetDelta <= currentBudgetGrowthDelta + 0.05) continue;
+
       const candidate = {
         driverCombo,
         constructorCombo,
@@ -1261,8 +1264,8 @@ function priceContext(team) {
     const incoming = transferInRows(team);
     const names = incoming.map((row) => `${row.key} ${priceMomentum(row).label}`).join(", ");
     return incoming.length
-      ? `Budget Growth only bought rise candidates: ${names}. Existing fall-risk assets may stay if replacing them would hurt points or budget.`
-      : "Budget Growth found no positive-momentum transfer that improved the lineup enough, so it kept the current structure.";
+      ? `Budget Growth improved the full lineup outlook with these moves: ${names}. It can still accept one fall-risk asset if the overall team budget trend is better.`
+      : "Budget Growth found no transfer that improved the full lineup price outlook enough, so it kept the current structure.";
   }
   if (team.projectedBudgetDelta > 0.4) {
     return `This lineup has ${formatSignedMoney(team.projectedBudgetDelta)} estimated price momentum, useful if you want to grow budget for future GPs.`;
