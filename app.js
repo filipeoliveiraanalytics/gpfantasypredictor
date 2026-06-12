@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260612-budget-growth-clean";
+const ASSET_VERSION = "20260612-budget-growth-v2";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -17,7 +17,7 @@ const CHIP_CONFIG = {
 const STRATEGY_NOTES = {
   max_points: "Max Points ranks the strongest projected lineup, even if it uses paid transfers.",
   current_friendly: "Transfer Friendly avoids paid transfers unless a selected chip changes the transfer rules.",
-  budget_growth: "Budget Growth looks for a better total price outlook while keeping projected points close.",
+  budget_growth: "Budget Growth targets assets projected into price-rise bands while keeping total points close.",
 };
 
 const TEAM_COLORS = {
@@ -250,7 +250,7 @@ function strategyScore(team, strategy) {
     const transferBudgetDelta = Number.isFinite(team.incomingBudgetDeltaValue)
       ? team.incomingBudgetDeltaValue
       : incomingBudgetDelta(team);
-    return team.netExpectedPoints + team.projectedBudgetDelta * 5 + transferBudgetDelta * 8;
+    return team.netExpectedPoints + team.projectedBudgetDelta * 18 + transferBudgetDelta * 10 + (team.budgetGrowthScore ?? 0) * 2;
   }
   return team.projectedPoints;
 }
@@ -396,7 +396,11 @@ function cacheProjectionNumbers(row) {
   row._cost = toNumber(row.price_m);
   row._points = toNumber(row.expected_fantasy_points);
   row._risk = toNumber(row.risk_score);
-  row._priceDelta = projectedPriceChange(row);
+  row._projectedPriceDelta = projectedPriceChange(row);
+  row._priceDelta = budgetGrowthDelta(row);
+  row._growthScore = priceGrowthScore(row);
+  row._riseProbability = priceGrowthProfile(row).riseProbability;
+  row._fallProbability = priceGrowthProfile(row).fallProbability;
   row._dnfProtection = Math.abs(Math.min(0, toNumber(row.dnf_penalty_points_est)));
 }
 
@@ -405,10 +409,13 @@ function comboFromRows(rows, type) {
   const cost = rows.reduce((sum, row) => sum + row._cost, 0);
   const expectedPoints = rows.reduce((sum, row) => sum + row._points, 0);
   const budgetDelta = rows.reduce((sum, row) => sum + row._priceDelta, 0);
+  const growthScore = rows.reduce((sum, row) => sum + row._growthScore, 0);
+  const riseProbability = rows.reduce((sum, row) => sum + row._riseProbability, 0) / Math.max(rows.length, 1);
+  const fallProbability = rows.reduce((sum, row) => sum + row._fallProbability, 0) / Math.max(rows.length, 1);
   const noNegativeProtection = rows.reduce((sum, row) => sum + row._dnfProtection, 0);
   const riskSum = rows.reduce((sum, row) => sum + row._risk, 0);
   const mask = rows.reduce((bits, row) => bits | row._bit, 0);
-  const nonGrowthMask = rows.reduce((bits, row) => (row._priceDelta > 0 ? bits : bits | row._bit), 0);
+  const nonGrowthMask = rows.reduce((bits, row) => (hasBudgetRisePath(row) ? bits : bits | row._bit), 0);
   const bestBoost =
     type === "driver"
       ? [...rows].sort((a, b) => b._points - a._points)[0]
@@ -424,6 +431,9 @@ function comboFromRows(rows, type) {
     cost,
     expectedPoints,
     budgetDelta,
+    growthScore,
+    riseProbability,
+    fallProbability,
     noNegativeProtection,
     riskSum,
     bestBoost,
@@ -510,6 +520,9 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
   const projectedPoints = expectedPoints + boostExtraPoints + noNegativeProtection;
   const netExpectedPoints = projectedPoints + transferPenalty;
   const projectedBudgetDelta = teamBudgetDelta(entities);
+  const budgetGrowthScore = teamBudgetGrowthScore(entities);
+  const avgRiseProbability = averagePriceProbability(entities, "riseProbability");
+  const avgFallProbability = averagePriceProbability(entities, "fallProbability");
 
   return {
     drivers: driverCombo,
@@ -523,6 +536,9 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
     projectedPoints,
     netExpectedPoints,
     projectedBudgetDelta,
+    budgetGrowthScore,
+    avgRiseProbability,
+    avgFallProbability,
     valuePerMillion: expectedPoints / totalCost,
     avgRiskScore,
     transferCount,
@@ -565,6 +581,7 @@ function comboSummary(rows, type, inputs) {
     cost: rows.reduce((sum, row) => sum + toNumber(row.price_m), 0),
     expectedPoints: rows.reduce((sum, row) => sum + toNumber(row.expected_fantasy_points), 0),
     budgetDelta: teamBudgetDelta(rows),
+    growthScore: teamBudgetGrowthScore(rows),
     noNegativeProtection: rows.reduce((sum, row) => sum + Math.abs(Math.min(0, toNumber(row.dnf_penalty_points_est))), 0),
     bestBoost:
       type === "driver"
@@ -573,7 +590,7 @@ function comboSummary(rows, type, inputs) {
     inKeys,
     outKeys,
     incomingBudgetDelta: teamBudgetDelta(incomingRows),
-    hasOnlyGrowthTransfers: incomingRows.length === 0 || incomingRows.every((row) => projectedPriceChange(row) > 0),
+    hasOnlyGrowthTransfers: incomingRows.length === 0 || incomingRows.every(hasBudgetRisePath),
   };
 }
 
@@ -581,9 +598,10 @@ function entityPoolScore(row, inputs) {
   const points = toNumber(row.expected_fantasy_points);
   const price = toNumber(row.price_m);
   const value = price ? points / price : 0;
-  const priceDelta = projectedPriceChange(row);
-  const growthWeight = inputs.strategy === "budget_growth" ? 26 : 10;
-  return points + value * 3 + priceDelta * growthWeight;
+  const priceDelta = budgetGrowthDelta(row);
+  const growthScore = priceGrowthScore(row);
+  const growthWeight = inputs.strategy === "budget_growth" ? 12 : 4;
+  return points + value * 3 + priceDelta * 12 + growthScore * growthWeight;
 }
 
 function pickDriverPool(inputs) {
@@ -600,7 +618,7 @@ function pickDriverPool(inputs) {
   const cheapest = [...state.drivers].sort((a, b) => toNumber(a.price_m) - toNumber(b.price_m));
   ranked.forEach((row) => {
     if (selected.size < 13) selected.set(row.key, row);
-    else if (inputs.strategy === "budget_growth" && selected.size < 16 && projectedPriceChange(row) > 0) selected.set(row.key, row);
+    else if (inputs.strategy === "budget_growth" && selected.size < 16 && hasBudgetRisePath(row)) selected.set(row.key, row);
   });
   cheapest.slice(0, 5).forEach((row) => selected.set(row.key, row));
 
@@ -632,9 +650,10 @@ function currentNearbyDriverCombos(inputs) {
 
 function comboPoolScore(combo, inputs) {
   const transferCost = combo.inKeys.length * (inputs.strategy === "current_friendly" ? 14 : 6);
-  const growthBonus = combo.budgetDelta * (inputs.strategy === "budget_growth" ? 40 : 18);
+  const growthBonus = combo.budgetDelta * (inputs.strategy === "budget_growth" ? 35 : 12);
+  const growthQualityBonus = (combo.growthScore ?? 0) * (inputs.strategy === "budget_growth" ? 10 : 3);
   const valueBonus = combo.cost ? (combo.expectedPoints / combo.cost) * 4 : 0;
-  return combo.expectedPoints + growthBonus + valueBonus - transferCost;
+  return combo.expectedPoints + growthBonus + growthQualityBonus + valueBonus - transferCost;
 }
 
 function trimComboPool(combos, inputs, limit) {
@@ -663,6 +682,7 @@ function findTopTeams(inputs) {
   const transferFriendly = inputs.strategy === "current_friendly" && !hasUnlimitedTransfers(inputs.activeChip);
   let budgetGrowthPointFloor = Number.NEGATIVE_INFINITY;
   let currentBudgetGrowthDelta = Number.NEGATIVE_INFINITY;
+  let currentBudgetGrowthScore = Number.NEGATIVE_INFINITY;
 
   if (budgetGrowth) {
     const currentDriverCombo = state.driverCombos.find((combo) => combo.mask === currentDriverMask);
@@ -674,6 +694,7 @@ function findTopTeams(inputs) {
         (currentDriverCombo.bestBoost?._points ?? 0);
       budgetGrowthPointFloor = currentProjectedPoints - 10;
       currentBudgetGrowthDelta = currentDriverCombo.budgetDelta + currentConstructorCombo.budgetDelta;
+      currentBudgetGrowthScore = currentDriverCombo.growthScore + currentConstructorCombo.growthScore;
     }
   }
 
@@ -707,9 +728,17 @@ function findTopTeams(inputs) {
       const paidTransfers = hasUnlimitedTransfers(inputs.activeChip) ? 0 : Math.max(0, transferCount - inputs.freeTransfers);
       const transferPenalty = paidTransfers * -10;
       const projectedBudgetDelta = driverCombo.budgetDelta + constructorCombo.budgetDelta;
+      const budgetGrowthScore = driverCombo.growthScore + constructorCombo.growthScore;
       const incomingBudgetDeltaValue = driverMeta.incomingBudgetDeltaValue + constructorMeta.incomingBudgetDeltaValue;
       const isBudgetGrowthBaseline = budgetGrowth && transferCount === 0;
-      if (budgetGrowth && transferCount > 0 && projectedBudgetDelta <= currentBudgetGrowthDelta + 0.05) continue;
+      if (
+        budgetGrowth &&
+        transferCount > 0 &&
+        projectedBudgetDelta <= currentBudgetGrowthDelta + 0.05 &&
+        budgetGrowthScore <= currentBudgetGrowthScore + 0.15
+      ) {
+        continue;
+      }
 
       const candidate = {
         driverCombo,
@@ -717,12 +746,14 @@ function findTopTeams(inputs) {
         projectedPoints,
         netExpectedPoints: projectedPoints + transferPenalty,
         projectedBudgetDelta,
+        budgetGrowthScore,
         incomingBudgetDeltaValue,
         strategyScore: strategyScore(
           {
             projectedPoints,
             netExpectedPoints: projectedPoints + transferPenalty,
             projectedBudgetDelta,
+            budgetGrowthScore,
             incomingBudgetDeltaValue,
           },
           inputs.strategy
@@ -748,6 +779,7 @@ function findTopTeams(inputs) {
   return topCandidates.map((candidate) => {
     const team = summarizeTeam(candidate.driverCombo.rows, candidate.constructorCombo.rows, inputs);
     team.incomingBudgetDeltaValue = candidate.incomingBudgetDeltaValue;
+    team.budgetGrowthScore = candidate.budgetGrowthScore;
     team.strategyScore = candidate.strategyScore;
     return team;
   });
@@ -1040,6 +1072,111 @@ function priceStep(row) {
   return toNumber(row.price_m) < 18.5 ? 0.6 : 0.3;
 }
 
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function priceConfidenceWeight(row) {
+  const confidence = String(row.price_model_confidence ?? "").toLowerCase();
+  if (confidence.includes("high")) return 1.0;
+  if (confidence.includes("medium")) return 0.85;
+  if (confidence.includes("low")) return 0.62;
+  return hasModeledPriceChange(row) ? 0.75 : 0.55;
+}
+
+function priceGrowthProfile(row) {
+  if (row._priceGrowthProfile) return row._priceGrowthProfile;
+  const rawDelta = projectedPriceChange(row);
+  const step = Math.max(Math.abs(rawDelta), priceStep(row), 0.1);
+  const expected = toNumber(row.expected_fantasy_points);
+  const good = toNumber(row.price_points_needed_good, Number.NaN);
+  const great = toNumber(row.price_points_needed_great, Number.NaN);
+  const confidenceWeight = priceConfidenceWeight(row);
+  const modelType = String(row.price_model_type ?? "");
+
+  if (modelType === "threshold" && Number.isFinite(good)) {
+    const greatTarget = Number.isFinite(great) ? great : good + Math.max(6, Math.abs(good) * 0.25);
+    const bandWidth = Math.max(4, Math.abs(greatTarget - good), toNumber(row.price_m) * 0.35);
+    const marginToGood = expected - good;
+    const marginToGreat = expected - greatTarget;
+    let riseProbability;
+
+    if (marginToGreat >= 0) {
+      riseProbability = 0.82 + clamp(marginToGreat / (bandWidth * 2), 0, 0.12);
+    } else if (marginToGood >= 0) {
+      riseProbability = 0.58 + clamp(marginToGood / bandWidth, 0, 0.20);
+    } else {
+      riseProbability = 0.08 + clamp((marginToGood + bandWidth) / bandWidth, 0, 0.30);
+    }
+
+    const fallProbability =
+      rawDelta < 0
+        ? 0.58 + clamp((good - expected) / Math.max(bandWidth, 1), 0, 0.28)
+        : clamp(0.20 - Math.max(marginToGood, 0) / Math.max(bandWidth * 2, 1), 0.05, 0.22);
+    const expectedDelta =
+      rawDelta > 0
+        ? rawDelta * riseProbability * confidenceWeight
+        : rawDelta < 0
+          ? rawDelta * fallProbability * confidenceWeight
+          : 0;
+    const growthScore =
+      expectedDelta * 2.8 +
+      riseProbability * 0.9 +
+      clamp(marginToGood / Math.max(bandWidth, 1), -0.75, 1.25) * 0.35 -
+      fallProbability * 0.65;
+
+    row._priceGrowthProfile = {
+      rawDelta,
+      expectedDelta,
+      growthScore,
+      riseProbability: clamp(riseProbability * confidenceWeight, 0, 0.95),
+      fallProbability: clamp(fallProbability * confidenceWeight, 0, 0.95),
+      marginToGood,
+      marginToGreat,
+      confidenceWeight,
+      modelType,
+    };
+    return row._priceGrowthProfile;
+  }
+
+  const ppm = rowValue(row);
+  const recentMove = toNumber(latestPriceMove(row)?.price_delta_m, 0);
+  const riseProbability = clamp((ppm - 0.75) / 0.65, 0.05, 0.78) + (recentMove > 0 ? 0.06 : 0);
+  const fallProbability = clamp((0.82 - ppm) / 0.45, 0.05, 0.70) + (recentMove < 0 ? 0.08 : 0);
+  const expectedDelta =
+    rawDelta > 0
+      ? rawDelta * clamp(riseProbability, 0, 0.9) * confidenceWeight
+      : rawDelta < 0
+        ? rawDelta * clamp(fallProbability, 0, 0.9) * confidenceWeight
+        : 0;
+
+  row._priceGrowthProfile = {
+    rawDelta,
+    expectedDelta,
+    growthScore: expectedDelta * 2.4 + riseProbability * 0.65 - fallProbability * 0.55,
+    riseProbability: clamp(riseProbability * confidenceWeight, 0, 0.9),
+    fallProbability: clamp(fallProbability * confidenceWeight, 0, 0.9),
+    marginToGood: Number.NaN,
+    marginToGreat: Number.NaN,
+    confidenceWeight,
+    modelType,
+  };
+  return row._priceGrowthProfile;
+}
+
+function budgetGrowthDelta(row) {
+  return priceGrowthProfile(row).expectedDelta;
+}
+
+function priceGrowthScore(row) {
+  return priceGrowthProfile(row).growthScore;
+}
+
+function hasBudgetRisePath(row) {
+  const profile = priceGrowthProfile(row);
+  return profile.expectedDelta > 0.04 || profile.riseProbability >= 0.46 || profile.marginToGood >= -1.5;
+}
+
 function hasModeledPriceChange(row) {
   return String(row.projected_price_delta_m ?? "").trim() !== "";
 }
@@ -1148,7 +1285,16 @@ function priceMomentum(row) {
 }
 
 function teamBudgetDelta(rows) {
-  return rows.reduce((sum, row) => sum + projectedPriceChange(row), 0);
+  return rows.reduce((sum, row) => sum + budgetGrowthDelta(row), 0);
+}
+
+function teamBudgetGrowthScore(rows) {
+  return rows.reduce((sum, row) => sum + priceGrowthScore(row), 0);
+}
+
+function averagePriceProbability(rows, field) {
+  if (!rows.length) return 0;
+  return rows.reduce((sum, row) => sum + (priceGrowthProfile(row)[field] ?? 0), 0) / rows.length;
 }
 
 function rowsByKey(type, keys) {
@@ -1167,13 +1313,27 @@ function incomingBudgetDelta(team) {
 
 function hasOnlyGrowthTransfers(team) {
   const incoming = transferInRows(team);
-  return incoming.length === 0 || incoming.every((row) => projectedPriceChange(row) > 0);
+  return incoming.length === 0 || incoming.every(hasBudgetRisePath);
 }
 
 function formatSignedMoney(value) {
+  if (Math.abs(value) < 0.05) return "Stable";
   if (value > 0) return `+${formatNumber(value, 1)}M`;
   if (value < 0) return `${formatNumber(value, 1)}M`;
   return "Stable";
+}
+
+function growthPathLabel(row) {
+  const profile = priceGrowthProfile(row);
+  const signal = priceMomentum(row);
+  const risePct = Math.round(profile.riseProbability * 100);
+  const margin =
+    Number.isFinite(profile.marginToGood)
+      ? profile.marginToGood >= 0
+        ? `${formatNumber(profile.marginToGood, 1)} pts over Good`
+        : `${formatNumber(Math.abs(profile.marginToGood), 1)} pts short of Good`
+      : `${formatNumber(rowValue(row), 2)} pts/M`;
+  return `${row.key} ${signal.label} (${risePct}% rise path, ${margin})`;
 }
 
 function formatNumber(value, decimals = 1) {
@@ -1273,18 +1433,18 @@ function budgetContext(team) {
 function priceContext(team) {
   if (els.strategy.value === "budget_growth") {
     const incoming = transferInRows(team);
-    const names = incoming.map((row) => `${row.key} ${priceMomentum(row).label}`).join(", ");
+    const names = incoming.map(growthPathLabel).join(", ");
     return incoming.length
-      ? `Budget Growth improved the full lineup outlook with these moves: ${names}. It can still accept one fall-risk asset if the overall team budget trend is better.`
-      : "Budget Growth found no transfer that improved the full lineup price outlook enough, so it kept the current structure.";
+      ? `Budget Growth improved the risk-adjusted full-lineup price outlook with these moves: ${names}. The score checks projected points against each asset's rise threshold before chasing budget.`
+      : "Budget Growth found no transfer with a better risk-adjusted rise path, so it kept the current structure.";
   }
   if (team.projectedBudgetDelta > 0.4) {
-    return `This lineup has ${formatSignedMoney(team.projectedBudgetDelta)} estimated price momentum, useful if you want to grow budget for future GPs.`;
+    return `This lineup has ${formatSignedMoney(team.projectedBudgetDelta)} risk-adjusted price momentum, useful if you want to grow budget for future GPs.`;
   }
   if (team.projectedBudgetDelta < -0.4) {
-    return `This lineup has ${formatSignedMoney(team.projectedBudgetDelta)} estimated price risk, so it may cost future budget if the price model is right.`;
+    return `This lineup has ${formatSignedMoney(team.projectedBudgetDelta)} risk-adjusted price risk, so it may cost future budget if the price model is right.`;
   }
-  return "Price outlook looks fairly stable, so this recommendation is mostly about points and transfer efficiency.";
+  return "Risk-adjusted price outlook looks fairly stable, so this recommendation is mostly about points and transfer efficiency.";
 }
 
 function trackContext(team, recommendation) {
