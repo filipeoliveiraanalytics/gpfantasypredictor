@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260612-budget-growth-net";
+const ASSET_VERSION = "20260612-budget-growth-clean";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -655,6 +655,7 @@ function trimComboPool(combos, inputs, limit) {
 
 function findTopTeams(inputs) {
   const topCandidates = [];
+  let budgetGrowthBaseline = null;
   const budgetLimit = ignoresBudget(inputs.activeChip) ? Number.POSITIVE_INFINITY : inputs.budget;
   const currentDriverMask = maskFromKeys(inputs.currentDrivers, state.driverKeyBits);
   const currentConstructorMask = maskFromKeys(inputs.currentConstructors, state.constructorKeyBits);
@@ -707,6 +708,7 @@ function findTopTeams(inputs) {
       const transferPenalty = paidTransfers * -10;
       const projectedBudgetDelta = driverCombo.budgetDelta + constructorCombo.budgetDelta;
       const incomingBudgetDeltaValue = driverMeta.incomingBudgetDeltaValue + constructorMeta.incomingBudgetDeltaValue;
+      const isBudgetGrowthBaseline = budgetGrowth && transferCount === 0;
       if (budgetGrowth && transferCount > 0 && projectedBudgetDelta <= currentBudgetGrowthDelta + 0.05) continue;
 
       const candidate = {
@@ -727,11 +729,20 @@ function findTopTeams(inputs) {
         ),
       };
 
+      if (isBudgetGrowthBaseline) {
+        budgetGrowthBaseline = candidate;
+        continue;
+      }
+
       const weakest = topCandidates[topCandidates.length - 1];
       if (topCandidates.length === 10 && compareTeams(candidate, weakest) >= 0) continue;
 
       keepTopTeam(topCandidates, candidate);
     }
+  }
+
+  if (budgetGrowth && topCandidates.length === 0 && budgetGrowthBaseline) {
+    topCandidates.push(budgetGrowthBaseline);
   }
 
   return topCandidates.map((candidate) => {
