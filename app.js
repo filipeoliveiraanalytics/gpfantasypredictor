@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260608-fast-combo-masks";
+const ASSET_VERSION = "20260611-hul-32";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -17,7 +17,7 @@ const CHIP_CONFIG = {
 const STRATEGY_NOTES = {
   max_points: "Max Points ranks the strongest projected lineup, even if it uses paid transfers.",
   current_friendly: "Transfer Friendly avoids paid transfers unless a selected chip changes the transfer rules.",
-  budget_growth: "Budget Growth buys assets with a realistic path to a price rise, then ranks by points plus price upside.",
+  budget_growth: "Budget Growth buys assets projected into price-rise bands, but only gives up points when the tradeoff stays close.",
 };
 
 const TEAM_COLORS = {
@@ -250,7 +250,7 @@ function strategyScore(team, strategy) {
     const transferBudgetDelta = Number.isFinite(team.incomingBudgetDeltaValue)
       ? team.incomingBudgetDeltaValue
       : incomingBudgetDelta(team);
-    return team.netExpectedPoints + team.projectedBudgetDelta * 35 + transferBudgetDelta * 20;
+    return team.netExpectedPoints + team.projectedBudgetDelta * 5 + transferBudgetDelta * 8;
   }
   return team.projectedPoints;
 }
@@ -660,6 +660,20 @@ function findTopTeams(inputs) {
   const currentConstructorMask = maskFromKeys(inputs.currentConstructors, state.constructorKeyBits);
   const budgetGrowth = inputs.strategy === "budget_growth";
   const transferFriendly = inputs.strategy === "current_friendly" && !hasUnlimitedTransfers(inputs.activeChip);
+  let budgetGrowthPointFloor = Number.NEGATIVE_INFINITY;
+
+  if (budgetGrowth) {
+    const currentDriverCombo = state.driverCombos.find((combo) => combo.mask === currentDriverMask);
+    const currentConstructorCombo = state.constructorCombos.find((combo) => combo.mask === currentConstructorMask);
+    if (currentDriverCombo && currentConstructorCombo && currentDriverCombo.cost + currentConstructorCombo.cost <= budgetLimit) {
+      const currentProjectedPoints =
+        currentDriverCombo.expectedPoints +
+        currentConstructorCombo.expectedPoints +
+        (currentDriverCombo.bestBoost?._points ?? 0);
+      budgetGrowthPointFloor = currentProjectedPoints - 10;
+    }
+  }
+
   const driverCandidates = state.driverCombos
     .map((combo) => comboRunMeta(combo, currentDriverMask))
     .filter((meta) => meta.combo.cost <= budgetLimit && (!budgetGrowth || meta.growthEligible));
@@ -686,6 +700,8 @@ function findTopTeams(inputs) {
       const noNegativeProtection =
         inputs.activeChip === "no_negative" ? driverCombo.noNegativeProtection + constructorCombo.noNegativeProtection : 0;
       const projectedPoints = expectedPoints + boostBase + chipExtraPoints + noNegativeProtection;
+      if (budgetGrowth && projectedPoints < budgetGrowthPointFloor) continue;
+
       const paidTransfers = hasUnlimitedTransfers(inputs.activeChip) ? 0 : Math.max(0, transferCount - inputs.freeTransfers);
       const transferPenalty = paidTransfers * -10;
       const projectedBudgetDelta = driverCombo.budgetDelta + constructorCombo.budgetDelta;
@@ -1019,13 +1035,36 @@ function modeledPriceSignal(row) {
 
   const delta = toNumber(row.projected_price_delta_m);
   const expected = toNumber(row.expected_fantasy_points);
-  const knownPoints = toNumber(row.price_last_two_points);
   const ppm = toNumber(row.price_projected_rolling_ppm);
   const neededGood = toNumber(row.price_points_needed_good);
   const neededGreat = toNumber(row.price_points_needed_great);
   const bucket = row.projected_price_bucket || "estimated";
+  const modelType = row.price_model_type || "";
+  const confidence = row.price_model_confidence || "";
   const tone = delta > 0 ? "rise" : delta < 0 ? "fall" : "stable";
   const label = delta > 0 ? `+${formatNumber(delta, 1)}M` : delta < 0 ? `${formatNumber(delta, 1)}M` : "Stable";
+  const confidenceCopy = confidence ? ` Confidence: ${confidence}.` : "";
+
+  if (modelType === "threshold") {
+    const range = row.price_bucket_range || bucket;
+    let thresholdCopy;
+    if (delta > 0 && neededGreat <= expected) {
+      thresholdCopy = "already projects inside the Great price-rise band";
+    } else if (delta > 0) {
+      thresholdCopy = `already projects inside the Good price-rise band; Great starts at ${formatNumber(neededGreat, 1)} pts`;
+    } else {
+      thresholdCopy = `Good starts at ${formatNumber(neededGood, 1)} pts and Great starts at ${formatNumber(neededGreat, 1)} pts`;
+    }
+
+    return {
+      delta,
+      tone,
+      label,
+      reason: `Projected ${formatNumber(expected, 1)} pts lands in the ${bucket} band (${range}). ${thresholdCopy}.${confidenceCopy}`,
+    };
+  }
+
+  const knownPoints = toNumber(row.price_last_two_points);
   let thresholdCopy;
   if (delta > 0 && neededGreat <= expected) {
     thresholdCopy = "already projects inside max-rise territory";
