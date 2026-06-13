@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260612-budget-growth-v2";
+const ASSET_VERSION = "20260612-price-probabilities";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -104,6 +104,7 @@ const els = {
   boostCardLabel: document.querySelector("#boost-card-label"),
   boostDriver: document.querySelector("#boost-driver"),
   priceDelta: document.querySelector("#price-delta"),
+  priceProbability: document.querySelector("#price-probability"),
   whyLineup: document.querySelector("#why-lineup"),
   driverList: document.querySelector("#driver-list"),
   constructorList: document.querySelector("#constructor-list"),
@@ -1033,6 +1034,8 @@ function chip(row) {
   const price = `${formatNumber(toNumber(row.price_m), 1)}M`;
   const points = `${formatNumber(toNumber(row.expected_fantasy_points), 1)} pts`;
   const priceSignal = priceMomentum(row);
+  const probabilityLabel = priceProbabilityLabel(row);
+  const probabilityTitle = priceProbabilityTitle(row, priceSignal);
   return `
     <span class="chip ${row.entity_type === "driver" ? "chip--driver" : "chip--constructor"}" style="--team-color:${color}">
       ${entityMark(row, "chip")}
@@ -1040,7 +1043,10 @@ function chip(row) {
         <strong>${escapeHtml(row.name)}</strong>
         <span>${escapeHtml(row.team)} | ${price} | ${points}</span>
       </span>
-      <span class="price-signal price-signal--${priceSignal.tone}" title="${escapeHtml(priceSignal.reason)}">${escapeHtml(priceSignal.label)}</span>
+      <span class="price-signal price-signal--${priceSignal.tone}" title="${escapeHtml(probabilityTitle)}">
+        <b>${escapeHtml(priceSignal.label)}</b>
+        <small>${escapeHtml(probabilityLabel)}</small>
+      </span>
     </span>`;
 }
 
@@ -1336,6 +1342,39 @@ function growthPathLabel(row) {
   return `${row.key} ${signal.label} (${risePct}% rise path, ${margin})`;
 }
 
+function priceProbabilityLabel(row) {
+  const profile = priceGrowthProfile(row);
+  const rawDelta = projectedPriceChange(row);
+  if (rawDelta > 0 || profile.riseProbability >= profile.fallProbability + 0.08) {
+    return `${Math.round(profile.riseProbability * 100)}% rise`;
+  }
+  if (rawDelta < 0 || profile.fallProbability >= profile.riseProbability + 0.08) {
+    return `${Math.round(profile.fallProbability * 100)}% fall`;
+  }
+  const stableProbability = clamp(1 - profile.riseProbability - profile.fallProbability, 0, 0.9);
+  return `${Math.round(stableProbability * 100)}% stable`;
+}
+
+function priceProbabilityTitle(row, signal = priceMomentum(row)) {
+  const profile = priceGrowthProfile(row);
+  const risePct = Math.round(profile.riseProbability * 100);
+  const fallPct = Math.round(profile.fallProbability * 100);
+  const marginCopy = Number.isFinite(profile.marginToGood)
+    ? profile.marginToGood >= 0
+      ? `${formatNumber(profile.marginToGood, 1)} pts above the Good threshold`
+      : `${formatNumber(Math.abs(profile.marginToGood), 1)} pts below the Good threshold`
+    : "threshold inferred from value trend";
+  return `${signal.reason} Rise path: ${risePct}%. Fall risk: ${fallPct}%. ${marginCopy}.`;
+}
+
+function teamPriceProbabilityLabel(team) {
+  const risePct = Math.round((team.avgRiseProbability ?? 0) * 100);
+  const fallPct = Math.round((team.avgFallProbability ?? 0) * 100);
+  if (team.projectedBudgetDelta > 0.05) return `${risePct}% avg rise path | ${fallPct}% fall risk`;
+  if (team.projectedBudgetDelta < -0.05) return `${fallPct}% avg fall risk | ${risePct}% rise path`;
+  return `${risePct}% avg rise path | stable outlook`;
+}
+
 function formatNumber(value, decimals = 1) {
   return value.toLocaleString(undefined, { maximumFractionDigits: decimals, minimumFractionDigits: decimals });
 }
@@ -1540,6 +1579,7 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
   els.boostDriver.innerHTML = boostDriverMarkup(best);
   els.priceDelta.textContent = formatSignedMoney(best.projectedBudgetDelta);
   els.priceDelta.className = best.projectedBudgetDelta > 0 ? "price-positive" : best.projectedBudgetDelta < 0 ? "price-negative" : "";
+  if (els.priceProbability) els.priceProbability.textContent = teamPriceProbabilityLabel(best);
   els.driverList.innerHTML = sortByValue(best.drivers).map(chip).join("");
   els.constructorList.innerHTML = sortByValue(best.constructors).map(chip).join("");
   els.transfersIn.textContent = [...best.driversIn, ...best.constructorsIn].join(", ") || "None";

@@ -513,6 +513,15 @@ button:disabled {
   margin-top: 6px;
 }
 
+.score-card small {
+  color: var(--muted);
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.2;
+  margin-top: 6px;
+}
+
 .why-lineup {
   background:
     radial-gradient(circle at 8% 18%, rgba(20, 200, 189, 0.18), transparent 8rem),
@@ -629,12 +638,28 @@ button:disabled {
 
 .price-signal {
   border-radius: 999px;
+  display: grid;
   flex: 0 0 auto;
   font-size: 0.66rem;
   font-weight: 1000;
+  gap: 2px;
   line-height: 1;
   margin-left: auto;
-  padding: 5px 7px;
+  min-width: 54px;
+  padding: 5px 8px;
+  text-align: center;
+}
+
+.price-signal b {
+  font-size: 0.66rem;
+  line-height: 1;
+}
+
+.price-signal small {
+  font-size: 0.54rem;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 0.88;
 }
 
 .price-signal--rise {
