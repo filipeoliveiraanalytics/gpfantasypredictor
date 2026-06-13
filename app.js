@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260613-share-result";
+const ASSET_VERSION = "20260613-after-practice-copy-v2";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -75,7 +75,6 @@ const state = {
   constructorLogoBasePath: "assets/constructors",
   pickerType: null,
   pickerSelection: new Set(),
-  shareText: "",
 };
 
 const els = {
@@ -114,11 +113,6 @@ const els = {
   transfersIn: document.querySelector("#transfers-in"),
   transfersOut: document.querySelector("#transfers-out"),
   transferPenalty: document.querySelector("#transfer-penalty"),
-  shareCard: document.querySelector("#share-result-card"),
-  sharePreview: document.querySelector("#share-result-preview"),
-  shareStatus: document.querySelector("#share-result-status"),
-  copyResult: document.querySelector("#copy-result"),
-  shareResult: document.querySelector("#share-result"),
   alternatives: document.querySelector("#alternatives"),
   alternativeCards: document.querySelector("#alternative-cards"),
   cookieBanner: document.querySelector("#cookie-banner"),
@@ -1370,113 +1364,6 @@ function formatSignedMoney(value) {
   return "Stable";
 }
 
-function publicSiteUrl() {
-  return "https://gpfantasypredictor.com/";
-}
-
-function shareAssetLabel(row) {
-  return row?.key ?? row?.name ?? "";
-}
-
-function shareLineupLabel(rows) {
-  return rows.map(shareAssetLabel).filter(Boolean).join(", ");
-}
-
-function transferShareLabel(team) {
-  if (!team.transferCount) return "No transfers";
-  return `${team.transferCount} transfer${team.transferCount === 1 ? "" : "s"}${
-    team.paidTransfers ? ` (${team.paidTransfers} paid)` : " (free only)"
-  }`;
-}
-
-function shareChipLabel(team) {
-  return team.activeChip === "none" ? "No chip" : chipLabel(team.activeChip);
-}
-
-function shareResultText(team) {
-  const gp = team.drivers[0]?.next_gp ?? "Next GP";
-  const mode = team.drivers[0]?.mode ?? "Projection";
-  const driverLine = shareLineupLabel(sortByValue(team.drivers));
-  const constructorLine = shareLineupLabel(sortByValue(team.constructors));
-
-  return [
-    `F1 Fantasy Predictor | ${gp} (${mode})`,
-    `Lineup: ${driverLine} + ${constructorLine}`,
-    `Projected: ${formatNumber(team.projectedPoints, 1)} pts | Cost: ${formatNumber(team.totalCost, 1)}M | Budget outlook: ${formatSignedMoney(team.projectedBudgetDelta)}`,
-    `Boost: ${boostLabel(team)} | Chip: ${shareChipLabel(team)} | ${transferShareLabel(team)}`,
-    publicSiteUrl(),
-  ].join("\n");
-}
-
-function shareResultPreview(team) {
-  const drivers = shareLineupLabel(sortByValue(team.drivers));
-  const constructors = shareLineupLabel(sortByValue(team.constructors));
-  return `${drivers} + ${constructors} | ${formatNumber(team.projectedPoints, 1)} pts | ${formatNumber(team.totalCost, 1)}M`;
-}
-
-function setShareStatus(message) {
-  if (els.shareStatus) els.shareStatus.textContent = message;
-}
-
-function updateShareResult(team) {
-  state.shareText = shareResultText(team);
-
-  if (els.shareCard) els.shareCard.hidden = false;
-  if (els.sharePreview) els.sharePreview.textContent = shareResultPreview(team);
-  if (els.shareResult) els.shareResult.hidden = typeof navigator.share !== "function";
-  setShareStatus("");
-}
-
-function fallbackCopyText(text) {
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.setAttribute("readonly", "");
-  textarea.style.opacity = "0";
-  textarea.style.position = "fixed";
-  document.body.appendChild(textarea);
-  textarea.select();
-  const copied = document.execCommand("copy");
-  textarea.remove();
-  return copied;
-}
-
-async function copyShareResult() {
-  if (!state.shareText) return;
-
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(state.shareText);
-    } else if (!fallbackCopyText(state.shareText)) {
-      throw new Error("Copy failed");
-    }
-    setShareStatus("Copied to clipboard.");
-    trackEvent("copy_share_result");
-  } catch {
-    setShareStatus("Could not copy automatically. Select the result text and copy it manually.");
-  }
-}
-
-async function shareResult() {
-  if (!state.shareText) return;
-
-  if (typeof navigator.share !== "function") {
-    await copyShareResult();
-    return;
-  }
-
-  try {
-    await navigator.share({
-      title: "F1 Fantasy Predictor lineup",
-      text: state.shareText,
-      url: publicSiteUrl(),
-    });
-    setShareStatus("Share sheet opened.");
-    trackEvent("share_result");
-  } catch (error) {
-    if (error?.name !== "AbortError") await copyShareResult();
-  }
-}
-
 function growthPathLabel(row) {
   const profile = priceGrowthProfile(row);
   const signal = priceMomentum(row);
@@ -1717,8 +1604,6 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
     els.alternativeCards.innerHTML = "";
     els.whyLineup.hidden = true;
     els.whyLineup.innerHTML = "";
-    state.shareText = "";
-    if (els.shareCard) els.shareCard.hidden = true;
     return;
   }
 
@@ -1736,7 +1621,6 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
   els.transfersOut.textContent = [...best.driversOut, ...best.constructorsOut].join(", ") || "None";
   els.transferPenalty.textContent = `${best.transferPenalty.toFixed(0)} pts`;
   renderWhyLineup(best, chipRecommendation);
-  updateShareResult(best);
 
   const displayTeams = teams.slice(0, 5);
 
@@ -1988,8 +1872,6 @@ els.form.addEventListener("submit", (event) => {
 els.openDriverPicker.addEventListener("click", () => openPicker("driver"));
 els.openConstructorPicker.addEventListener("click", () => openPicker("constructor"));
 els.strategy.addEventListener("change", updateStrategyNote);
-els.copyResult?.addEventListener("click", copyShareResult);
-els.shareResult?.addEventListener("click", shareResult);
 els.availableChipInputs.forEach((input) =>
   input.addEventListener("change", () => {
     saveAvailableChips();
