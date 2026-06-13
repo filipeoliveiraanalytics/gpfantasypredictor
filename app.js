@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260613-barcelona-fp3";
+const ASSET_VERSION = "20260613-after-practice-copy-v2";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -81,6 +81,8 @@ const els = {
   form: document.querySelector("#optimizer-form"),
   optimizeButton: document.querySelector("#optimize-button"),
   status: document.querySelector("#data-status"),
+  modelUpdatePill: document.querySelector("#model-update-pill"),
+  modelNoteCopy: document.querySelector("#model-note-copy"),
   budget: document.querySelector("#budget"),
   freeTransfers: document.querySelector("#free-transfers"),
   drivers: document.querySelector("#drivers"),
@@ -327,6 +329,39 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function displayGpName(value) {
+  return String(value || "Next GP").replaceAll("_", " ");
+}
+
+function displayModeName(value) {
+  const mode = String(value || "latest").trim();
+  if (!mode) return "latest";
+  return mode;
+}
+
+function modeFreshnessLabel(mode) {
+  const normalized = String(mode || "").toLowerCase();
+  if (normalized.includes("practice")) return "updated with FP1-FP3 practice data";
+  if (normalized.includes("quali")) return "updated with qualifying data";
+  if (normalized.includes("pre")) return "updated with latest race results";
+  return "updated with latest model data";
+}
+
+function updateModelCopy(sample) {
+  const gpName = displayGpName(sample?.next_gp);
+  const modeName = displayModeName(sample?.mode);
+  const freshness = modeFreshnessLabel(modeName);
+
+  if (els.modelUpdatePill) {
+    els.modelUpdatePill.textContent = `${gpName} ${modeName} model ${freshness}`;
+  }
+
+  if (els.modelNoteCopy) {
+    els.modelNoteCopy.textContent =
+      `The optimizer combines the ${gpName} ${modeName} GP model, updated F1 Fantasy prices, rolling price-momentum estimates, transfer penalties and the mandatory 2x driver boost. It is built for lineup decisions before team lock, with deeper race context available in the full GP Predictor.`;
+  }
 }
 
 function hashKey(value) {
@@ -1822,6 +1857,7 @@ async function init() {
   state.constructors = state.projections.filter((row) => row.entity_type === "constructor");
   buildComboCaches();
   const sample = state.projections[0];
+  updateModelCopy(sample);
   els.status.textContent = `${sample?.next_gp ?? "Next GP"} ${sample?.mode ? `| ${sample.mode}` : ""} model ready. Click Optimize Team to run it.`;
   updatePickerSummaries();
   loadAvailableChips();

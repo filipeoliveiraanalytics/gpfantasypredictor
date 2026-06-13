@@ -32,7 +32,7 @@
   <meta name="twitter:description"
     content="A fan-made F1 Fantasy predictor powered by GP prediction modelling." />
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png" />
-    <link rel="stylesheet" href="style.css?v=20260613-barcelona-fp3" />
+    <link rel="stylesheet" href="style.css?v=20260613-after-practice-copy-v2" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -65,7 +65,7 @@
           valid 5-driver + 2-constructor lineup.
         </p>
         <div class="update-stack" aria-label="Model freshness">
-          <p class="model-update-pill">Barcelona pre-weekend model updated with Monaco race results</p>
+          <p class="model-update-pill" id="model-update-pill">Loading latest model...</p>
         </div>
       </div>
       <aside class="forecast-cta" aria-label="Full GP Predictor">
@@ -81,10 +81,10 @@
     <section class="model-note">
       <div>
         <strong>How the recommendation works</strong>
-        <p>
-          The optimizer combines the Barcelona pre-weekend GP model, updated F1 Fantasy prices, rolling price-momentum
-          estimates, transfer penalties and the mandatory 2x driver boost. It is built for lineup decisions before team
-          lock, with deeper race context available in the full GP Predictor.
+        <p id="model-note-copy">
+          The optimizer combines the latest GP model, updated F1 Fantasy prices, rolling price-momentum estimates,
+          transfer penalties and the mandatory 2x driver boost. It is built for lineup decisions before team lock, with
+          deeper race context available in the full GP Predictor.
         </p>
       </div>
     </section>
@@ -302,7 +302,7 @@
   <script>
     window.GA_MEASUREMENT_ID = "G-0GCZQDW467";
   </script>
-    <script src="app.js?v=20260613-barcelona-fp3"></script>
+    <script src="app.js?v=20260613-after-practice-copy-v2"></script>
 </body>
 
 </html>
