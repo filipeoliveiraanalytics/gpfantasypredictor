@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260613-after-practice-copy-v2";
+const ASSET_VERSION = "20260613-chip-opportunity";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -18,6 +18,29 @@ const STRATEGY_NOTES = {
   max_points: "Max Points ranks the strongest projected lineup, even if it uses paid transfers.",
   current_friendly: "Transfer Friendly avoids paid transfers unless a selected chip changes the transfer rules.",
   budget_growth: "Budget Growth targets assets projected into price-rise bands while keeping total points close.",
+};
+
+const SEASON_CHIP_CONTEXT = {
+  sprintWeekends: [
+    { name: "Chinese GP", order: 2, aliases: ["china", "chinese", "shanghai"] },
+    { name: "Miami GP", order: 4, aliases: ["miami"] },
+    { name: "Canadian GP", order: 5, aliases: ["canada", "canadian", "montreal"] },
+    { name: "British GP", order: 8, aliases: ["british", "silverstone", "great britain"] },
+    { name: "Dutch GP", order: 14, aliases: ["dutch", "zandvoort", "netherlands"] },
+    { name: "Singapore GP", order: 17, aliases: ["singapore"] },
+  ],
+  gpOrder: [
+    { order: 1, aliases: ["australia", "australian", "melbourne"] },
+    { order: 2, aliases: ["china", "chinese", "shanghai"] },
+    { order: 3, aliases: ["japan", "japanese", "suzuka"] },
+    { order: 4, aliases: ["miami"] },
+    { order: 5, aliases: ["canada", "canadian", "montreal"] },
+    { order: 6, aliases: ["monaco", "monte-carlo", "monte carlo"] },
+    { order: 7, aliases: ["barcelona", "catalunya", "spain", "spanish"] },
+    { order: 8, aliases: ["british", "silverstone", "great britain"] },
+    { order: 14, aliases: ["dutch", "zandvoort", "netherlands"] },
+    { order: 17, aliases: ["singapore"] },
+  ],
 };
 
 const TEAM_COLORS = {
@@ -827,13 +850,46 @@ function topDriverGap(team) {
   return toNumber(sorted[0]?.expected_fantasy_points) - toNumber(sorted[1]?.expected_fantasy_points);
 }
 
-function trackProfile(team) {
-  const gp = (team?.drivers?.[0]?.next_gp ?? "").toLowerCase();
+function matchesAlias(value, aliases) {
+  const normalized = String(value ?? "").toLowerCase();
+  return aliases.some((alias) => normalized.includes(alias));
+}
+
+function gpOrderIndex(gp) {
+  const match = SEASON_CHIP_CONTEXT.gpOrder.find((entry) => matchesAlias(gp, entry.aliases));
+  if (match) return match.order;
+
+  const sprintMatch = SEASON_CHIP_CONTEXT.sprintWeekends.find((entry) => matchesAlias(gp, entry.aliases));
+  return sprintMatch?.order ?? 0;
+}
+
+function sprintOpportunity(gp) {
+  const order = gpOrderIndex(gp);
+  const currentSprint = SEASON_CHIP_CONTEXT.sprintWeekends.find((entry) => matchesAlias(gp, entry.aliases));
+  const remaining = SEASON_CHIP_CONTEXT.sprintWeekends.filter((entry) => {
+    if (currentSprint && entry.order === currentSprint.order) return false;
+    return order ? entry.order > order : !matchesAlias(gp, entry.aliases);
+  });
+
   return {
-    gp,
-    isMonaco: gp.includes("monaco"),
-    isStreet: ["monaco", "singapore", "baku", "jeddah", "las vegas"].some((name) => gp.includes(name)),
-    isSprint: gp.includes("sprint"),
+    currentSprint,
+    remaining,
+    remainingLabel: remaining.map((entry) => entry.name).join(", "),
+  };
+}
+
+function trackProfile(team) {
+  const gp = team?.drivers?.[0]?.next_gp ?? "";
+  const normalizedGp = gp.toLowerCase();
+  const sprintRead = sprintOpportunity(gp);
+  return {
+    gp: normalizedGp,
+    gpName: gp,
+    isMonaco: normalizedGp.includes("monaco"),
+    isStreet: ["monaco", "singapore", "baku", "jeddah", "las vegas"].some((name) => normalizedGp.includes(name)),
+    isSprint: Boolean(sprintRead.currentSprint) || normalizedGp.includes("sprint"),
+    remainingSprints: sprintRead.remaining,
+    remainingSprintLabel: sprintRead.remainingLabel,
   };
 }
 
@@ -879,7 +935,14 @@ function x3Predictability(team) {
   if (positionChange <= 1.5) score += 2;
   if (dnfRisk <= 1.5) score += 2;
   if (lineupShare >= 0.17) score += 2;
-  if (profile.isSprint) score += 2;
+  if (profile.isSprint) {
+    score += 4;
+    reasons.push("sprint scoring adds extra upside for the boosted driver");
+  } else if (profile.remainingSprints.length) {
+    const opportunityPenalty = Math.min(5, 2 + profile.remainingSprints.length);
+    score -= opportunityPenalty;
+    reasons.push(`${profile.remainingSprintLabel} still offer higher-ceiling sprint spots`);
+  }
 
   const confidence = score >= 13 ? "Strong" : score >= 9 ? "Medium" : "Hold";
   return {
@@ -929,10 +992,19 @@ function recommendChip(base, availableChips) {
   }
 
   const profile = trackProfile(base);
-  const result = { chip: "none", confidence: "Hold", reason: "No available chip creates a strong enough edge this week." };
+  const futureSprintText = profile.remainingSprintLabel ? ` (${profile.remainingSprintLabel})` : "";
+  const result = {
+    chip: "none",
+    confidence: "Hold",
+    reason:
+      !profile.isSprint && profile.remainingSprints.length && (availableChips.has("x3") || availableChips.has("limitless"))
+        ? `Save premium chips for remaining sprint weekends${futureSprintText} unless this GP has an exceptional edge.`
+        : "No available chip creates a strong enough edge this week.",
+  };
   const transferPressure = base.paidTransfers > 0 || base.transferCount >= 4;
   const boostGap = topDriverGap(base);
   const x3Read = x3Predictability(base);
+  const x3SpendThreshold = profile.isSprint ? 9 : profile.remainingSprints.length ? 13 : 10;
   const riskProtection = applyChipToTeam(base, "no_negative", "max_points").noNegativeProtection;
 
   const candidates = [];
@@ -945,12 +1017,15 @@ function recommendChip(base, availableChips) {
     });
   }
 
-  if (availableChips.has("limitless") && (profile.isSprint || (profile.isMonaco && base.budgetRemaining < 0.7 && transferPressure))) {
+  const nonSprintLimitlessSpot = profile.isMonaco && base.budgetRemaining < 0.7 && transferPressure && profile.remainingSprints.length === 0;
+  if (availableChips.has("limitless") && (profile.isSprint || nonSprintLimitlessSpot)) {
     candidates.push({
       chip: "limitless",
-      score: profile.isSprint ? 13 : 8,
+      score: profile.isSprint ? 15 : 8,
       confidence: profile.isSprint ? "Strong" : "Medium",
-      reason: `${chipLabel("limitless")} can work as a one-week attack when the best lineup is budget squeezed, especially if premium constructors are important.`,
+      reason: profile.isSprint
+        ? `${chipLabel("limitless")} fits because sprint scoring gives the one-week attack more total points to chase.`
+        : `${chipLabel("limitless")} can work as a one-week attack when the best lineup is budget squeezed and no better sprint spot remains.`,
     });
   }
 
@@ -963,7 +1038,7 @@ function recommendChip(base, availableChips) {
     });
   }
 
-  if (availableChips.has("x3") && x3Read.score >= 9) {
+  if (availableChips.has("x3") && x3Read.score >= x3SpendThreshold) {
     candidates.push({
       chip: "x3",
       score: x3Read.score,
