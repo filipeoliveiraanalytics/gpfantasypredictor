@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260613-chip-opportunity";
+const ASSET_VERSION = "20260619-austria-prices";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -1209,6 +1209,55 @@ function priceGrowthProfile(row) {
   const great = toNumber(row.price_points_needed_great, Number.NaN);
   const confidenceWeight = priceConfidenceWeight(row);
   const modelType = String(row.price_model_type ?? "");
+  const providedExpectedDelta = toNumber(row.risk_adjusted_price_delta_m, Number.NaN);
+  const providedGrowthScore = toNumber(row.price_growth_score, Number.NaN);
+  const providedRiseProbability = toNumber(row.price_rise_path_score, Number.NaN);
+  const providedFallProbability = toNumber(row.price_fall_risk_score, Number.NaN);
+  const providedMarginToGood = toNumber(row.price_margin_to_good, Number.NaN);
+  const providedMarginToGreat = toNumber(row.price_margin_to_great, Number.NaN);
+
+  if (
+    Number.isFinite(providedExpectedDelta) ||
+    Number.isFinite(providedGrowthScore) ||
+    Number.isFinite(providedRiseProbability) ||
+    Number.isFinite(providedFallProbability)
+  ) {
+    const riseProbability = Number.isFinite(providedRiseProbability)
+      ? providedRiseProbability
+      : rawDelta > 0
+        ? confidenceWeight
+        : 0.1 * confidenceWeight;
+    const fallProbability = Number.isFinite(providedFallProbability)
+      ? providedFallProbability
+      : rawDelta < 0
+        ? confidenceWeight
+        : 0.1 * confidenceWeight;
+
+    row._priceGrowthProfile = {
+      rawDelta,
+      expectedDelta: Number.isFinite(providedExpectedDelta) ? providedExpectedDelta : rawDelta * confidenceWeight,
+      growthScore: Number.isFinite(providedGrowthScore)
+        ? providedGrowthScore
+        : (Number.isFinite(providedExpectedDelta) ? providedExpectedDelta : rawDelta * confidenceWeight) * 2.4 +
+          riseProbability * 0.65 -
+          fallProbability * 0.55,
+      riseProbability: clamp(riseProbability, 0, 0.95),
+      fallProbability: clamp(fallProbability, 0, 0.95),
+      marginToGood: Number.isFinite(providedMarginToGood)
+        ? providedMarginToGood
+        : Number.isFinite(good)
+          ? expected - good
+          : Number.NaN,
+      marginToGreat: Number.isFinite(providedMarginToGreat)
+        ? providedMarginToGreat
+        : Number.isFinite(great)
+          ? expected - great
+          : Number.NaN,
+      confidenceWeight,
+      modelType,
+    };
+    return row._priceGrowthProfile;
+  }
 
   if (modelType === "threshold" && Number.isFinite(good)) {
     const greatTarget = Number.isFinite(great) ? great : good + Math.max(6, Math.abs(good) * 0.25);
@@ -1539,22 +1588,29 @@ function chipContext(team, recommendation) {
 function constructorContext(team) {
   const gp = team.drivers[0]?.next_gp ?? "this GP";
   const isMonaco = gp.toLowerCase().includes("monaco");
+  const isAustria = gp.toLowerCase().includes("austria") || gp.toLowerCase().includes("spielberg");
   const constructorNames = team.constructors.map((row) => row.name).join(" + ");
   const constructorKeys = new Set(team.constructorKeys);
 
   if (constructorKeys.has("MER") && constructorKeys.has("FER")) {
     return isMonaco
       ? `${constructorNames} is expensive, but it fits Monaco: Mercedes leads the model's constructor projection and Ferrari is also strong on qualifying-heavy weekends.`
+      : isAustria
+        ? `${constructorNames} is expensive, but it fits Austria because both teams project strongly on a short lap where two-car qualifying and race points stack quickly.`
       : `${constructorNames} is expensive, but both teams sit near the top of the model's constructor projection for ${gp}.`;
   }
   if (constructorKeys.has("MER")) {
     return isMonaco
       ? `${constructorNames} keeps Mercedes exposure, which is useful at Monaco because constructor qualifying points can be hard to recover elsewhere.`
+      : isAustria
+        ? `${constructorNames} keeps Mercedes exposure, which the model likes for Austria's straight-line efficiency and traction profile.`
       : `${constructorNames} keeps Mercedes exposure, which the model rates strongly for ${gp}.`;
   }
   if (constructorKeys.has("FER")) {
     return isMonaco
       ? `${constructorNames} leans into Ferrari's Monaco profile, where track position and clean qualifying tend to matter more than race overtakes.`
+      : isAustria
+        ? `${constructorNames} keeps Ferrari exposure, useful at Austria if the car converts high-speed balance into clean qualifying and race points.`
       : `${constructorNames} keeps Ferrari exposure, which the model still rates as useful for ${gp}.`;
   }
   return `${constructorNames} gives the model the best points-per-budget balance for this track and the selected transfer limit.`;
@@ -1563,6 +1619,7 @@ function constructorContext(team) {
 function budgetContext(team) {
   const gp = team.drivers[0]?.next_gp ?? "this GP";
   const isMonaco = gp.toLowerCase().includes("monaco");
+  const isAustria = gp.toLowerCase().includes("austria") || gp.toLowerCase().includes("spielberg");
   const budgetLeft = `${formatNumber(team.budgetRemaining, 1)}M`;
   if (team.paidTransfers > 0) {
     const penalty = Math.abs(team.transferPenalty);
@@ -1574,6 +1631,8 @@ function budgetContext(team) {
   if (team.budgetRemaining < 0.3) {
     return isMonaco
       ? `${transferSummary(team)} and nearly all budget used. That is acceptable here because Monaco rewards concentrated qualifying strength.`
+      : isAustria
+        ? `${transferSummary(team)} and nearly all budget used. That is acceptable here if the spend buys stronger traction, straight-line and two-car scoring upside.`
       : `${transferSummary(team)} and nearly all budget used. That is acceptable if the extra spend improves the projected lineup for ${gp}.`;
   }
   return `${transferSummary(team)} with ${budgetLeft} left, so the lineup improves projection without spending paid transfers.`;
@@ -1623,6 +1682,24 @@ function trackContext(team, recommendation) {
         [
           "Track logic",
           "High-speed corners, traction zones and tyre degradation matter together here, so strong race pace and stable two-car constructor scoring carry extra weight.",
+        ],
+        ["Constructor logic", constructorContext(team)],
+        ["Chip logic", chipContext(team, recommendation)],
+        ["Price logic", priceContext(team)],
+        ["Budget logic", budgetContext(team)],
+      ],
+    };
+  }
+
+  if (gpKey.includes("austria") || gpKey.includes("spielberg")) {
+    return {
+      title: "Austria context: short lap, traction and clean exits",
+      summary:
+        "The Red Bull Ring is a short, high-speed lap with heavy braking and traction exits, so the optimizer values strong qualifying, straight-line efficiency and reliable two-car scoring.",
+      insights: [
+        [
+          "Track logic",
+          "Lap gaps can be tight and DRS helps overtaking, but clean exits from the slow corners and low-drag pace are still key to converting grid position into race points.",
         ],
         ["Constructor logic", constructorContext(team)],
         ["Chip logic", chipContext(team, recommendation)],
