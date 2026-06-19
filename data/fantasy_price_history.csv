@@ -99,3 +99,36 @@ driver,RUS,George Russell,Mercedes,28.2,157,2026-06-08,TRUE
 driver,SAI,Carlos Sainz,Williams,12.6,68,2026-06-08,TRUE
 driver,STR,Lance Stroll,Aston Martin,4.8,-46,2026-06-08,TRUE
 driver,VER,Max Verstappen,Red Bull Racing,28.3,144,2026-06-08,TRUE
+constructor,ALP,Alpine,Alpine,16.7,216,2026-06-19,TRUE
+constructor,AMR,Aston Martin,Aston Martin,6.9,-86,2026-06-19,TRUE
+constructor,AUD,Audi,Audi,4.4,26,2026-06-19,TRUE
+constructor,CAD,Cadillac,Cadillac,5.4,18,2026-06-19,TRUE
+constructor,FER,Ferrari,Ferrari,25.4,476,2026-06-19,TRUE
+constructor,HAA,Haas F1 Team,Haas F1 Team,10.4,145,2026-06-19,TRUE
+constructor,MCL,McLaren,McLaren,29.8,308,2026-06-19,TRUE
+constructor,MER,Mercedes,Mercedes,31.4,592,2026-06-19,TRUE
+constructor,RBL,Racing Bulls,Racing Bulls,10.5,189,2026-06-19,TRUE
+constructor,RBR,Red Bull Racing,Red Bull Racing,29.7,264,2026-06-19,TRUE
+constructor,WIL,Williams,Williams,15.0,109,2026-06-19,TRUE
+driver,ALB,Alexander Albon,Williams,8.2,5,2026-06-19,TRUE
+driver,ALO,Fernando Alonso,Aston Martin,6.2,-25,2026-06-19,TRUE
+driver,ANT,Kimi Antonelli,Mercedes,25.3,305,2026-06-19,TRUE
+driver,BEA,Oliver Bearman,Haas F1 Team,7.6,44,2026-06-19,TRUE
+driver,BOR,Gabriel Bortoleto,Audi,5.8,26,2026-06-19,TRUE
+driver,BOT,Valtteri Bottas,Cadillac,3.3,-33,2026-06-19,TRUE
+driver,COL,Franco Colapinto,Alpine,10.0,75,2026-06-19,TRUE
+driver,GAS,Pierre Gasly,Alpine,12.2,95,2026-06-19,TRUE
+driver,HAD,Isack Hadjar,Red Bull Racing,12.1,47,2026-06-19,TRUE
+driver,HAM,Lewis Hamilton,Ferrari,24.2,237,2026-06-19,TRUE
+driver,HUL,Nico Hulkenberg,Audi,3.0,-43,2026-06-19,TRUE
+driver,LAW,Liam Lawson,Racing Bulls,8.7,83,2026-06-19,TRUE
+driver,LEC,Charles Leclerc,Ferrari,23.5,152,2026-06-19,TRUE
+driver,LIN,Arvid Lindblad,Racing Bulls,5.6,31,2026-06-19,TRUE
+driver,NOR,Lando Norris,McLaren,25.9,101,2026-06-19,TRUE
+driver,OCO,Esteban Ocon,Haas F1 Team,10.3,84,2026-06-19,TRUE
+driver,PER,Sergio Perez,Cadillac,6.2,52,2026-06-19,TRUE
+driver,PIA,Oscar Piastri,McLaren,25.0,110,2026-06-19,TRUE
+driver,RUS,George Russell,Mercedes,27.9,185,2026-06-19,TRUE
+driver,SAI,Carlos Sainz,Williams,12.0,79,2026-06-19,TRUE
+driver,STR,Lance Stroll,Aston Martin,4.2,-66,2026-06-19,TRUE
+driver,VER,Max Verstappen,Red Bull Racing,28.0,166,2026-06-19,TRUE
