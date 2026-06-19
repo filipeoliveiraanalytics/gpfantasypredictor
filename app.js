@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260619-price-floor";
+const ASSET_VERSION = "20260619-sprint-copy";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -25,7 +25,7 @@ const SEASON_CHIP_CONTEXT = {
     { name: "Chinese GP", order: 2, aliases: ["china", "chinese", "shanghai"] },
     { name: "Miami GP", order: 4, aliases: ["miami"] },
     { name: "Canadian GP", order: 5, aliases: ["canada", "canadian", "montreal"] },
-    { name: "British GP", order: 8, aliases: ["british", "silverstone", "great britain"] },
+    { name: "British GP", order: 9, aliases: ["british", "silverstone", "great britain"] },
     { name: "Dutch GP", order: 14, aliases: ["dutch", "zandvoort", "netherlands"] },
     { name: "Singapore GP", order: 17, aliases: ["singapore"] },
   ],
@@ -37,7 +37,8 @@ const SEASON_CHIP_CONTEXT = {
     { order: 5, aliases: ["canada", "canadian", "montreal"] },
     { order: 6, aliases: ["monaco", "monte-carlo", "monte carlo"] },
     { order: 7, aliases: ["barcelona", "catalunya", "spain", "spanish"] },
-    { order: 8, aliases: ["british", "silverstone", "great britain"] },
+    { order: 8, aliases: ["austria", "austrian", "spielberg", "red bull ring"] },
+    { order: 9, aliases: ["british", "silverstone", "great britain"] },
     { order: 14, aliases: ["dutch", "zandvoort", "netherlands"] },
     { order: 17, aliases: ["singapore"] },
   ],
@@ -1723,7 +1724,7 @@ function trackContext(team, recommendation) {
       insights: [
         [
           "Track logic",
-          "Lap gaps can be tight and DRS helps overtaking, but clean exits from the slow corners and low-drag pace are still key to converting grid position into race points.",
+          "Lap gaps can be tight, but clean exits from the slow corners, braking stability and low-drag pace are still key to converting grid position into race points.",
         ],
         ["Constructor logic", constructorContext(team)],
         ["Chip logic", chipContext(team, recommendation)],
