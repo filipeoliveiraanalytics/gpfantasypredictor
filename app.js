@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260619-austria-prices";
+const ASSET_VERSION = "20260619-price-floor";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -1200,6 +1200,14 @@ function priceConfidenceWeight(row) {
   return hasModeledPriceChange(row) ? 0.75 : 0.55;
 }
 
+function isPriceFloorCapped(row) {
+  return String(row.price_floor_capped ?? "").toUpperCase() === "TRUE";
+}
+
+function isAtPriceFloor(row) {
+  return isPriceFloorCapped(row) && toNumber(row.projected_price_delta_m) >= 0;
+}
+
 function priceGrowthProfile(row) {
   if (row._priceGrowthProfile) return row._priceGrowthProfile;
   const rawDelta = projectedPriceChange(row);
@@ -1215,6 +1223,8 @@ function priceGrowthProfile(row) {
   const providedFallProbability = toNumber(row.price_fall_risk_score, Number.NaN);
   const providedMarginToGood = toNumber(row.price_margin_to_good, Number.NaN);
   const providedMarginToGreat = toNumber(row.price_margin_to_great, Number.NaN);
+  const floorCapped = isPriceFloorCapped(row);
+  const atPriceFloor = isAtPriceFloor(row);
 
   if (
     Number.isFinite(providedExpectedDelta) ||
@@ -1229,6 +1239,8 @@ function priceGrowthProfile(row) {
         : 0.1 * confidenceWeight;
     const fallProbability = Number.isFinite(providedFallProbability)
       ? providedFallProbability
+      : atPriceFloor
+        ? 0
       : rawDelta < 0
         ? confidenceWeight
         : 0.1 * confidenceWeight;
@@ -1255,6 +1267,8 @@ function priceGrowthProfile(row) {
           : Number.NaN,
       confidenceWeight,
       modelType,
+      floorCapped,
+      atPriceFloor,
     };
     return row._priceGrowthProfile;
   }
@@ -1275,7 +1289,9 @@ function priceGrowthProfile(row) {
     }
 
     const fallProbability =
-      rawDelta < 0
+      atPriceFloor
+        ? 0
+        : rawDelta < 0
         ? 0.58 + clamp((good - expected) / Math.max(bandWidth, 1), 0, 0.28)
         : clamp(0.20 - Math.max(marginToGood, 0) / Math.max(bandWidth * 2, 1), 0.05, 0.22);
     const expectedDelta =
@@ -1300,6 +1316,8 @@ function priceGrowthProfile(row) {
       marginToGreat,
       confidenceWeight,
       modelType,
+      floorCapped,
+      atPriceFloor,
     };
     return row._priceGrowthProfile;
   }
@@ -1357,14 +1375,20 @@ function modeledPriceSignal(row) {
   const bucket = row.projected_price_bucket || "estimated";
   const modelType = row.price_model_type || "";
   const confidence = row.price_model_confidence || "";
+  const floorCapped = isPriceFloorCapped(row);
+  const atPriceFloor = isAtPriceFloor(row);
   const tone = delta > 0 ? "rise" : delta < 0 ? "fall" : "stable";
-  const label = delta > 0 ? `+${formatNumber(delta, 1)}M` : delta < 0 ? `${formatNumber(delta, 1)}M` : "Stable";
+  const label = atPriceFloor ? "Floor" : delta > 0 ? `+${formatNumber(delta, 1)}M` : delta < 0 ? `${formatNumber(delta, 1)}M` : "Stable";
   const confidenceCopy = confidence ? ` Confidence: ${confidence}.` : "";
 
   if (modelType === "threshold") {
     const range = row.price_bucket_range || bucket;
     let thresholdCopy;
-    if (delta > 0 && neededGreat <= expected) {
+    if (atPriceFloor) {
+      thresholdCopy = "the model sees downside, but price is already at the 3.0M floor";
+    } else if (floorCapped) {
+      thresholdCopy = "the model sees more downside, but the 3.0M floor caps the possible loss";
+    } else if (delta > 0 && neededGreat <= expected) {
       thresholdCopy = "already projects inside the Great price-rise band";
     } else if (delta > 0) {
       thresholdCopy = `already projects inside the Good price-rise band; Great starts at ${formatNumber(neededGreat, 1)} pts`;
