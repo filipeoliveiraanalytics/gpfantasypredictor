@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260619-sprint-copy";
+const ASSET_VERSION = "20260627-austria-fp2";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -367,7 +367,7 @@ function displayModeName(value) {
 
 function modeFreshnessLabel(mode) {
   const normalized = String(mode || "").toLowerCase();
-  if (normalized.includes("practice")) return "updated with FP1-FP3 practice data";
+  if (normalized.includes("practice")) return "updated with free-practice data";
   if (normalized.includes("quali")) return "updated with qualifying data";
   if (normalized.includes("pre")) return "updated with latest race results";
   return "updated with latest model data";
