@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260627-austria-fp2";
+const ASSET_VERSION = "20260629-british-pre-weekend";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -1614,6 +1614,7 @@ function constructorContext(team) {
   const gp = team.drivers[0]?.next_gp ?? "this GP";
   const isMonaco = gp.toLowerCase().includes("monaco");
   const isAustria = gp.toLowerCase().includes("austria") || gp.toLowerCase().includes("spielberg");
+  const isBritish = gp.toLowerCase().includes("british") || gp.toLowerCase().includes("silverstone");
   const constructorNames = team.constructors.map((row) => row.name).join(" + ");
   const constructorKeys = new Set(team.constructorKeys);
 
@@ -1622,6 +1623,8 @@ function constructorContext(team) {
       ? `${constructorNames} is expensive, but it fits Monaco: Mercedes leads the model's constructor projection and Ferrari is also strong on qualifying-heavy weekends.`
       : isAustria
         ? `${constructorNames} is expensive, but it fits Austria because both teams project strongly on a short lap where two-car qualifying and race points stack quickly.`
+      : isBritish
+        ? `${constructorNames} is expensive, but it fits Silverstone because both teams project well on high-speed aero load and two-car sprint-weekend scoring.`
       : `${constructorNames} is expensive, but both teams sit near the top of the model's constructor projection for ${gp}.`;
   }
   if (constructorKeys.has("MER")) {
@@ -1629,6 +1632,8 @@ function constructorContext(team) {
       ? `${constructorNames} keeps Mercedes exposure, which is useful at Monaco because constructor qualifying points can be hard to recover elsewhere.`
       : isAustria
         ? `${constructorNames} keeps Mercedes exposure, which the model likes for Austria's straight-line efficiency and traction profile.`
+      : isBritish
+        ? `${constructorNames} keeps Mercedes exposure, useful at Silverstone if high-speed balance and tyre control translate across sprint and race sessions.`
       : `${constructorNames} keeps Mercedes exposure, which the model rates strongly for ${gp}.`;
   }
   if (constructorKeys.has("FER")) {
@@ -1636,6 +1641,8 @@ function constructorContext(team) {
       ? `${constructorNames} leans into Ferrari's Monaco profile, where track position and clean qualifying tend to matter more than race overtakes.`
       : isAustria
         ? `${constructorNames} keeps Ferrari exposure, useful at Austria if the car converts high-speed balance into clean qualifying and race points.`
+      : isBritish
+        ? `${constructorNames} keeps Ferrari exposure, useful at Silverstone if its recent high-speed and long-run pace carries into the sprint format.`
       : `${constructorNames} keeps Ferrari exposure, which the model still rates as useful for ${gp}.`;
   }
   return `${constructorNames} gives the model the best points-per-budget balance for this track and the selected transfer limit.`;
@@ -1645,6 +1652,7 @@ function budgetContext(team) {
   const gp = team.drivers[0]?.next_gp ?? "this GP";
   const isMonaco = gp.toLowerCase().includes("monaco");
   const isAustria = gp.toLowerCase().includes("austria") || gp.toLowerCase().includes("spielberg");
+  const isBritish = gp.toLowerCase().includes("british") || gp.toLowerCase().includes("silverstone");
   const budgetLeft = `${formatNumber(team.budgetRemaining, 1)}M`;
   if (team.paidTransfers > 0) {
     const penalty = Math.abs(team.transferPenalty);
@@ -1658,6 +1666,8 @@ function budgetContext(team) {
       ? `${transferSummary(team)} and nearly all budget used. That is acceptable here because Monaco rewards concentrated qualifying strength.`
       : isAustria
         ? `${transferSummary(team)} and nearly all budget used. That is acceptable here if the spend buys stronger traction, straight-line and two-car scoring upside.`
+      : isBritish
+        ? `${transferSummary(team)} and nearly all budget used. That is acceptable here if the spend buys high-speed pace and sprint-weekend scoring upside.`
       : `${transferSummary(team)} and nearly all budget used. That is acceptable if the extra spend improves the projected lineup for ${gp}.`;
   }
   return `${transferSummary(team)} with ${budgetLeft} left, so the lineup improves projection without spending paid transfers.`;
@@ -1725,6 +1735,24 @@ function trackContext(team, recommendation) {
         [
           "Track logic",
           "Lap gaps can be tight, but clean exits from the slow corners, braking stability and low-drag pace are still key to converting grid position into race points.",
+        ],
+        ["Constructor logic", constructorContext(team)],
+        ["Chip logic", chipContext(team, recommendation)],
+        ["Price logic", priceContext(team)],
+        ["Budget logic", budgetContext(team)],
+      ],
+    };
+  }
+
+  if (gpKey.includes("british") || gpKey.includes("silverstone")) {
+    return {
+      title: "Silverstone context: high-speed aero and sprint upside",
+      summary:
+        "Silverstone rewards high-speed corner confidence, aero efficiency and tyre control through long loaded sections, with the sprint format adding extra points on the table.",
+      insights: [
+        [
+          "Track logic",
+          "Fast corners, tyre load and changeable British weather make stable race pace valuable, while the sprint weekend increases the reward for strong qualifying and clean execution.",
         ],
         ["Constructor logic", constructorContext(team)],
         ["Chip logic", chipContext(team, recommendation)],
