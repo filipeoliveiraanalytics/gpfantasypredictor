@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260629-british-pre-weekend";
+const ASSET_VERSION = "20260629-british-transfer-guard";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -542,13 +542,49 @@ function comboIncomingBudgetDelta(combo, currentMask) {
   return total;
 }
 
-function comboRunMeta(combo, currentMask) {
+function strongPriceRiseAsset(row) {
+  const profile = priceGrowthProfile(row);
+  return profile.expectedDelta >= 0.25 || profile.riseProbability >= 0.65 || projectedPriceChange(row) >= priceStep(row) - 0.05;
+}
+
+function highPriceFallRiskAsset(row) {
+  if (isAtPriceFloor(row)) return false;
+  const profile = priceGrowthProfile(row);
+  return profile.expectedDelta <= -0.25 || profile.fallProbability >= 0.55 || projectedPriceChange(row) <= -priceStep(row) + 0.05;
+}
+
+function protectedPriceTradeoff(combo, currentMask, sourceRows) {
+  const inRows = combo.rows.filter((row) => (row._bit & currentMask) === 0);
+  const outRows = sourceRows.filter((row) => (row._bit & currentMask) !== 0 && (row._bit & combo.mask) === 0);
+  if (!inRows.length || !outRows.length) return null;
+
+  const protectedOut = outRows.filter(strongPriceRiseAsset);
+  const riskyIn = inRows.filter(highPriceFallRiskAsset);
+  if (!protectedOut.length || !riskyIn.length) return null;
+
+  return {
+    pointGain: inRows.reduce((sum, row) => sum + row._points, 0) - outRows.reduce((sum, row) => sum + row._points, 0),
+    budgetSwing:
+      protectedOut.reduce((sum, row) => sum + Math.max(0, row._priceDelta), 0) +
+      riskyIn.reduce((sum, row) => sum + Math.abs(Math.min(0, row._priceDelta)), 0),
+  };
+}
+
+function blocksProtectedPriceTradeoff(tradeoff, inputs) {
+  if (!tradeoff || inputs.activeChip === "limitless") return false;
+  const minimumPointGain = inputs.strategy === "budget_growth" ? 8 : 5;
+  const swingPenalty = tradeoff.budgetSwing >= 0.8 ? 1 : 0;
+  return tradeoff.pointGain < minimumPointGain + swingPenalty;
+}
+
+function comboRunMeta(combo, currentMask, sourceRows) {
   const keptCount = popCount(combo.mask & currentMask);
   return {
     combo,
     transferCount: combo.size - keptCount,
     incomingBudgetDeltaValue: comboIncomingBudgetDelta(combo, currentMask),
     growthEligible: (combo.nonGrowthMask & currentMask) === combo.nonGrowthMask,
+    protectedPriceTradeoff: protectedPriceTradeoff(combo, currentMask, sourceRows),
   };
 }
 
@@ -759,10 +795,10 @@ function findTopTeams(inputs) {
   }
 
   const driverCandidates = state.driverCombos
-    .map((combo) => comboRunMeta(combo, currentDriverMask))
+    .map((combo) => comboRunMeta(combo, currentDriverMask, state.drivers))
     .filter((meta) => meta.combo.cost <= budgetLimit);
   const constructorCandidates = state.constructorCombos
-    .map((combo) => comboRunMeta(combo, currentConstructorMask));
+    .map((combo) => comboRunMeta(combo, currentConstructorMask, state.constructors));
 
   for (const driverMeta of driverCandidates) {
     const driverCombo = driverMeta.combo;
@@ -776,6 +812,12 @@ function findTopTeams(inputs) {
 
       const transferCount = driverMeta.transferCount + constructorMeta.transferCount;
       if (transferFriendly && transferCount > inputs.freeTransfers) continue;
+      if (
+        blocksProtectedPriceTradeoff(driverMeta.protectedPriceTradeoff, inputs) ||
+        blocksProtectedPriceTradeoff(constructorMeta.protectedPriceTradeoff, inputs)
+      ) {
+        continue;
+      }
 
       const expectedPoints = driverCombo.expectedPoints + constructorCombo.expectedPoints;
       const boostBase = driverCombo.bestBoost?._points ?? 0;
