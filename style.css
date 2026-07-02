@@ -126,14 +126,15 @@ h1 {
   width: 34px;
 }
 
-.gp-flag img {
+.gp-flag img,
+.gp-flag svg {
   display: block;
   height: 100%;
   object-fit: cover;
   width: 100%;
 }
 
-.gp-flag--asset {
+.gp-flag--inline {
   background: rgba(17, 22, 36, 0.88);
 }
 

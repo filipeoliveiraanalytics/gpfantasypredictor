@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260702-flag-img";
+const ASSET_VERSION = "20260702-uk-flag-inline-fill";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -53,12 +53,7 @@ const GP_IDENTITY = [
   { aliases: ["monaco", "monte-carlo", "monte carlo"], location: "Monte-Carlo, Monaco", flag: "mc" },
   { aliases: ["barcelona", "catalunya", "spain", "spanish"], location: "Barcelona, Spain", flag: "es" },
   { aliases: ["austria", "austrian", "spielberg", "red bull ring"], location: "Spielberg, Austria", flag: "at" },
-  {
-    aliases: ["british", "silverstone", "great britain"],
-    location: "Silverstone, UK",
-    flag: "gb",
-    flagAsset: "assets/flags/uk.svg",
-  },
+  { aliases: ["british", "silverstone", "great britain"], location: "Silverstone, UK", flag: "gb" },
   { aliases: ["belgium", "belgian", "spa"], location: "Spa-Francorchamps, Belgium", flag: "be" },
   { aliases: ["hungary", "hungarian", "hungaroring"], location: "Budapest, Hungary", flag: "hu" },
   { aliases: ["dutch", "zandvoort", "netherlands"], location: "Zandvoort, Netherlands", flag: "nl" },
@@ -72,6 +67,17 @@ const GP_IDENTITY = [
   { aliases: ["qatar", "lusail"], location: "Lusail, Qatar", flag: "qa" },
   { aliases: ["abu dhabi", "yas marina"], location: "Abu Dhabi, UAE", flag: "ae" },
 ];
+
+const FLAG_MARKUP = {
+  gb: `
+    <svg viewBox="0 0 60 36" preserveAspectRatio="xMidYMid slice" role="img" aria-label="UK flag" focusable="false">
+      <rect width="60" height="36" fill="#012169"></rect>
+      <path d="M0 0 60 36M60 0 0 36" stroke="#fff" stroke-width="7.2"></path>
+      <path d="M0 0 60 36M60 0 0 36" stroke="#c8102e" stroke-width="4.8"></path>
+      <path d="M30 0v36M0 18h60" stroke="#fff" stroke-width="12"></path>
+      <path d="M30 0v36M0 18h60" stroke="#c8102e" stroke-width="7.2"></path>
+    </svg>`,
+};
 
 const TEAM_COLORS = {
   Mercedes: "#00d2be",
@@ -439,10 +445,9 @@ function updateModelCopy(sample) {
   }
 
   if (els.gpFlag) {
-    els.gpFlag.className = `gp-flag gp-flag--${identity.flag}${identity.flagAsset ? " gp-flag--asset" : ""}`;
-    els.gpFlag.innerHTML = identity.flagAsset
-      ? `<img src="${escapeHtml(identity.flagAsset)}?v=${ASSET_VERSION}" alt="" loading="eager" />`
-      : "";
+    const flagMarkup = FLAG_MARKUP[identity.flag] || "";
+    els.gpFlag.className = `gp-flag gp-flag--${identity.flag}${flagMarkup ? " gp-flag--inline" : ""}`;
+    els.gpFlag.innerHTML = flagMarkup;
   }
 
   if (els.gpLocation) {
