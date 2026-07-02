@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260702-min-transfer-edge";
+const ASSET_VERSION = "20260702-chip-gain-compare";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -1062,7 +1062,16 @@ function applyChipToTeam(team, chip, strategy) {
   };
 }
 
-function recommendChip(base, availableChips) {
+function chipGain(base, team) {
+  if (!base || !team) return 0;
+  return team.netExpectedPoints - base.netExpectedPoints;
+}
+
+function chipGainLabel(gain) {
+  return `${gain >= 0 ? "+" : ""}${formatNumber(gain, 1)} pts`;
+}
+
+function recommendChip(base, availableChips, chipPreviews = {}) {
   if (!base || availableChips.size === 0) {
     return { chip: "none", confidence: "Hold", reason: "No available chip creates a strong enough edge this week." };
   }
@@ -1081,6 +1090,11 @@ function recommendChip(base, availableChips) {
   const boostGap = topDriverGap(base);
   const x3Read = x3Predictability(base);
   const x3SpendThreshold = profile.isSprint ? 9 : profile.remainingSprints.length ? 13 : 10;
+  const x3Gain = chipGain(base, chipPreviews.x3) || toNumber(base.bestBoost?.expected_fantasy_points);
+  const limitlessGain = chipGain(base, chipPreviews.limitless);
+  const limitlessSpendThreshold = profile.isSprint ? 35 : profile.remainingSprints.length ? 45 : 30;
+  const x3DominatedByLimitless =
+    availableChips.has("limitless") && limitlessGain >= x3Gain + (profile.isSprint ? 8 : 12);
   const riskProtection = applyChipToTeam(base, "no_negative", "max_points").noNegativeProtection;
 
   const candidates = [];
@@ -1094,14 +1108,18 @@ function recommendChip(base, availableChips) {
   }
 
   const nonSprintLimitlessSpot = profile.isMonaco && base.budgetRemaining < 0.7 && transferPressure && profile.remainingSprints.length === 0;
-  if (availableChips.has("limitless") && (profile.isSprint || nonSprintLimitlessSpot)) {
+  if (availableChips.has("limitless") && (profile.isSprint || nonSprintLimitlessSpot || limitlessGain >= limitlessSpendThreshold)) {
+    const x3Comparison =
+      availableChips.has("x3") && x3Gain > 0
+        ? ` It also beats ${chipLabel("x3")}'s estimated ${chipGainLabel(x3Gain)} gain.`
+        : "";
     candidates.push({
       chip: "limitless",
-      score: profile.isSprint ? 15 : 8,
-      confidence: profile.isSprint ? "Strong" : "Medium",
+      score: limitlessGain + (profile.isSprint ? 4 : 0),
+      confidence: limitlessGain >= limitlessSpendThreshold + 15 ? "Strong" : "Medium",
       reason: profile.isSprint
-        ? `${chipLabel("limitless")} fits because sprint scoring gives the one-week attack more total points to chase.`
-        : `${chipLabel("limitless")} can work as a one-week attack when the best lineup is budget squeezed and no better sprint spot remains.`,
+        ? `${chipLabel("limitless")} fits because sprint scoring gives the one-week attack more total points to chase; projected gain is about ${chipGainLabel(limitlessGain)} versus no chip.${x3Comparison}`
+        : `${chipLabel("limitless")} can work as a one-week attack here; projected gain is about ${chipGainLabel(limitlessGain)} versus no chip.${x3Comparison}`,
     });
   }
 
@@ -1114,12 +1132,12 @@ function recommendChip(base, availableChips) {
     });
   }
 
-  if (availableChips.has("x3") && x3Read.score >= x3SpendThreshold) {
+  if (availableChips.has("x3") && x3Read.score >= x3SpendThreshold && x3Gain >= 18 && !x3DominatedByLimitless) {
     candidates.push({
       chip: "x3",
-      score: x3Read.score,
+      score: x3Gain + x3Read.score * 0.3,
       confidence: x3Read.confidence,
-      reason: `${chipLabel("x3")} fits because ${base.bestBoost?.key ?? "the top driver"} has a predictable high-upside path: ${x3Read.reason}.`,
+      reason: `${chipLabel("x3")} adds about ${chipGainLabel(x3Gain)} because ${base.bestBoost?.key ?? "the top driver"} has a predictable high-upside path: ${x3Read.reason}.`,
     });
   }
 
@@ -1158,11 +1176,19 @@ function optimize() {
 
   const availableChips = getAvailableChips();
   const baseTeams = findTopTeams(baseInputs);
-  const chipRecommendation = recommendChip(baseTeams[0], availableChips);
-  const topTeams = baseTeams
-    .map((team) => applyChipToTeam(team, chipRecommendation.chip, baseInputs.strategy))
-    .sort(compareTeams)
-    .slice(0, 10);
+  const teamsByChip = new Map([["none", baseTeams]]);
+  const teamsForChip = (chip) => {
+    if (!teamsByChip.has(chip)) {
+      teamsByChip.set(chip, findTopTeams({ ...baseInputs, activeChip: chip }));
+    }
+    return teamsByChip.get(chip);
+  };
+  const chipPreviews = {
+    x3: availableChips.has("x3") ? teamsForChip("x3")[0] : null,
+    limitless: availableChips.has("limitless") ? teamsForChip("limitless")[0] : null,
+  };
+  const chipRecommendation = recommendChip(baseTeams[0], availableChips, chipPreviews);
+  const topTeams = teamsForChip(chipRecommendation.chip).slice(0, 10);
 
   render(topTeams, chipRecommendation);
 
