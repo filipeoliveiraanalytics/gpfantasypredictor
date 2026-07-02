@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260702-race-chip-v2";
+const ASSET_VERSION = "20260702-real-uk-flag";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";

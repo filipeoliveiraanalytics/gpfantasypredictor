@@ -134,8 +134,7 @@ h1 {
   background: linear-gradient(90deg, #ef3340 0 26%, transparent 26%), linear-gradient(#009739 0 33%, #fff 33% 66%, #000 66%);
 }
 
-.gp-flag--au,
-.gp-flag--gb {
+.gp-flag--au {
   background:
     linear-gradient(0deg, transparent 40%, #fff 40% 60%, transparent 60%),
     linear-gradient(90deg, transparent 41%, #fff 41% 59%, transparent 59%),
@@ -144,6 +143,10 @@ h1 {
     linear-gradient(32deg, transparent 43%, #fff 43% 49%, #c8102e 49% 51%, #fff 51% 57%, transparent 57%),
     linear-gradient(-32deg, transparent 43%, #fff 43% 49%, #c8102e 49% 51%, #fff 51% 57%, transparent 57%),
     #012169;
+}
+
+.gp-flag--gb {
+  background: #0b1020 url("assets/flags/uk.svg?v=20260702-real-uk-flag") center / cover no-repeat;
 }
 
 .gp-flag--az {
