@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260702-gp-flag-card";
+const ASSET_VERSION = "20260702-race-chip-v2";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -387,6 +387,10 @@ function displayGpName(value) {
   return String(value || "Next GP").replaceAll("_", " ");
 }
 
+function shortGpName(value) {
+  return displayGpName(value).replace(" Grand Prix", " GP");
+}
+
 function displayModeName(value) {
   const mode = String(value || "latest").trim();
   if (!mode) return "latest";
@@ -407,15 +411,15 @@ function gpIdentityFor(value) {
 function weekendTypeLabel(gpName, modeName) {
   const sprintRead = sprintOpportunity(gpName);
   const weekendType = sprintRead.currentSprint ? "Sprint weekend" : "Standard weekend";
-  return `${weekendType} | ${modeName}`;
+  return `${shortGpName(gpName)} | ${weekendType} | ${modeName}`;
 }
 
 function modeFreshnessLabel(mode) {
   const normalized = String(mode || "").toLowerCase();
-  if (normalized.includes("practice")) return "updated with free-practice data";
-  if (normalized.includes("quali")) return "updated with qualifying data";
-  if (normalized.includes("pre")) return "updated with latest race results";
-  return "updated with latest model data";
+  if (normalized.includes("practice")) return "Free-practice data included";
+  if (normalized.includes("quali")) return "Qualifying data included";
+  if (normalized.includes("pre")) return "Latest race results included";
+  return "Latest model data included";
 }
 
 function updateModelCopy(sample) {
@@ -442,7 +446,7 @@ function updateModelCopy(sample) {
   }
 
   if (els.modelUpdatePill) {
-    els.modelUpdatePill.textContent = `${gpName} ${modeName} model ${freshness}`;
+    els.modelUpdatePill.textContent = freshness;
   }
 
   if (els.modelNoteCopy) {
