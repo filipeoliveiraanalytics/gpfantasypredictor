@@ -77,9 +77,142 @@ h1 {
 .update-stack {
   align-items: flex-start;
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 8px;
   margin: 18px 0 0;
+}
+
+.gp-identity {
+  align-items: center;
+  background: rgba(17, 22, 36, 0.82);
+  border: 1px solid rgba(203, 214, 255, 0.18);
+  border-radius: 18px;
+  display: inline-flex;
+  gap: 12px;
+  padding: 10px 12px;
+}
+
+.gp-identity[hidden] {
+  display: none;
+}
+
+.gp-identity strong,
+.gp-identity small {
+  display: block;
+}
+
+.gp-identity strong {
+  font-size: 0.98rem;
+  line-height: 1.15;
+}
+
+.gp-identity small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-top: 3px;
+}
+
+.gp-flag {
+  background: linear-gradient(45deg, #111827 25%, #f8fafc 25% 50%, #111827 50% 75%, #f8fafc 75%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04), 0 10px 28px rgba(0, 0, 0, 0.28);
+  flex: 0 0 42px;
+  height: 42px;
+  overflow: hidden;
+  width: 42px;
+}
+
+.gp-flag--at {
+  background: linear-gradient(#ef3340 0 33%, #fff 33% 66%, #ef3340 66%);
+}
+
+.gp-flag--ae {
+  background: linear-gradient(90deg, #ef3340 0 26%, transparent 26%), linear-gradient(#009739 0 33%, #fff 33% 66%, #000 66%);
+}
+
+.gp-flag--au,
+.gp-flag--gb {
+  background:
+    linear-gradient(0deg, transparent 40%, #fff 40% 60%, transparent 60%),
+    linear-gradient(90deg, transparent 41%, #fff 41% 59%, transparent 59%),
+    linear-gradient(0deg, transparent 46%, #c8102e 46% 54%, transparent 54%),
+    linear-gradient(90deg, transparent 46%, #c8102e 46% 54%, transparent 54%),
+    linear-gradient(32deg, transparent 43%, #fff 43% 49%, #c8102e 49% 51%, #fff 51% 57%, transparent 57%),
+    linear-gradient(-32deg, transparent 43%, #fff 43% 49%, #c8102e 49% 51%, #fff 51% 57%, transparent 57%),
+    #012169;
+}
+
+.gp-flag--az {
+  background: linear-gradient(#00b5e2 0 33%, #ef3340 33% 66%, #509e2f 66%);
+}
+
+.gp-flag--be {
+  background: linear-gradient(90deg, #000 0 33%, #ffd90c 33% 66%, #ef3340 66%);
+}
+
+.gp-flag--br {
+  background:
+    radial-gradient(circle at 50% 50%, #002776 0 18%, transparent 19%),
+    linear-gradient(35deg, transparent 36%, #ffdf00 36% 64%, transparent 64%),
+    linear-gradient(-35deg, transparent 36%, #ffdf00 36% 64%, transparent 64%),
+    #009c3b;
+}
+
+.gp-flag--ca {
+  background: linear-gradient(90deg, #d80621 0 25%, #fff 25% 75%, #d80621 75%);
+}
+
+.gp-flag--cn {
+  background: radial-gradient(circle at 34% 35%, #ffde00 0 9%, transparent 10%), #de2910;
+}
+
+.gp-flag--es {
+  background: linear-gradient(#aa151b 0 25%, #f1bf00 25% 75%, #aa151b 75%);
+}
+
+.gp-flag--hu {
+  background: linear-gradient(#ce2939 0 33%, #fff 33% 66%, #477050 66%);
+}
+
+.gp-flag--it {
+  background: linear-gradient(90deg, #009246 0 33%, #fff 33% 66%, #ce2b37 66%);
+}
+
+.gp-flag--jp {
+  background: radial-gradient(circle at 50% 50%, #bc002d 0 25%, transparent 26%), #fff;
+}
+
+.gp-flag--mc {
+  background: linear-gradient(#ce1126 0 50%, #fff 50%);
+}
+
+.gp-flag--mx {
+  background:
+    radial-gradient(circle at 50% 50%, #9c6b30 0 7%, transparent 8%),
+    linear-gradient(90deg, #006847 0 33%, #fff 33% 66%, #ce1126 66%);
+}
+
+.gp-flag--nl {
+  background: linear-gradient(#ae1c28 0 33%, #fff 33% 66%, #21468b 66%);
+}
+
+.gp-flag--qa {
+  background: linear-gradient(90deg, #fff 0 28%, #8a1538 28%);
+}
+
+.gp-flag--sg {
+  background: linear-gradient(#ef3340 0 50%, #fff 50%);
+}
+
+.gp-flag--us {
+  background:
+    linear-gradient(#3c3b6e 0 52%, transparent 52%),
+    repeating-linear-gradient(#b22234 0 7.7%, #fff 7.7% 15.4%);
+  background-size: 48% 54%, 100% 100%;
+  background-repeat: no-repeat;
 }
 
 .model-update-pill {

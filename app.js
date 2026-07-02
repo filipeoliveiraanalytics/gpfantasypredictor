@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260702-chip-gain-compare";
+const ASSET_VERSION = "20260702-gp-flag-card";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -43,6 +43,30 @@ const SEASON_CHIP_CONTEXT = {
     { order: 17, aliases: ["singapore"] },
   ],
 };
+
+const GP_IDENTITY = [
+  { aliases: ["australia", "australian", "melbourne"], location: "Melbourne, Australia", flag: "au" },
+  { aliases: ["china", "chinese", "shanghai"], location: "Shanghai, China", flag: "cn" },
+  { aliases: ["japan", "japanese", "suzuka"], location: "Suzuka, Japan", flag: "jp" },
+  { aliases: ["miami"], location: "Miami, USA", flag: "us" },
+  { aliases: ["canada", "canadian", "montreal"], location: "Montreal, Canada", flag: "ca" },
+  { aliases: ["monaco", "monte-carlo", "monte carlo"], location: "Monte-Carlo, Monaco", flag: "mc" },
+  { aliases: ["barcelona", "catalunya", "spain", "spanish"], location: "Barcelona, Spain", flag: "es" },
+  { aliases: ["austria", "austrian", "spielberg", "red bull ring"], location: "Spielberg, Austria", flag: "at" },
+  { aliases: ["british", "silverstone", "great britain"], location: "Silverstone, UK", flag: "gb" },
+  { aliases: ["belgium", "belgian", "spa"], location: "Spa-Francorchamps, Belgium", flag: "be" },
+  { aliases: ["hungary", "hungarian", "hungaroring"], location: "Budapest, Hungary", flag: "hu" },
+  { aliases: ["dutch", "zandvoort", "netherlands"], location: "Zandvoort, Netherlands", flag: "nl" },
+  { aliases: ["italy", "italian", "monza"], location: "Monza, Italy", flag: "it" },
+  { aliases: ["azerbaijan", "baku"], location: "Baku, Azerbaijan", flag: "az" },
+  { aliases: ["singapore"], location: "Singapore", flag: "sg" },
+  { aliases: ["united states", "austin", "cota"], location: "Austin, USA", flag: "us" },
+  { aliases: ["mexico", "mexican"], location: "Mexico City, Mexico", flag: "mx" },
+  { aliases: ["brazil", "brazilian", "sao paulo", "interlagos"], location: "Sao Paulo, Brazil", flag: "br" },
+  { aliases: ["las vegas"], location: "Las Vegas, USA", flag: "us" },
+  { aliases: ["qatar", "lusail"], location: "Lusail, Qatar", flag: "qa" },
+  { aliases: ["abu dhabi", "yas marina"], location: "Abu Dhabi, UAE", flag: "ae" },
+];
 
 const TEAM_COLORS = {
   Mercedes: "#00d2be",
@@ -107,6 +131,10 @@ const els = {
   status: document.querySelector("#data-status"),
   modelUpdatePill: document.querySelector("#model-update-pill"),
   modelNoteCopy: document.querySelector("#model-note-copy"),
+  gpIdentity: document.querySelector("#gp-identity"),
+  gpFlag: document.querySelector("#gp-flag"),
+  gpLocation: document.querySelector("#gp-location"),
+  gpWeekendType: document.querySelector("#gp-weekend-type"),
   budget: document.querySelector("#budget"),
   freeTransfers: document.querySelector("#free-transfers"),
   drivers: document.querySelector("#drivers"),
@@ -365,6 +393,23 @@ function displayModeName(value) {
   return mode;
 }
 
+function gpIdentityFor(value) {
+  const gpName = displayGpName(value);
+  const normalized = gpName.toLowerCase();
+  return (
+    GP_IDENTITY.find((entry) => entry.aliases.some((alias) => normalized.includes(alias))) || {
+      location: gpName,
+      flag: "generic",
+    }
+  );
+}
+
+function weekendTypeLabel(gpName, modeName) {
+  const sprintRead = sprintOpportunity(gpName);
+  const weekendType = sprintRead.currentSprint ? "Sprint weekend" : "Standard weekend";
+  return `${weekendType} | ${modeName}`;
+}
+
 function modeFreshnessLabel(mode) {
   const normalized = String(mode || "").toLowerCase();
   if (normalized.includes("practice")) return "updated with free-practice data";
@@ -377,6 +422,24 @@ function updateModelCopy(sample) {
   const gpName = displayGpName(sample?.next_gp);
   const modeName = displayModeName(sample?.mode);
   const freshness = modeFreshnessLabel(modeName);
+  const identity = gpIdentityFor(gpName);
+
+  if (els.gpIdentity) {
+    els.gpIdentity.hidden = false;
+    els.gpIdentity.setAttribute("aria-label", `${identity.location}, ${weekendTypeLabel(gpName, modeName)}`);
+  }
+
+  if (els.gpFlag) {
+    els.gpFlag.className = `gp-flag gp-flag--${identity.flag}`;
+  }
+
+  if (els.gpLocation) {
+    els.gpLocation.textContent = identity.location;
+  }
+
+  if (els.gpWeekendType) {
+    els.gpWeekendType.textContent = weekendTypeLabel(gpName, modeName);
+  }
 
   if (els.modelUpdatePill) {
     els.modelUpdatePill.textContent = `${gpName} ${modeName} model ${freshness}`;

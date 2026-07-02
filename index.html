@@ -32,7 +32,7 @@
   <meta name="twitter:description"
     content="A fan-made F1 Fantasy predictor powered by GP prediction modelling." />
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png" />
-    <link rel="stylesheet" href="style.css?v=20260702-chip-gain-compare" />
+    <link rel="stylesheet" href="style.css?v=20260702-gp-flag-card" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -65,6 +65,13 @@
           valid 5-driver + 2-constructor lineup.
         </p>
         <div class="update-stack" aria-label="Model freshness">
+          <div class="gp-identity" id="gp-identity" hidden>
+            <span class="gp-flag" id="gp-flag" aria-hidden="true"></span>
+            <span>
+              <strong id="gp-location">Next GP</strong>
+              <small id="gp-weekend-type">Model loading</small>
+            </span>
+          </div>
           <p class="model-update-pill" id="model-update-pill">Loading latest model...</p>
         </div>
       </div>
@@ -302,7 +309,7 @@
   <script>
     window.GA_MEASUREMENT_ID = "G-0GCZQDW467";
   </script>
-    <script src="app.js?v=20260702-chip-gain-compare"></script>
+    <script src="app.js?v=20260702-gp-flag-card"></script>
 </body>
 
 </html>
