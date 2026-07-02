@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260702-real-uk-flag";
+const ASSET_VERSION = "20260702-flag-img";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -53,7 +53,12 @@ const GP_IDENTITY = [
   { aliases: ["monaco", "monte-carlo", "monte carlo"], location: "Monte-Carlo, Monaco", flag: "mc" },
   { aliases: ["barcelona", "catalunya", "spain", "spanish"], location: "Barcelona, Spain", flag: "es" },
   { aliases: ["austria", "austrian", "spielberg", "red bull ring"], location: "Spielberg, Austria", flag: "at" },
-  { aliases: ["british", "silverstone", "great britain"], location: "Silverstone, UK", flag: "gb" },
+  {
+    aliases: ["british", "silverstone", "great britain"],
+    location: "Silverstone, UK",
+    flag: "gb",
+    flagAsset: "assets/flags/uk.svg",
+  },
   { aliases: ["belgium", "belgian", "spa"], location: "Spa-Francorchamps, Belgium", flag: "be" },
   { aliases: ["hungary", "hungarian", "hungaroring"], location: "Budapest, Hungary", flag: "hu" },
   { aliases: ["dutch", "zandvoort", "netherlands"], location: "Zandvoort, Netherlands", flag: "nl" },
@@ -434,7 +439,10 @@ function updateModelCopy(sample) {
   }
 
   if (els.gpFlag) {
-    els.gpFlag.className = `gp-flag gp-flag--${identity.flag}`;
+    els.gpFlag.className = `gp-flag gp-flag--${identity.flag}${identity.flagAsset ? " gp-flag--asset" : ""}`;
+    els.gpFlag.innerHTML = identity.flagAsset
+      ? `<img src="${escapeHtml(identity.flagAsset)}?v=${ASSET_VERSION}" alt="" loading="eager" />`
+      : "";
   }
 
   if (els.gpLocation) {

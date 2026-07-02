@@ -126,6 +126,17 @@ h1 {
   width: 34px;
 }
 
+.gp-flag img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.gp-flag--asset {
+  background: rgba(17, 22, 36, 0.88);
+}
+
 .gp-flag--at {
   background: linear-gradient(#ef3340 0 33%, #fff 33% 66%, #ef3340 66%);
 }
@@ -143,10 +154,6 @@ h1 {
     linear-gradient(32deg, transparent 43%, #fff 43% 49%, #c8102e 49% 51%, #fff 51% 57%, transparent 57%),
     linear-gradient(-32deg, transparent 43%, #fff 43% 49%, #c8102e 49% 51%, #fff 51% 57%, transparent 57%),
     #012169;
-}
-
-.gp-flag--gb {
-  background: #0b1020 url("assets/flags/uk.svg?v=20260702-real-uk-flag") center / cover no-repeat;
 }
 
 .gp-flag--az {
