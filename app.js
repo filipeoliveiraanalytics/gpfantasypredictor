@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260629-british-transfer-guard";
+const ASSET_VERSION = "20260702-min-transfer-edge";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -577,6 +577,36 @@ function blocksProtectedPriceTradeoff(tradeoff, inputs) {
   return tradeoff.pointGain < minimumPointGain + swingPenalty;
 }
 
+function comboProjectedPoints(driverCombo, constructorCombo, activeChip) {
+  const expectedPoints = driverCombo.expectedPoints + constructorCombo.expectedPoints;
+  const boostBase = driverCombo.bestBoost?._points ?? 0;
+  const chipExtraPoints = activeChip === "x3" ? boostBase : 0;
+  const noNegativeProtection =
+    activeChip === "no_negative" ? driverCombo.noNegativeProtection + constructorCombo.noNegativeProtection : 0;
+  return expectedPoints + boostBase + chipExtraPoints + noNegativeProtection;
+}
+
+function minimumFreeTransferGain(transferCount, budgetDeltaChange, inputs) {
+  let minimum = transferCount === 1 ? 1.2 : 1.8 + Math.max(0, transferCount - 2) * 0.4;
+
+  if (budgetDeltaChange < -0.25) minimum += 0.8;
+  if (budgetDeltaChange > 0.25) minimum -= 0.5;
+  if (inputs.strategy === "budget_growth") minimum -= 0.4;
+
+  return Math.max(0.8, minimum);
+}
+
+function blocksLowValueFreeTransfer(candidate, currentBaseline, inputs) {
+  if (!currentBaseline || candidate.transferCount <= 0 || candidate.paidTransfers > 0) return false;
+  if (hasUnlimitedTransfers(inputs.activeChip)) return false;
+
+  const pointGain = candidate.projectedPoints - currentBaseline.projectedPoints;
+  const budgetDeltaChange = candidate.projectedBudgetDelta - currentBaseline.projectedBudgetDelta;
+  const minimumGain = minimumFreeTransferGain(candidate.transferCount, budgetDeltaChange, inputs);
+
+  return pointGain < minimumGain;
+}
+
 function comboRunMeta(combo, currentMask, sourceRows) {
   const keptCount = popCount(combo.mask & currentMask);
   return {
@@ -625,6 +655,8 @@ function summarizeTeam(driverCombo, constructorCombo, inputs) {
     constructors: constructorCombo,
     driverKeys,
     constructorKeys,
+    currentDriverKeys: [...inputs.currentDrivers],
+    currentConstructorKeys: [...inputs.currentConstructors],
     totalCost,
     budgetRemaining: inputs.budget - totalCost,
     activeChip: inputs.activeChip,
@@ -776,22 +808,24 @@ function findTopTeams(inputs) {
   const currentConstructorMask = maskFromKeys(inputs.currentConstructors, state.constructorKeyBits);
   const budgetGrowth = inputs.strategy === "budget_growth";
   const transferFriendly = inputs.strategy === "current_friendly" && !hasUnlimitedTransfers(inputs.activeChip);
+  const currentDriverCombo = state.driverCombos.find((combo) => combo.mask === currentDriverMask);
+  const currentConstructorCombo = state.constructorCombos.find((combo) => combo.mask === currentConstructorMask);
+  const currentBaseline =
+    currentDriverCombo && currentConstructorCombo && currentDriverCombo.cost + currentConstructorCombo.cost <= budgetLimit
+      ? {
+          projectedPoints: comboProjectedPoints(currentDriverCombo, currentConstructorCombo, inputs.activeChip),
+          projectedBudgetDelta: currentDriverCombo.budgetDelta + currentConstructorCombo.budgetDelta,
+          budgetGrowthScore: currentDriverCombo.growthScore + currentConstructorCombo.growthScore,
+        }
+      : null;
   let budgetGrowthPointFloor = Number.NEGATIVE_INFINITY;
   let currentBudgetGrowthDelta = Number.NEGATIVE_INFINITY;
   let currentBudgetGrowthScore = Number.NEGATIVE_INFINITY;
 
-  if (budgetGrowth) {
-    const currentDriverCombo = state.driverCombos.find((combo) => combo.mask === currentDriverMask);
-    const currentConstructorCombo = state.constructorCombos.find((combo) => combo.mask === currentConstructorMask);
-    if (currentDriverCombo && currentConstructorCombo && currentDriverCombo.cost + currentConstructorCombo.cost <= budgetLimit) {
-      const currentProjectedPoints =
-        currentDriverCombo.expectedPoints +
-        currentConstructorCombo.expectedPoints +
-        (currentDriverCombo.bestBoost?._points ?? 0);
-      budgetGrowthPointFloor = currentProjectedPoints - 10;
-      currentBudgetGrowthDelta = currentDriverCombo.budgetDelta + currentConstructorCombo.budgetDelta;
-      currentBudgetGrowthScore = currentDriverCombo.growthScore + currentConstructorCombo.growthScore;
-    }
+  if (budgetGrowth && currentBaseline) {
+    budgetGrowthPointFloor = currentBaseline.projectedPoints - 10;
+    currentBudgetGrowthDelta = currentBaseline.projectedBudgetDelta;
+    currentBudgetGrowthScore = currentBaseline.budgetGrowthScore;
   }
 
   const driverCandidates = state.driverCombos
@@ -819,12 +853,7 @@ function findTopTeams(inputs) {
         continue;
       }
 
-      const expectedPoints = driverCombo.expectedPoints + constructorCombo.expectedPoints;
-      const boostBase = driverCombo.bestBoost?._points ?? 0;
-      const chipExtraPoints = inputs.activeChip === "x3" ? boostBase : 0;
-      const noNegativeProtection =
-        inputs.activeChip === "no_negative" ? driverCombo.noNegativeProtection + constructorCombo.noNegativeProtection : 0;
-      const projectedPoints = expectedPoints + boostBase + chipExtraPoints + noNegativeProtection;
+      const projectedPoints = comboProjectedPoints(driverCombo, constructorCombo, inputs.activeChip);
       if (budgetGrowth && projectedPoints < budgetGrowthPointFloor) continue;
 
       const paidTransfers = hasUnlimitedTransfers(inputs.activeChip) ? 0 : Math.max(0, transferCount - inputs.freeTransfers);
@@ -845,6 +874,8 @@ function findTopTeams(inputs) {
       const candidate = {
         driverCombo,
         constructorCombo,
+        transferCount,
+        paidTransfers,
         projectedPoints,
         netExpectedPoints: projectedPoints + transferPenalty,
         projectedBudgetDelta,
@@ -861,6 +892,8 @@ function findTopTeams(inputs) {
           inputs.strategy
         ),
       };
+
+      if (blocksLowValueFreeTransfer(candidate, currentBaseline, inputs)) continue;
 
       if (isBudgetGrowthBaseline) {
         budgetGrowthBaseline = candidate;
@@ -1732,6 +1765,67 @@ function priceContext(team) {
   return "Risk-adjusted price outlook looks fairly stable, so this recommendation is mostly about points and transfer efficiency.";
 }
 
+function formatSignedPoints(value) {
+  if (Math.abs(value) < 0.05) return "0.0";
+  return `${value > 0 ? "+" : ""}${formatNumber(value, 1)}`;
+}
+
+function risePathCopy(row) {
+  const profile = priceGrowthProfile(row);
+  const delta = Math.max(projectedPriceChange(row), profile.expectedDelta, 0);
+  if (delta >= 0.05) return `a ${formatSignedMoney(delta)} rise path`;
+  return `a ${Math.round(profile.riseProbability * 100)}% rise path`;
+}
+
+function fallRiskCopy(row) {
+  const profile = priceGrowthProfile(row);
+  const delta = Math.min(projectedPriceChange(row), profile.expectedDelta, 0);
+  if (delta <= -0.05) return `${formatSignedMoney(delta)} fall risk`;
+  return `${Math.round(profile.fallProbability * 100)}% fall risk`;
+}
+
+function protectedHoldExplanation(team, type) {
+  if (team.activeChip === "limitless") return null;
+
+  const selectedRows = type === "driver" ? team.drivers : team.constructors;
+  const currentKeys = new Set(type === "driver" ? team.currentDriverKeys : team.currentConstructorKeys);
+  const selectedKeys = new Set(selectedRows.map((row) => row.key));
+  const sourceRows = type === "driver" ? state.drivers : state.constructors;
+  const keptRows = selectedRows.filter((row) => currentKeys.has(row.key) && strongPriceRiseAsset(row));
+  if (!keptRows.length) return null;
+
+  const candidates = [];
+  keptRows.forEach((kept) => {
+    sourceRows.forEach((candidate) => {
+      if (selectedKeys.has(candidate.key) || !highPriceFallRiskAsset(candidate)) return;
+      const affordable = team.budgetRemaining + toNumber(kept.price_m) - toNumber(candidate.price_m) >= -0.01;
+      const pointGain = toNumber(candidate.expected_fantasy_points) - toNumber(kept.expected_fantasy_points);
+      const budgetSwing = Math.max(0, projectedPriceChange(kept)) + Math.abs(Math.min(0, projectedPriceChange(candidate)));
+      const minimumPointGain = budgetSwing >= 0.8 ? 6 : 5;
+      if (!affordable || pointGain <= 0 || pointGain >= minimumPointGain) return;
+      candidates.push({ kept, candidate, pointGain, budgetSwing });
+    });
+  });
+
+  if (!candidates.length) return null;
+  const best = candidates.sort((a, b) => b.budgetSwing - a.budgetSwing || b.pointGain - a.pointGain)[0];
+  return `Kept ${best.kept.key} because ${best.candidate.key} adds only ${formatSignedPoints(best.pointGain)} projected pts while swapping ${risePathCopy(best.kept)} for ${fallRiskCopy(best.candidate)}.`;
+}
+
+function transferContext(team) {
+  const driverHold = protectedHoldExplanation(team, "driver");
+  if (driverHold) return driverHold;
+
+  const constructorHold = protectedHoldExplanation(team, "constructor");
+  if (constructorHold) return constructorHold;
+
+  if (team.transferCount === 0) {
+    return "No transfer cleared the points, price-momentum and free-transfer checks, so the model kept your current structure.";
+  }
+
+  return "The transfers shown clear the model's points, price-momentum and transfer-penalty checks for this strategy.";
+}
+
 function trackContext(team, recommendation) {
   const gp = team.drivers[0]?.next_gp ?? "this GP";
   const gpKey = gp.toLowerCase();
@@ -1745,6 +1839,7 @@ function trackContext(team, recommendation) {
         ["Constructor logic", constructorContext(team)],
         ["Chip logic", chipContext(team, recommendation)],
         ["Price logic", priceContext(team)],
+        ["Transfer logic", transferContext(team)],
         ["Budget logic", budgetContext(team)],
       ],
     };
@@ -1763,6 +1858,7 @@ function trackContext(team, recommendation) {
         ["Constructor logic", constructorContext(team)],
         ["Chip logic", chipContext(team, recommendation)],
         ["Price logic", priceContext(team)],
+        ["Transfer logic", transferContext(team)],
         ["Budget logic", budgetContext(team)],
       ],
     };
@@ -1781,6 +1877,7 @@ function trackContext(team, recommendation) {
         ["Constructor logic", constructorContext(team)],
         ["Chip logic", chipContext(team, recommendation)],
         ["Price logic", priceContext(team)],
+        ["Transfer logic", transferContext(team)],
         ["Budget logic", budgetContext(team)],
       ],
     };
@@ -1799,6 +1896,7 @@ function trackContext(team, recommendation) {
         ["Constructor logic", constructorContext(team)],
         ["Chip logic", chipContext(team, recommendation)],
         ["Price logic", priceContext(team)],
+        ["Transfer logic", transferContext(team)],
         ["Budget logic", budgetContext(team)],
       ],
     };
@@ -1813,6 +1911,7 @@ function trackContext(team, recommendation) {
       ["Constructor logic", constructorContext(team)],
       ["Chip logic", chipContext(team, recommendation)],
       ["Price logic", priceContext(team)],
+      ["Transfer logic", transferContext(team)],
       ["Budget logic", budgetContext(team)],
     ],
   };
