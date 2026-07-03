@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260702-uk-flag-inline-fill";
+const ASSET_VERSION = "20260702-forecast-cta";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -182,6 +182,8 @@ const els = {
   acceptAnalytics: document.querySelector("#accept-analytics"),
   declineAnalytics: document.querySelector("#decline-analytics"),
   forecastLink: document.querySelector("#forecast-link"),
+  forecastTitle: document.querySelector("#forecast-title"),
+  forecastCopy: document.querySelector("#forecast-copy"),
 };
 
 function hasAnalyticsId() {
@@ -465,6 +467,15 @@ function updateModelCopy(sample) {
   if (els.modelNoteCopy) {
     els.modelNoteCopy.textContent =
       `The optimizer combines the ${gpName} ${modeName} GP model, updated F1 Fantasy prices, rolling price-momentum estimates, transfer penalties and the mandatory 2x driver boost. It is built for lineup decisions before team lock, with deeper race context available in the full GP Predictor.`;
+  }
+
+  if (els.forecastTitle) {
+    els.forecastTitle.textContent = `Open the ${shortGpName(gpName)} race forecast.`;
+  }
+
+  if (els.forecastCopy) {
+    els.forecastCopy.textContent =
+      "See the grid prediction, podium odds, fastest-lap pick, weather, safety-car risk and track-fit ratings behind this optimizer.";
   }
 }
 

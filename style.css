@@ -264,12 +264,14 @@ button {
 }
 
 .forecast-cta {
-  background: rgba(17, 22, 36, 0.78);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(240, 200, 75, 0.16), transparent 34%),
+    linear-gradient(145deg, rgba(20, 200, 189, 0.12), rgba(17, 22, 36, 0.84));
   border: 1px solid rgba(20, 200, 189, 0.28);
   border-radius: 24px;
   box-shadow: var(--shadow);
-  max-width: 330px;
-  padding: 18px;
+  max-width: 360px;
+  padding: 20px;
 }
 
 .forecast-cta span {
@@ -285,11 +287,44 @@ button {
 .forecast-cta strong {
   display: block;
   line-height: 1.35;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
+}
+
+.forecast-cta p {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  margin: 0 0 14px;
+}
+
+.forecast-quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.forecast-quick-links small {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(203, 214, 255, 0.12);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  margin: 0;
+  padding: 5px 8px;
+  text-transform: none;
 }
 
 .forecast-cta .analysis-link {
+  box-shadow: 0 12px 28px rgba(20, 200, 189, 0.14);
   width: 100%;
+}
+
+.forecast-cta .analysis-link:hover {
+  background: var(--teal);
+  color: #041012;
 }
 
 .model-note {
