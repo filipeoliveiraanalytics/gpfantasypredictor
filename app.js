@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260703-forecast-cta-no-tags";
+const ASSET_VERSION = "20260703-british-fp1-sq-v2";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -427,9 +427,11 @@ function weekendTypeLabel(gpName, modeName) {
   return `${shortGpName(gpName)} | ${weekendType} | ${modeName}`;
 }
 
-function modeFreshnessLabel(mode) {
+function modeFreshnessLabel(mode, gpName = "") {
   const normalized = String(mode || "").toLowerCase();
-  if (normalized.includes("practice")) return "Free-practice data included";
+  if (normalized.includes("practice")) {
+    return sprintOpportunity(gpName).currentSprint ? "FP1 + Sprint Qualifying included" : "Free-practice data included";
+  }
   if (normalized.includes("quali")) return "Qualifying data included";
   if (normalized.includes("pre")) return "Latest race results included";
   return "Latest model data included";
@@ -438,7 +440,7 @@ function modeFreshnessLabel(mode) {
 function updateModelCopy(sample) {
   const gpName = displayGpName(sample?.next_gp);
   const modeName = displayModeName(sample?.mode);
-  const freshness = modeFreshnessLabel(modeName);
+  const freshness = modeFreshnessLabel(modeName, gpName);
   const identity = gpIdentityFor(gpName);
 
   if (els.gpIdentity) {
