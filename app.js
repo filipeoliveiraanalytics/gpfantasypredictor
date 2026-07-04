@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260703-british-fp1-sq-v2";
+const ASSET_VERSION = "20260704-british-sprint";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -430,7 +430,7 @@ function weekendTypeLabel(gpName, modeName) {
 function modeFreshnessLabel(mode, gpName = "") {
   const normalized = String(mode || "").toLowerCase();
   if (normalized.includes("practice")) {
-    return sprintOpportunity(gpName).currentSprint ? "FP1 + Sprint Qualifying included" : "Free-practice data included";
+    return sprintOpportunity(gpName).currentSprint ? "FP1 + Sprint Qualifying + Sprint included" : "Free-practice data included";
   }
   if (normalized.includes("quali")) return "Qualifying data included";
   if (normalized.includes("pre")) return "Latest race results included";
