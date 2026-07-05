@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260704-british-sprint";
+const ASSET_VERSION = "20260705-british-post-quali";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
