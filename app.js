@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260705-british-post-quali";
+const ASSET_VERSION = "20260706-belgium-price-calibration";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -1809,6 +1809,7 @@ function constructorContext(team) {
   const isMonaco = gp.toLowerCase().includes("monaco");
   const isAustria = gp.toLowerCase().includes("austria") || gp.toLowerCase().includes("spielberg");
   const isBritish = gp.toLowerCase().includes("british") || gp.toLowerCase().includes("silverstone");
+  const isBelgium = gp.toLowerCase().includes("belgium") || gp.toLowerCase().includes("spa");
   const constructorNames = team.constructors.map((row) => row.name).join(" + ");
   const constructorKeys = new Set(team.constructorKeys);
 
@@ -1819,6 +1820,8 @@ function constructorContext(team) {
         ? `${constructorNames} is expensive, but it fits Austria because both teams project strongly on a short lap where two-car qualifying and race points stack quickly.`
       : isBritish
         ? `${constructorNames} is expensive, but it fits Silverstone because both teams project well on high-speed aero load and two-car sprint-weekend scoring.`
+      : isBelgium
+        ? `${constructorNames} is expensive, but it fits Spa because long straights, high-speed commitment and reliability reward strong two-car scoring.`
       : `${constructorNames} is expensive, but both teams sit near the top of the model's constructor projection for ${gp}.`;
   }
   if (constructorKeys.has("MER")) {
@@ -1828,6 +1831,8 @@ function constructorContext(team) {
         ? `${constructorNames} keeps Mercedes exposure, which the model likes for Austria's straight-line efficiency and traction profile.`
       : isBritish
         ? `${constructorNames} keeps Mercedes exposure, useful at Silverstone if high-speed balance and tyre control translate across sprint and race sessions.`
+      : isBelgium
+        ? `${constructorNames} keeps Mercedes exposure, useful at Spa if efficient aero and straight-line pace translate across the long lap.`
       : `${constructorNames} keeps Mercedes exposure, which the model rates strongly for ${gp}.`;
   }
   if (constructorKeys.has("FER")) {
@@ -1837,6 +1842,8 @@ function constructorContext(team) {
         ? `${constructorNames} keeps Ferrari exposure, useful at Austria if the car converts high-speed balance into clean qualifying and race points.`
       : isBritish
         ? `${constructorNames} keeps Ferrari exposure, useful at Silverstone if its recent high-speed and long-run pace carries into the sprint format.`
+      : isBelgium
+        ? `${constructorNames} keeps Ferrari exposure, useful at Spa if high-speed stability and sector-two confidence carry into race pace.`
       : `${constructorNames} keeps Ferrari exposure, which the model still rates as useful for ${gp}.`;
   }
   return `${constructorNames} gives the model the best points-per-budget balance for this track and the selected transfer limit.`;
@@ -1847,6 +1854,7 @@ function budgetContext(team) {
   const isMonaco = gp.toLowerCase().includes("monaco");
   const isAustria = gp.toLowerCase().includes("austria") || gp.toLowerCase().includes("spielberg");
   const isBritish = gp.toLowerCase().includes("british") || gp.toLowerCase().includes("silverstone");
+  const isBelgium = gp.toLowerCase().includes("belgium") || gp.toLowerCase().includes("spa");
   const budgetLeft = `${formatNumber(team.budgetRemaining, 1)}M`;
   if (team.paidTransfers > 0) {
     const penalty = Math.abs(team.transferPenalty);
@@ -1862,6 +1870,8 @@ function budgetContext(team) {
         ? `${transferSummary(team)} and nearly all budget used. That is acceptable here if the spend buys stronger traction, straight-line and two-car scoring upside.`
       : isBritish
         ? `${transferSummary(team)} and nearly all budget used. That is acceptable here if the spend buys high-speed pace and sprint-weekend scoring upside.`
+      : isBelgium
+        ? `${transferSummary(team)} and nearly all budget used. That is acceptable here if the spend buys efficient straight-line speed and high-speed stability for Spa.`
       : `${transferSummary(team)} and nearly all budget used. That is acceptable if the extra spend improves the projected lineup for ${gp}.`;
   }
   return `${transferSummary(team)} with ${budgetLeft} left, so the lineup improves projection without spending paid transfers.`;
@@ -2011,6 +2021,25 @@ function trackContext(team, recommendation) {
         [
           "Track logic",
           "Fast corners, tyre load and changeable British weather make stable race pace valuable, while the sprint weekend increases the reward for strong qualifying and clean execution.",
+        ],
+        ["Constructor logic", constructorContext(team)],
+        ["Chip logic", chipContext(team, recommendation)],
+        ["Price logic", priceContext(team)],
+        ["Transfer logic", transferContext(team)],
+        ["Budget logic", budgetContext(team)],
+      ],
+    };
+  }
+
+  if (gpKey.includes("belgium") || gpKey.includes("spa")) {
+    return {
+      title: "Spa context: long lap, high-speed load and weather risk",
+      summary:
+        "Spa rewards efficient straight-line speed, confidence through fast corners and a clean setup compromise across very different sectors, so the optimizer values strong race pace and reliable two-car scoring.",
+      insights: [
+        [
+          "Track logic",
+          "The long lap spreads mistakes out, but Eau Rouge/Raidillon, Pouhon and the long Kemmel run mean aero efficiency, high-speed stability and straight-line pace matter together.",
         ],
         ["Constructor logic", constructorContext(team)],
         ["Chip logic", chipContext(team, recommendation)],
