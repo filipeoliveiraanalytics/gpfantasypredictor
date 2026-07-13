@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260706-belgium-fantasy-tune";
+const ASSET_VERSION = "20260713-wildcard-copy";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -1241,7 +1241,7 @@ function recommendChip(base, availableChips, chipPreviews = {}) {
       chip: "wildcard",
       score: base.paidTransfers > 0 ? 11 + base.paidTransfers : 7 + base.transferCount,
       confidence: base.transferCount >= 5 ? "Strong" : "Medium",
-      reason: `${chipLabel("wildcard")} fits because the optimizer wants ${base.transferCount} moves and the free-transfer limit is holding the rebuild back.`,
+      reason: `${chipLabel("wildcard")} fits because the optimizer wants ${base.transferCount} moves and the normal free-transfer limit is holding the rebuild back. The chip makes those penalty-free Wildcard moves; it does not mean you have ${base.transferCount} ordinary free transfers.`,
     });
   }
 
@@ -1788,6 +1788,12 @@ function budgetLeftLabel(team) {
 
 function transferSummary(team) {
   if (team.transferCount === 0) return "No transfers needed";
+  if (team.activeChip === "wildcard") {
+    return `${team.transferCount} ${team.transferCount === 1 ? "Wildcard move" : "Wildcard moves"}`;
+  }
+  if (team.activeChip === "limitless") {
+    return `${team.transferCount} temporary Limitless changes`;
+  }
   if (team.paidTransfers === 0) return `${team.transferCount} free ${team.transferCount === 1 ? "move" : "moves"}`;
   return `${team.transferCount} moves | ${team.paidTransfers} paid`;
 }
