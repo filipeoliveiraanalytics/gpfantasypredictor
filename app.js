@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260706-belgium-price-calibration";
+const ASSET_VERSION = "20260706-belgium-fantasy-tune";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -26,8 +26,8 @@ const SEASON_CHIP_CONTEXT = {
     { name: "Miami GP", order: 4, aliases: ["miami"] },
     { name: "Canadian GP", order: 5, aliases: ["canada", "canadian", "montreal"] },
     { name: "British GP", order: 9, aliases: ["british", "silverstone", "great britain"] },
-    { name: "Dutch GP", order: 14, aliases: ["dutch", "zandvoort", "netherlands"] },
-    { name: "Singapore GP", order: 17, aliases: ["singapore"] },
+    { name: "Dutch GP", order: 12, aliases: ["dutch", "zandvoort", "netherlands"] },
+    { name: "Singapore GP", order: 16, aliases: ["singapore"] },
   ],
   gpOrder: [
     { order: 1, aliases: ["australia", "australian", "melbourne"] },
@@ -39,8 +39,19 @@ const SEASON_CHIP_CONTEXT = {
     { order: 7, aliases: ["barcelona", "catalunya", "spain", "spanish"] },
     { order: 8, aliases: ["austria", "austrian", "spielberg", "red bull ring"] },
     { order: 9, aliases: ["british", "silverstone", "great britain"] },
-    { order: 14, aliases: ["dutch", "zandvoort", "netherlands"] },
-    { order: 17, aliases: ["singapore"] },
+    { order: 10, aliases: ["belgium", "belgian", "spa"] },
+    { order: 11, aliases: ["hungary", "hungarian", "hungaroring"] },
+    { order: 12, aliases: ["dutch", "zandvoort", "netherlands"] },
+    { order: 13, aliases: ["italy", "italian", "monza"] },
+    { order: 14, aliases: ["spain", "spanish", "madrid"] },
+    { order: 15, aliases: ["azerbaijan", "baku"] },
+    { order: 16, aliases: ["singapore"] },
+    { order: 17, aliases: ["united states", "austin", "cota"] },
+    { order: 18, aliases: ["mexico", "mexican"] },
+    { order: 19, aliases: ["brazil", "brazilian", "sao paulo", "interlagos"] },
+    { order: 20, aliases: ["las vegas"] },
+    { order: 21, aliases: ["qatar", "lusail"] },
+    { order: 22, aliases: ["abu dhabi", "yas marina"] },
   ],
 };
 
@@ -654,17 +665,26 @@ function protectedPriceTradeoff(combo, currentMask, sourceRows) {
   const protectedOut = outRows.filter(strongPriceRiseAsset);
   const riskyIn = inRows.filter(highPriceFallRiskAsset);
   if (!protectedOut.length || !riskyIn.length) return null;
+  const weakRiskSwitch = riskyIn.some((inRow) =>
+    protectedOut.some((outRow) => {
+      const pointGain = inRow._points - outRow._points;
+      const budgetSwing = Math.max(0, outRow._priceDelta) + Math.abs(Math.min(0, inRow._priceDelta));
+      return budgetSwing >= 0.6 && pointGain < 4.0;
+    })
+  );
 
   return {
     pointGain: inRows.reduce((sum, row) => sum + row._points, 0) - outRows.reduce((sum, row) => sum + row._points, 0),
     budgetSwing:
       protectedOut.reduce((sum, row) => sum + Math.max(0, row._priceDelta), 0) +
       riskyIn.reduce((sum, row) => sum + Math.abs(Math.min(0, row._priceDelta)), 0),
+    weakRiskSwitch,
   };
 }
 
 function blocksProtectedPriceTradeoff(tradeoff, inputs) {
   if (!tradeoff || inputs.activeChip === "limitless") return false;
+  if (tradeoff.weakRiskSwitch) return true;
   const minimumPointGain = inputs.strategy === "budget_growth" ? 8 : 5;
   const swingPenalty = tradeoff.budgetSwing >= 0.8 ? 1 : 0;
   return tradeoff.pointGain < minimumPointGain + swingPenalty;
@@ -1691,6 +1711,10 @@ function transferInRows(team) {
   return [...rowsByKey("driver", team.driversIn), ...rowsByKey("constructor", team.constructorsIn)];
 }
 
+function transferOutRows(team) {
+  return [...rowsByKey("driver", team.driversOut), ...rowsByKey("constructor", team.constructorsOut)];
+}
+
 function incomingBudgetDelta(team) {
   return teamBudgetDelta(transferInRows(team));
 }
@@ -1952,7 +1976,27 @@ function transferContext(team) {
     return "No transfer cleared the points, price-momentum and free-transfer checks, so the model kept your current structure.";
   }
 
-  return "The transfers shown clear the model's points, price-momentum and transfer-penalty checks for this strategy.";
+  const incoming = transferInRows(team);
+  const outgoing = transferOutRows(team);
+  const incomingRise = incoming.filter(hasBudgetRisePath);
+  const incomingRisk = incoming.filter(highPriceFallRiskAsset);
+  const outgoingRise = outgoing.filter(strongPriceRiseAsset);
+
+  if (incomingRisk.length && outgoingRise.length) {
+    return `${transferSummary(team)} are being used for points, but the model is cautious: ${incomingRisk
+      .map((row) => row.key)
+      .join(", ")} carry ${incomingRisk.map(fallRiskCopy).join(" / ")} while ${outgoingRise
+      .map((row) => row.key)
+      .join(", ")} have ${outgoingRise.map(risePathCopy).join(" / ")}.`;
+  }
+
+  if (incomingRise.length) {
+    return `${transferSummary(team)} bring in ${incomingRise
+      .map((row) => `${row.key} (${risePathCopy(row)})`)
+      .join(", ")} while staying inside the transfer plan.`;
+  }
+
+  return `${transferSummary(team)} clear the projected-points and transfer-penalty checks for this strategy.`;
 }
 
 function trackContext(team, recommendation) {
