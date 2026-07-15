@@ -458,6 +458,16 @@ select:focus {
   line-height: 1.4;
 }
 
+.budget-validation {
+  background: rgba(249, 79, 104, 0.1);
+  border-left: 2px solid #f94f68;
+  color: #ffb4bf;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.4;
+  padding: 9px 10px;
+}
+
 .chip-controls {
   display: grid;
   gap: 10px;

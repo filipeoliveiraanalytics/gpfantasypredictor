@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260713-wildcard-copy";
+const ASSET_VERSION = "20260715-budget-check";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -158,6 +158,7 @@ const els = {
   gpLocation: document.querySelector("#gp-location"),
   gpWeekendType: document.querySelector("#gp-weekend-type"),
   budget: document.querySelector("#budget"),
+  budgetValidation: document.querySelector("#budget-validation"),
   freeTransfers: document.querySelector("#free-transfers"),
   drivers: document.querySelector("#drivers"),
   constructors: document.querySelector("#constructors"),
@@ -808,6 +809,35 @@ function currentInputs(activeChip = "none") {
   };
 }
 
+function currentSelectionCost(inputs) {
+  if (inputs.currentDrivers.size !== 5 || inputs.currentConstructors.size !== 2) return null;
+
+  const selectedDrivers = state.drivers.filter((row) => inputs.currentDrivers.has(row.key));
+  const selectedConstructors = state.constructors.filter((row) => inputs.currentConstructors.has(row.key));
+  if (selectedDrivers.length !== 5 || selectedConstructors.length !== 2) return null;
+
+  return [...selectedDrivers, ...selectedConstructors].reduce((sum, row) => sum + toNumber(row.price_m), 0);
+}
+
+function updateBudgetValidation() {
+  const inputs = currentInputs();
+  const currentCost = currentSelectionCost(inputs);
+  if (!els.budgetValidation || currentCost === null || inputs.budget <= 0) {
+    els.budgetValidation.hidden = true;
+    return null;
+  }
+
+  const shortfall = currentCost - inputs.budget;
+  if (shortfall > 0.01) {
+    els.budgetValidation.hidden = false;
+    els.budgetValidation.textContent = `Current selection costs ${formatNumber(currentCost, 1)}M, which is ${formatNumber(shortfall, 1)}M above this budget. Enter your full current squad value, not only unused cash.`;
+    return currentCost;
+  }
+
+  els.budgetValidation.hidden = true;
+  return currentCost;
+}
+
 function comboSummary(rows, type, inputs) {
   const currentKeys = type === "driver" ? inputs.currentDrivers : inputs.currentConstructors;
   const keys = rows.map((row) => row.key);
@@ -1280,6 +1310,16 @@ function optimize() {
   const baseInputs = currentInputs("none");
   if (baseInputs.budget <= 0 || baseInputs.currentDrivers.size !== 5 || baseInputs.currentConstructors.size !== 2) {
     els.status.textContent = "Enter your budget and choose exactly 5 drivers + 2 constructors first.";
+    els.whyLineup.hidden = true;
+    els.whyLineup.innerHTML = "";
+    els.alternatives.innerHTML = "";
+    els.alternativeCards.innerHTML = "";
+    return;
+  }
+
+  const currentCost = updateBudgetValidation();
+  if (currentCost !== null && currentCost > baseInputs.budget + 0.01) {
+    els.status.textContent = `Your current selection costs ${formatNumber(currentCost, 1)}M. Increase the total squad budget before optimizing.`;
     els.whyLineup.hidden = true;
     els.whyLineup.innerHTML = "";
     els.alternatives.innerHTML = "";
@@ -2272,6 +2312,7 @@ function lineupList(rows, type) {
 function updatePickerSummaries() {
   els.driverPickerSummary.textContent = [...parseKeys(els.drivers.value)].join(", ") || "Choose drivers";
   els.constructorPickerSummary.textContent = [...parseKeys(els.constructors.value)].join(", ") || "Choose constructors";
+  updateBudgetValidation();
 }
 
 function openPicker(type) {
@@ -2406,6 +2447,7 @@ async function init() {
   updatePickerSummaries();
   loadAvailableChips();
   syncChipAvailability();
+  updateBudgetValidation();
 }
 
 els.form.addEventListener("submit", (event) => {
@@ -2415,6 +2457,7 @@ els.form.addEventListener("submit", (event) => {
 
 els.openDriverPicker.addEventListener("click", () => openPicker("driver"));
 els.openConstructorPicker.addEventListener("click", () => openPicker("constructor"));
+els.budget.addEventListener("input", updateBudgetValidation);
 els.strategy.addEventListener("change", updateStrategyNote);
 els.availableChipInputs.forEach((input) =>
   input.addEventListener("change", () => {

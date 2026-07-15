@@ -32,7 +32,7 @@
   <meta name="twitter:description"
     content="A fan-made F1 Fantasy predictor powered by GP prediction modelling." />
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png" />
-    <link rel="stylesheet" href="style.css?v=20260713-wildcard-copy" />
+    <link rel="stylesheet" href="style.css?v=20260715-budget-check" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -110,8 +110,10 @@
         </div>
 
         <label>
-          Budget available
+          Total squad budget
           <input id="budget" type="number" min="0" step="0.1" placeholder="e.g. 100.0" />
+          <span class="field-note">Include your current 5 drivers, 2 constructors and any spare cash.</span>
+          <span class="budget-validation" id="budget-validation" hidden aria-live="polite"></span>
         </label>
 
         <label>
@@ -312,7 +314,7 @@
   <script>
     window.GA_MEASUREMENT_ID = "G-0GCZQDW467";
   </script>
-    <script src="app.js?v=20260713-wildcard-copy"></script>
+    <script src="app.js?v=20260715-budget-check"></script>
 </body>
 
 </html>
