@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260716-nor-grid-penalty";
+const ASSET_VERSION = "20260716-nor-penalty-note";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -155,6 +155,7 @@ const els = {
   optimizeButton: document.querySelector("#optimize-button"),
   status: document.querySelector("#data-status"),
   modelUpdatePill: document.querySelector("#model-update-pill"),
+  modelAdjustment: document.querySelector("#model-adjustment"),
   modelNoteCopy: document.querySelector("#model-note-copy"),
   gpIdentity: document.querySelector("#gp-identity"),
   gpFlag: document.querySelector("#gp-flag"),
@@ -479,6 +480,14 @@ function updateModelCopy(sample) {
 
   if (els.modelUpdatePill) {
     els.modelUpdatePill.textContent = freshness;
+  }
+
+  if (els.modelAdjustment) {
+    const hasNorrisPenalty = gpName.toLowerCase().includes("belgium");
+    els.modelAdjustment.hidden = !hasNorrisPenalty;
+    els.modelAdjustment.textContent = hasNorrisPenalty
+      ? "Norris's 10-place grid penalty is included in this model."
+      : "";
   }
 
   if (els.modelNoteCopy) {

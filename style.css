@@ -249,6 +249,25 @@ h1 {
   width: 6px;
 }
 
+.model-adjustment {
+  align-items: center;
+  color: #f0c84b;
+  display: flex;
+  font-size: 0.8rem;
+  font-weight: 700;
+  gap: 7px;
+  margin: 0;
+}
+
+.model-adjustment::before {
+  background: #f0c84b;
+  border-radius: 50%;
+  content: "";
+  flex: 0 0 auto;
+  height: 6px;
+  width: 6px;
+}
+
 .analysis-link,
 button {
   background: var(--text);
