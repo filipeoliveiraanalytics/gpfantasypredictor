@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260715-budget-check";
+const ASSET_VERSION = "20260716-nor-grid-penalty";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -19,6 +19,7 @@ const STRATEGY_NOTES = {
   current_friendly: "Transfer Friendly avoids paid transfers unless a selected chip changes the transfer rules.",
   budget_growth: "Budget Growth targets assets projected into price-rise bands while keeping total points close.",
 };
+const TOP_TEAM_LIMIT = 5;
 
 const SEASON_CHIP_CONTEXT = {
   sprintWeekends: [
@@ -135,6 +136,8 @@ const state = {
   constructors: [],
   driverCombos: [],
   constructorCombos: [],
+  driverComboMetaCache: new Map(),
+  constructorComboMetaCache: new Map(),
   driverKeyBits: new Map(),
   constructorKeyBits: new Map(),
   driverPhotos: new Set(),
@@ -339,7 +342,7 @@ function compareTeams(a, b) {
   return b.strategyScore - a.strategyScore || b.projectedPoints - a.projectedPoints;
 }
 
-function keepTopTeam(topTeams, team, limit = 10) {
+function keepTopTeam(topTeams, team, limit = TOP_TEAM_LIMIT) {
   if (topTeams.length < limit) {
     topTeams.push(team);
     topTeams.sort(compareTeams);
@@ -619,6 +622,8 @@ function buildComboCaches() {
   });
   state.driverCombos = combinations(state.drivers, 5).map((rows) => comboFromRows(rows, "driver"));
   state.constructorCombos = combinations(state.constructors, 2).map((rows) => comboFromRows(rows, "constructor"));
+  state.driverComboMetaCache = new Map();
+  state.constructorComboMetaCache = new Map();
 }
 
 function popCount(value) {
@@ -730,6 +735,17 @@ function comboRunMeta(combo, currentMask, sourceRows) {
     growthEligible: (combo.nonGrowthMask & currentMask) === combo.nonGrowthMask,
     protectedPriceTradeoff: protectedPriceTradeoff(combo, currentMask, sourceRows),
   };
+}
+
+function cachedComboRunMeta(combo, type, currentMask, sourceRows) {
+  const cache = type === "driver" ? state.driverComboMetaCache : state.constructorComboMetaCache;
+  const cacheKey = `${currentMask}:${combo.mask}`;
+  const cached = cache.get(cacheKey);
+  if (cached) return cached;
+
+  const meta = comboRunMeta(combo, currentMask, sourceRows);
+  cache.set(cacheKey, meta);
+  return meta;
 }
 
 function summarizeTeam(driverCombo, constructorCombo, inputs) {
@@ -879,19 +895,35 @@ function pickDriverPool(inputs) {
   const currentKeys = inputs.currentDrivers;
   const byKey = new Map(state.drivers.map((row) => [row.key, row]));
   const selected = new Map();
+  const poolLimit = inputs.strategy === "budget_growth" ? 16 : 15;
 
   currentKeys.forEach((key) => {
     const row = byKey.get(key);
     if (row) selected.set(key, row);
   });
 
-  const ranked = [...state.drivers].sort((a, b) => entityPoolScore(b, inputs) - entityPoolScore(a, inputs));
   const cheapest = [...state.drivers].sort((a, b) => toNumber(a.price_m) - toNumber(b.price_m));
-  ranked.forEach((row) => {
-    if (selected.size < 13) selected.set(row.key, row);
-    else if (inputs.strategy === "budget_growth" && selected.size < 16 && hasBudgetRisePath(row)) selected.set(row.key, row);
+  const ranked = [...state.drivers].sort((a, b) => entityPoolScore(b, inputs) - entityPoolScore(a, inputs));
+
+  // Keep realistic funding paths before filling the remaining places with the
+  // best model targets. This caps the expensive 5-driver search without
+  // removing a user's current lineup or low-cost enablers.
+  cheapest.slice(0, 6).forEach((row) => {
+    if (selected.size < poolLimit) selected.set(row.key, row);
   });
-  cheapest.slice(0, 5).forEach((row) => selected.set(row.key, row));
+
+  ranked.forEach((row) => {
+    if (selected.size < poolLimit) selected.set(row.key, row);
+    else if (inputs.strategy === "budget_growth" && hasBudgetRisePath(row)) {
+      const replaceable = [...selected.values()]
+        .filter((candidate) => !currentKeys.has(candidate.key) && !hasBudgetRisePath(candidate))
+        .sort((a, b) => entityPoolScore(a, inputs) - entityPoolScore(b, inputs))[0];
+      if (replaceable && entityPoolScore(row, inputs) > entityPoolScore(replaceable, inputs)) {
+        selected.delete(replaceable.key);
+        selected.set(row.key, row);
+      }
+    }
+  });
 
   return [...selected.values()];
 }
@@ -951,6 +983,7 @@ function findTopTeams(inputs) {
   const currentConstructorMask = maskFromKeys(inputs.currentConstructors, state.constructorKeyBits);
   const budgetGrowth = inputs.strategy === "budget_growth";
   const transferFriendly = inputs.strategy === "current_friendly" && !hasUnlimitedTransfers(inputs.activeChip);
+  const driverPoolMask = pickDriverPool(inputs).reduce((mask, row) => mask | row._bit, 0);
   const currentDriverCombo = state.driverCombos.find((combo) => combo.mask === currentDriverMask);
   const currentConstructorCombo = state.constructorCombos.find((combo) => combo.mask === currentConstructorMask);
   const currentBaseline =
@@ -972,16 +1005,21 @@ function findTopTeams(inputs) {
   }
 
   const driverCandidates = state.driverCombos
-    .map((combo) => comboRunMeta(combo, currentDriverMask, state.drivers))
-    .filter((meta) => meta.combo.cost <= budgetLimit);
+    .filter((combo) => (combo.mask & driverPoolMask) === combo.mask)
+    .map((combo) => cachedComboRunMeta(combo, "driver", currentDriverMask, state.drivers))
+    .filter(
+      (meta) =>
+        meta.combo.cost <= budgetLimit &&
+        (!transferFriendly || meta.transferCount <= inputs.freeTransfers) &&
+        !blocksProtectedPriceTradeoff(meta.protectedPriceTradeoff, inputs)
+    );
   const constructorCandidates = state.constructorCombos
-    .map((combo) => comboRunMeta(combo, currentConstructorMask, state.constructors));
+    .map((combo) => cachedComboRunMeta(combo, "constructor", currentConstructorMask, state.constructors))
+    .filter((meta) => !blocksProtectedPriceTradeoff(meta.protectedPriceTradeoff, inputs));
 
   for (const driverMeta of driverCandidates) {
     const driverCombo = driverMeta.combo;
     if (driverCombo.cost > budgetLimit) continue;
-    if (transferFriendly && driverMeta.transferCount > inputs.freeTransfers) continue;
-
     for (const constructorMeta of constructorCandidates) {
       const constructorCombo = constructorMeta.combo;
       const totalCost = driverCombo.cost + constructorCombo.cost;
@@ -989,13 +1027,6 @@ function findTopTeams(inputs) {
 
       const transferCount = driverMeta.transferCount + constructorMeta.transferCount;
       if (transferFriendly && transferCount > inputs.freeTransfers) continue;
-      if (
-        blocksProtectedPriceTradeoff(driverMeta.protectedPriceTradeoff, inputs) ||
-        blocksProtectedPriceTradeoff(constructorMeta.protectedPriceTradeoff, inputs)
-      ) {
-        continue;
-      }
-
       const projectedPoints = comboProjectedPoints(driverCombo, constructorCombo, inputs.activeChip);
       if (budgetGrowth && projectedPoints < budgetGrowthPointFloor) continue;
 
@@ -1044,7 +1075,7 @@ function findTopTeams(inputs) {
       }
 
       const weakest = topCandidates[topCandidates.length - 1];
-      if (topCandidates.length === 10 && compareTeams(candidate, weakest) >= 0) continue;
+      if (topCandidates.length === TOP_TEAM_LIMIT && compareTeams(candidate, weakest) >= 0) continue;
 
       keepTopTeam(topCandidates, candidate);
     }
@@ -1341,7 +1372,7 @@ function optimize() {
     limitless: availableChips.has("limitless") ? teamsForChip("limitless")[0] : null,
   };
   const chipRecommendation = recommendChip(baseTeams[0], availableChips, chipPreviews);
-  const topTeams = teamsForChip(chipRecommendation.chip).slice(0, 10);
+  const topTeams = teamsForChip(chipRecommendation.chip).slice(0, TOP_TEAM_LIMIT);
 
   render(topTeams, chipRecommendation);
 
