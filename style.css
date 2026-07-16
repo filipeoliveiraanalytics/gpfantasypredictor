@@ -242,7 +242,7 @@ h1 {
   font-weight: 700;
   gap: 7px;
   margin: 0;
-  padding: 0 0 0 7px;
+  padding: 0;
 }
 
 .model-update-pill::before {
