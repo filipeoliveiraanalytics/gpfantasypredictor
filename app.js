@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260716-nor-penalty-note";
+const ASSET_VERSION = "20260716-spa-official-alignment";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -2163,13 +2163,13 @@ function trackContext(team, recommendation) {
 
   if (gpKey.includes("belgium") || gpKey.includes("spa")) {
     return {
-      title: "Spa context: long lap, high-speed load and weather risk",
+      title: "Spa context: long lap, high-speed load and overtaking",
       summary:
         "Spa rewards efficient straight-line speed, confidence through fast corners and a clean setup compromise across very different sectors, so the optimizer values strong race pace and reliable two-car scoring.",
       insights: [
         [
           "Track logic",
-          "The long lap spreads mistakes out, but Eau Rouge/Raidillon, Pouhon and the long Kemmel run mean aero efficiency, high-speed stability and straight-line pace matter together.",
+          "Kemmel rewards straight-line efficiency and creates overtaking chances, while Eau Rouge/Raidillon and Pouhon still demand high-speed stability. The strongest setup has to do both.",
         ],
         ["Constructor logic", constructorContext(team)],
         ["Chip logic", chipContext(team, recommendation)],
