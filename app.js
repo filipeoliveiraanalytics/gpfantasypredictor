@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260716-spa-official-alignment";
+const ASSET_VERSION = "20260718-spa-after-practice-penalties";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -483,10 +483,10 @@ function updateModelCopy(sample) {
   }
 
   if (els.modelAdjustment) {
-    const hasNorrisPenalty = gpName.toLowerCase().includes("belgium");
-    els.modelAdjustment.hidden = !hasNorrisPenalty;
-    els.modelAdjustment.textContent = hasNorrisPenalty
-      ? "Norris's 10-place grid penalty is included in this model."
+    const hasSpaPenalties = gpName.toLowerCase().includes("belgium");
+    els.modelAdjustment.hidden = !hasSpaPenalties;
+    els.modelAdjustment.textContent = hasSpaPenalties
+      ? "Grid penalties for Norris, Hadjar, Stroll and Alonso are included in this model."
       : "";
   }
 
