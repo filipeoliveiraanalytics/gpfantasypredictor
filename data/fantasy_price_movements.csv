@@ -4,164 +4,197 @@ constructor,ALP,Alpine,Alpine,2026-05-26,2026-06-08,15.5,16.1,0.6,3.87,155,172,1
 constructor,ALP,Alpine,Alpine,2026-06-08,2026-06-19,16.1,16.7,0.6,3.73,172,216,44,11,0.055
 constructor,ALP,Alpine,Alpine,2026-06-19,2026-06-29,16.7,17.3,0.6,3.59,216,237,21,10,0.060
 constructor,ALP,Alpine,Alpine,2026-06-29,2026-07-06,17.3,17.9,0.6,3.47,237,290,53,7,0.086
+constructor,ALP,Alpine,Alpine,2026-07-06,2026-07-20,17.9,18.5,0.6,3.35,290,309,19,14,0.043
 constructor,AMR,Aston Martin,Aston Martin,2026-05-16,2026-05-26,7.9,7.3,-0.6,-7.59,-32,-46,-14,10,-0.060
 constructor,AMR,Aston Martin,Aston Martin,2026-05-26,2026-06-08,7.3,7.5,0.2,2.74,-46,-50,-4,13,0.015
 constructor,AMR,Aston Martin,Aston Martin,2026-06-08,2026-06-19,7.5,6.9,-0.6,-8.00,-50,-86,-36,11,-0.055
 constructor,AMR,Aston Martin,Aston Martin,2026-06-19,2026-06-29,6.9,6.3,-0.6,-8.70,-86,-97,-11,10,-0.060
 constructor,AMR,Aston Martin,Aston Martin,2026-06-29,2026-07-06,6.3,5.7,-0.6,-9.52,-97,-81,16,7,-0.086
+constructor,AMR,Aston Martin,Aston Martin,2026-07-06,2026-07-20,5.7,5.1,-0.6,-10.53,-81,-94,-13,14,-0.043
 constructor,AUD,Audi,Audi,2026-05-16,2026-05-26,5.0,4.4,-0.6,-12.00,-8,3,11,10,-0.060
 constructor,AUD,Audi,Audi,2026-05-26,2026-06-08,4.4,3.8,-0.6,-13.64,3,24,21,13,-0.046
 constructor,AUD,Audi,Audi,2026-06-08,2026-06-19,3.8,4.4,0.6,15.79,24,26,2,11,0.055
 constructor,AUD,Audi,Audi,2026-06-19,2026-06-29,4.4,5.0,0.6,13.64,26,41,15,10,0.060
 constructor,AUD,Audi,Audi,2026-06-29,2026-07-06,5.0,5.6,0.6,12.00,41,58,17,7,0.086
+constructor,AUD,Audi,Audi,2026-07-06,2026-07-20,5.6,6.2,0.6,10.71,58,77,19,14,0.043
 constructor,CAD,Cadillac,Cadillac,2026-05-16,2026-05-26,5.6,6.2,0.6,10.71,38,40,2,10,0.060
 constructor,CAD,Cadillac,Cadillac,2026-05-26,2026-06-08,6.2,6.0,-0.2,-3.23,40,27,-13,13,-0.015
 constructor,CAD,Cadillac,Cadillac,2026-06-08,2026-06-19,6.0,5.4,-0.6,-10.00,27,18,-9,11,-0.055
 constructor,CAD,Cadillac,Cadillac,2026-06-19,2026-06-29,5.4,4.8,-0.6,-11.11,18,-17,-35,10,-0.060
 constructor,CAD,Cadillac,Cadillac,2026-06-29,2026-07-06,4.8,4.2,-0.6,-12.50,-17,-4,13,7,-0.086
+constructor,CAD,Cadillac,Cadillac,2026-07-06,2026-07-20,4.2,3.6,-0.6,-14.29,-4,-21,-17,14,-0.043
 constructor,FER,Ferrari,Ferrari,2026-05-16,2026-05-26,24.5,24.8,0.3,1.22,320,389,69,10,0.030
 constructor,FER,Ferrari,Ferrari,2026-05-26,2026-06-08,24.8,25.1,0.3,1.21,389,418,29,13,0.023
 constructor,FER,Ferrari,Ferrari,2026-06-08,2026-06-19,25.1,25.4,0.3,1.20,418,476,58,11,0.027
 constructor,FER,Ferrari,Ferrari,2026-06-19,2026-06-29,25.4,25.7,0.3,1.18,476,532,56,10,0.030
 constructor,FER,Ferrari,Ferrari,2026-06-29,2026-07-06,25.7,26.0,0.3,1.17,532,624,92,7,0.043
+constructor,FER,Ferrari,Ferrari,2026-07-06,2026-07-20,26.0,26.3,0.3,1.15,624,695,71,14,0.021
 constructor,HAA,Haas F1 Team,Haas F1 Team,2026-05-16,2026-05-26,9.8,10.4,0.6,6.12,118,137,19,10,0.060
 constructor,HAA,Haas F1 Team,Haas F1 Team,2026-05-26,2026-06-08,10.4,10.6,0.2,1.92,137,129,-8,13,0.015
 constructor,HAA,Haas F1 Team,Haas F1 Team,2026-06-08,2026-06-19,10.6,10.4,-0.2,-1.89,129,145,16,11,-0.018
 constructor,HAA,Haas F1 Team,Haas F1 Team,2026-06-19,2026-06-29,10.4,10.2,-0.2,-1.92,145,158,13,10,-0.020
 constructor,HAA,Haas F1 Team,Haas F1 Team,2026-06-29,2026-07-06,10.2,10.8,0.6,5.88,158,191,33,7,0.086
+constructor,HAA,Haas F1 Team,Haas F1 Team,2026-07-06,2026-07-20,10.8,11.4,0.6,5.56,191,206,15,14,0.043
 constructor,MCL,McLaren,McLaren,2026-05-16,2026-05-26,28.9,29.2,0.3,1.04,194,227,33,10,0.030
 constructor,MCL,McLaren,McLaren,2026-05-26,2026-06-08,29.2,29.5,0.3,1.03,227,244,17,13,0.023
 constructor,MCL,McLaren,McLaren,2026-06-08,2026-06-19,29.5,29.8,0.3,1.02,244,308,64,11,0.027
 constructor,MCL,McLaren,McLaren,2026-06-19,2026-06-29,29.8,30.1,0.3,1.01,308,357,49,10,0.030
 constructor,MCL,McLaren,McLaren,2026-06-29,2026-07-06,30.1,30.4,0.3,1.00,357,429,72,7,0.043
+constructor,MCL,McLaren,McLaren,2026-07-06,2026-07-20,30.4,30.7,0.3,0.99,429,500,71,14,0.021
 constructor,MER,Mercedes,Mercedes,2026-05-16,2026-05-26,30.5,30.8,0.3,0.98,407,483,76,10,0.030
 constructor,MER,Mercedes,Mercedes,2026-05-26,2026-06-08,30.8,31.1,0.3,0.97,483,553,70,13,0.023
 constructor,MER,Mercedes,Mercedes,2026-06-08,2026-06-19,31.1,31.4,0.3,0.96,553,592,39,11,0.027
 constructor,MER,Mercedes,Mercedes,2026-06-19,2026-06-29,31.4,31.7,0.3,0.96,592,677,85,10,0.030
 constructor,MER,Mercedes,Mercedes,2026-06-29,2026-07-06,31.7,32.0,0.3,0.95,677,769,92,7,0.043
+constructor,MER,Mercedes,Mercedes,2026-07-06,2026-07-20,32.0,32.3,0.3,0.94,769,811,42,14,0.021
 constructor,RBL,Racing Bulls,Racing Bulls,2026-05-16,2026-05-26,8.7,9.3,0.6,6.90,105,127,22,10,0.060
 constructor,RBL,Racing Bulls,Racing Bulls,2026-05-26,2026-06-08,9.3,9.9,0.6,6.45,127,169,42,13,0.046
 constructor,RBL,Racing Bulls,Racing Bulls,2026-06-08,2026-06-19,9.9,10.5,0.6,6.06,169,189,20,11,0.055
 constructor,RBL,Racing Bulls,Racing Bulls,2026-06-19,2026-06-29,10.5,11.1,0.6,5.71,189,227,38,10,0.060
 constructor,RBL,Racing Bulls,Racing Bulls,2026-06-29,2026-07-06,11.1,11.7,0.6,5.41,227,282,55,7,0.086
+constructor,RBL,Racing Bulls,Racing Bulls,2026-07-06,2026-07-20,11.7,12.3,0.6,5.13,282,297,15,14,0.043
 constructor,RBR,Red Bull Racing,Red Bull Racing,2026-05-16,2026-05-26,29.2,29.3,0.1,0.34,143,187,44,10,0.010
 constructor,RBR,Red Bull Racing,Red Bull Racing,2026-05-26,2026-06-08,29.3,29.4,0.1,0.34,187,209,22,13,0.008
 constructor,RBR,Red Bull Racing,Red Bull Racing,2026-06-08,2026-06-19,29.4,29.7,0.3,1.02,209,264,55,11,0.027
 constructor,RBR,Red Bull Racing,Red Bull Racing,2026-06-19,2026-06-29,29.7,30.0,0.3,1.01,264,332,68,10,0.030
 constructor,RBR,Red Bull Racing,Red Bull Racing,2026-06-29,2026-07-06,30.0,30.3,0.3,1.00,332,364,32,7,0.043
+constructor,RBR,Red Bull Racing,Red Bull Racing,2026-07-06,2026-07-20,30.3,30.6,0.3,0.99,364,443,79,14,0.021
 constructor,WIL,Williams,Williams,2026-05-16,2026-05-26,14.4,15.0,0.6,4.17,93,99,6,10,0.060
 constructor,WIL,Williams,Williams,2026-05-26,2026-06-08,15.0,15.6,0.6,4.00,99,108,9,13,0.046
 constructor,WIL,Williams,Williams,2026-06-08,2026-06-19,15.6,15.0,-0.6,-3.85,108,109,1,11,-0.055
 constructor,WIL,Williams,Williams,2026-06-19,2026-06-29,15.0,14.4,-0.6,-4.00,109,103,-6,10,-0.060
 constructor,WIL,Williams,Williams,2026-06-29,2026-07-06,14.4,13.8,-0.6,-4.17,103,103,0,7,-0.086
+constructor,WIL,Williams,Williams,2026-07-06,2026-07-20,13.8,13.2,-0.6,-4.35,103,122,19,14,-0.043
 driver,ALB,Alexander Albon,Williams,2026-05-16,2026-05-26,9.6,9.0,-0.6,-6.25,20,12,-8,10,-0.060
 driver,ALB,Alexander Albon,Williams,2026-05-26,2026-06-08,9.0,8.8,-0.2,-2.22,12,21,9,13,-0.015
 driver,ALB,Alexander Albon,Williams,2026-06-08,2026-06-19,8.8,8.2,-0.6,-6.82,21,5,-16,11,-0.055
 driver,ALB,Alexander Albon,Williams,2026-06-19,2026-06-29,8.2,7.6,-0.6,-7.32,5,12,7,10,-0.060
 driver,ALB,Alexander Albon,Williams,2026-06-29,2026-07-06,7.6,7.0,-0.6,-7.89,12,-1,-13,7,-0.086
+driver,ALB,Alexander Albon,Williams,2026-07-06,2026-07-20,7.0,6.4,-0.6,-8.57,-1,2,3,14,-0.043
 driver,ALO,Fernando Alonso,Aston Martin,2026-05-16,2026-05-26,8.0,7.4,-0.6,-7.50,3,-23,-26,10,-0.060
 driver,ALO,Fernando Alonso,Aston Martin,2026-05-26,2026-06-08,7.4,6.8,-0.6,-8.11,-23,-8,15,13,-0.046
 driver,ALO,Fernando Alonso,Aston Martin,2026-06-08,2026-06-19,6.8,6.2,-0.6,-8.82,-8,-25,-17,11,-0.055
 driver,ALO,Fernando Alonso,Aston Martin,2026-06-19,2026-06-29,6.2,5.6,-0.6,-9.68,-25,-18,7,10,-0.060
 driver,ALO,Fernando Alonso,Aston Martin,2026-06-29,2026-07-06,5.6,5.0,-0.6,-10.71,-18,-10,8,7,-0.086
+driver,ALO,Fernando Alonso,Aston Martin,2026-07-06,2026-07-20,5.0,5.6,0.6,12.00,-10,-5,5,14,0.043
 driver,ANT,Kimi Antonelli,Mercedes,2026-05-16,2026-05-26,24.4,24.7,0.3,1.23,192,254,62,10,0.030
 driver,ANT,Kimi Antonelli,Mercedes,2026-05-26,2026-06-08,24.7,25.0,0.3,1.21,254,309,55,13,0.023
 driver,ANT,Kimi Antonelli,Mercedes,2026-06-08,2026-06-19,25.0,25.3,0.3,1.20,309,305,-4,11,0.027
 driver,ANT,Kimi Antonelli,Mercedes,2026-06-19,2026-06-29,25.3,25.4,0.1,0.40,305,340,35,10,0.010
 driver,ANT,Kimi Antonelli,Mercedes,2026-06-29,2026-07-06,25.4,25.3,-0.1,-0.39,340,363,23,7,-0.014
+driver,ANT,Kimi Antonelli,Mercedes,2026-07-06,2026-07-20,25.3,25.6,0.3,1.19,363,401,38,14,0.021
 driver,BEA,Oliver Bearman,Haas F1 Team,2026-05-16,2026-05-26,9.4,8.8,-0.6,-6.38,46,56,10,10,-0.060
 driver,BEA,Oliver Bearman,Haas F1 Team,2026-05-26,2026-06-08,8.8,8.2,-0.6,-6.82,56,37,-19,13,-0.046
 driver,BEA,Oliver Bearman,Haas F1 Team,2026-06-08,2026-06-19,8.2,7.6,-0.6,-7.32,37,44,7,11,-0.055
 driver,BEA,Oliver Bearman,Haas F1 Team,2026-06-19,2026-06-29,7.6,7.0,-0.6,-7.89,44,45,1,10,-0.060
 driver,BEA,Oliver Bearman,Haas F1 Team,2026-06-29,2026-07-06,7.0,7.2,0.2,2.86,45,58,13,7,0.029
+driver,BEA,Oliver Bearman,Haas F1 Team,2026-07-06,2026-07-20,7.2,7.4,0.2,2.78,58,66,8,14,0.014
 driver,BOR,Gabriel Bortoleto,Audi,2026-05-16,2026-05-26,5.2,5.4,0.2,3.85,9,14,5,10,0.020
 driver,BOR,Gabriel Bortoleto,Audi,2026-05-26,2026-06-08,5.4,5.6,0.2,3.70,14,19,5,13,0.015
 driver,BOR,Gabriel Bortoleto,Audi,2026-06-08,2026-06-19,5.6,5.8,0.2,3.57,19,26,7,11,0.018
 driver,BOR,Gabriel Bortoleto,Audi,2026-06-19,2026-06-29,5.8,6.0,0.2,3.45,26,31,5,10,0.020
 driver,BOR,Gabriel Bortoleto,Audi,2026-06-29,2026-07-06,6.0,6.6,0.6,10.00,31,47,16,7,0.086
+driver,BOR,Gabriel Bortoleto,Audi,2026-07-06,2026-07-20,6.6,7.2,0.6,9.09,47,55,8,14,0.043
 driver,BOT,Valtteri Bottas,Cadillac,2026-05-16,2026-05-26,3.9,4.5,0.6,15.38,-7,5,12,10,0.060
 driver,BOT,Valtteri Bottas,Cadillac,2026-05-26,2026-06-08,4.5,3.9,-0.6,-13.33,5,-15,-20,13,-0.046
 driver,BOT,Valtteri Bottas,Cadillac,2026-06-08,2026-06-19,3.9,3.3,-0.6,-15.38,-15,-33,-18,11,-0.055
 driver,BOT,Valtteri Bottas,Cadillac,2026-06-19,2026-06-29,3.3,3.0,-0.3,-9.09,-33,-50,-17,10,-0.030
 driver,BOT,Valtteri Bottas,Cadillac,2026-06-29,2026-07-06,3.0,3.0,0.0,0.00,-50,-45,5,7,0.000
+driver,BOT,Valtteri Bottas,Cadillac,2026-07-06,2026-07-20,3.0,3.0,0.0,0.00,-45,-44,1,14,0.000
 driver,COL,Franco Colapinto,Alpine,2026-05-16,2026-05-26,8.2,8.8,0.6,7.32,41,66,25,10,0.060
 driver,COL,Franco Colapinto,Alpine,2026-05-26,2026-06-08,8.8,9.4,0.6,6.82,66,66,0,13,0.046
 driver,COL,Franco Colapinto,Alpine,2026-06-08,2026-06-19,9.4,10.0,0.6,6.38,66,75,9,11,0.055
 driver,COL,Franco Colapinto,Alpine,2026-06-19,2026-06-29,10.0,9.8,-0.2,-2.00,75,85,10,10,-0.020
 driver,COL,Franco Colapinto,Alpine,2026-06-29,2026-07-06,9.8,10.4,0.6,6.12,85,112,27,7,0.086
+driver,COL,Franco Colapinto,Alpine,2026-07-06,2026-07-20,10.4,11.0,0.6,5.77,112,120,8,14,0.043
 driver,GAS,Pierre Gasly,Alpine,2026-05-16,2026-05-26,12.8,12.2,-0.6,-4.69,37,53,16,10,-0.060
 driver,GAS,Pierre Gasly,Alpine,2026-05-26,2026-06-08,12.2,11.6,-0.6,-4.92,53,65,12,13,-0.046
 driver,GAS,Pierre Gasly,Alpine,2026-06-08,2026-06-19,11.6,12.2,0.6,5.17,65,95,30,11,0.055
 driver,GAS,Pierre Gasly,Alpine,2026-06-19,2026-06-29,12.2,12.8,0.6,4.92,95,98,3,10,0.060
 driver,GAS,Pierre Gasly,Alpine,2026-06-29,2026-07-06,12.8,13.0,0.2,1.56,98,121,23,7,0.029
+driver,GAS,Pierre Gasly,Alpine,2026-07-06,2026-07-20,13.0,12.8,-0.2,-1.54,121,129,8,14,-0.014
 driver,HAD,Isack Hadjar,Red Bull Racing,2026-05-16,2026-05-26,12.7,12.1,-0.6,-4.72,0,6,6,10,-0.060
 driver,HAD,Isack Hadjar,Red Bull Racing,2026-05-26,2026-06-08,12.1,11.5,-0.6,-4.96,6,29,23,13,-0.046
 driver,HAD,Isack Hadjar,Red Bull Racing,2026-06-08,2026-06-19,11.5,12.1,0.6,5.22,29,47,18,11,0.055
 driver,HAD,Isack Hadjar,Red Bull Racing,2026-06-19,2026-06-29,12.1,12.7,0.6,4.96,47,62,15,10,0.060
 driver,HAD,Isack Hadjar,Red Bull Racing,2026-06-29,2026-07-06,12.7,13.3,0.6,4.72,62,85,23,7,0.086
+driver,HAD,Isack Hadjar,Red Bull Racing,2026-07-06,2026-07-20,13.3,13.9,0.6,4.51,85,123,38,14,0.043
 driver,HAM,Lewis Hamilton,Ferrari,2026-05-16,2026-05-26,23.5,23.6,0.1,0.43,112,154,42,10,0.010
 driver,HAM,Lewis Hamilton,Ferrari,2026-05-26,2026-06-08,23.6,23.9,0.3,1.27,154,181,27,13,0.023
 driver,HAM,Lewis Hamilton,Ferrari,2026-06-08,2026-06-19,23.9,24.2,0.3,1.26,181,237,56,11,0.027
 driver,HAM,Lewis Hamilton,Ferrari,2026-06-19,2026-06-29,24.2,24.5,0.3,1.24,237,264,27,10,0.030
 driver,HAM,Lewis Hamilton,Ferrari,2026-06-29,2026-07-06,24.5,24.8,0.3,1.22,264,297,33,7,0.043
+driver,HAM,Lewis Hamilton,Ferrari,2026-07-06,2026-07-20,24.8,24.9,0.1,0.40,297,319,22,14,0.007
 driver,HUL,Nico Hulkenberg,Audi,2026-05-16,2026-05-26,4.4,3.8,-0.6,-13.64,-32,-31,1,10,-0.060
 driver,HUL,Nico Hulkenberg,Audi,2026-05-26,2026-06-08,3.8,3.5,-0.3,-7.89,-31,-28,3,13,-0.023
 driver,HUL,Nico Hulkenberg,Audi,2026-06-08,2026-06-11,3.5,3.2,-0.3,-8.57,-28,-28,0,3,-0.100
 driver,HUL,Nico Hulkenberg,Audi,2026-06-11,2026-06-19,3.2,3.0,-0.2,-6.25,-28,-43,-15,8,-0.025
 driver,HUL,Nico Hulkenberg,Audi,2026-06-19,2026-06-29,3.0,3.0,0.0,0.00,-43,-38,5,10,0.000
 driver,HUL,Nico Hulkenberg,Audi,2026-06-29,2026-07-06,3.0,3.0,0.0,0.00,-38,-45,-7,7,0.000
+driver,HUL,Nico Hulkenberg,Audi,2026-07-06,2026-07-20,3.0,3.0,0.0,0.00,-45,-41,4,14,0.000
 driver,LAW,Liam Lawson,Racing Bulls,2026-05-16,2026-05-26,8.1,7.9,-0.2,-2.47,38,61,23,10,-0.020
 driver,LAW,Liam Lawson,Racing Bulls,2026-05-26,2026-06-08,7.9,8.1,0.2,2.53,61,77,16,13,0.015
 driver,LAW,Liam Lawson,Racing Bulls,2026-06-08,2026-06-19,8.1,8.7,0.6,7.41,77,83,6,11,0.055
 driver,LAW,Liam Lawson,Racing Bulls,2026-06-19,2026-06-29,8.7,8.9,0.2,2.30,83,90,7,10,0.020
 driver,LAW,Liam Lawson,Racing Bulls,2026-06-29,2026-07-06,8.9,9.5,0.6,6.74,90,112,22,7,0.086
+driver,LAW,Liam Lawson,Racing Bulls,2026-07-06,2026-07-20,9.5,9.7,0.2,2.11,112,115,3,14,0.014
 driver,LEC,Charles Leclerc,Ferrari,2026-05-16,2026-05-26,24.0,24.1,0.1,0.42,138,165,27,10,0.010
 driver,LEC,Charles Leclerc,Ferrari,2026-05-26,2026-06-08,24.1,23.8,-0.3,-1.24,165,152,-13,13,-0.023
 driver,LEC,Charles Leclerc,Ferrari,2026-06-08,2026-06-19,23.8,23.5,-0.3,-1.26,152,152,0,11,-0.027
 driver,LEC,Charles Leclerc,Ferrari,2026-06-19,2026-06-29,23.5,23.2,-0.3,-1.28,152,161,9,10,-0.030
 driver,LEC,Charles Leclerc,Ferrari,2026-06-29,2026-07-06,23.2,23.3,0.1,0.43,161,215,54,7,0.014
+driver,LEC,Charles Leclerc,Ferrari,2026-07-06,2026-07-20,23.3,23.6,0.3,1.29,215,254,39,14,0.021
 driver,LIN,Arvid Lindblad,Racing Bulls,2026-05-16,2026-05-26,7.0,6.4,-0.6,-8.57,19,3,-16,10,-0.060
 driver,LIN,Arvid Lindblad,Racing Bulls,2026-05-26,2026-06-08,6.4,5.8,-0.6,-9.38,3,24,21,13,-0.046
 driver,LIN,Arvid Lindblad,Racing Bulls,2026-06-08,2026-06-19,5.8,5.6,-0.2,-3.45,24,31,7,11,-0.018
 driver,LIN,Arvid Lindblad,Racing Bulls,2026-06-19,2026-06-29,5.6,6.2,0.6,10.71,31,37,6,10,0.060
 driver,LIN,Arvid Lindblad,Racing Bulls,2026-06-29,2026-07-06,6.2,6.8,0.6,9.68,37,55,18,7,0.086
+driver,LIN,Arvid Lindblad,Racing Bulls,2026-07-06,2026-07-20,6.8,7.4,0.6,8.82,55,60,5,14,0.043
 driver,NOR,Lando Norris,McLaren,2026-05-16,2026-05-26,26.4,26.5,0.1,0.38,89,95,6,10,0.010
 driver,NOR,Lando Norris,McLaren,2026-05-26,2026-06-08,26.5,26.2,-0.3,-1.13,95,78,-17,13,-0.023
 driver,NOR,Lando Norris,McLaren,2026-06-08,2026-06-19,26.2,25.9,-0.3,-1.15,78,101,23,11,-0.027
 driver,NOR,Lando Norris,McLaren,2026-06-19,2026-06-29,25.9,25.6,-0.3,-1.16,101,112,11,10,-0.030
 driver,NOR,Lando Norris,McLaren,2026-06-29,2026-07-06,25.6,25.7,0.1,0.39,112,150,38,7,0.014
+driver,NOR,Lando Norris,McLaren,2026-07-06,2026-07-20,25.7,25.8,0.1,0.39,150,190,40,14,0.007
 driver,OCO,Esteban Ocon,Haas F1 Team,2026-05-16,2026-05-26,9.7,9.9,0.2,2.06,56,64,8,10,0.020
 driver,OCO,Esteban Ocon,Haas F1 Team,2026-05-26,2026-06-08,9.9,10.1,0.2,2.02,64,76,12,13,0.015
 driver,OCO,Esteban Ocon,Haas F1 Team,2026-06-08,2026-06-19,10.1,10.3,0.2,1.98,76,84,8,11,0.018
 driver,OCO,Esteban Ocon,Haas F1 Team,2026-06-19,2026-06-29,10.3,10.1,-0.2,-1.94,84,91,7,10,-0.020
 driver,OCO,Esteban Ocon,Haas F1 Team,2026-06-29,2026-07-06,10.1,10.3,0.2,1.98,91,110,19,7,0.029
+driver,OCO,Esteban Ocon,Haas F1 Team,2026-07-06,2026-07-20,10.3,10.5,0.2,1.94,110,116,6,14,0.014
 driver,PER,Sergio Perez,Cadillac,2026-05-16,2026-05-26,7.6,7.0,-0.6,-7.89,47,36,-11,10,-0.060
 driver,PER,Sergio Perez,Cadillac,2026-05-26,2026-06-08,7.0,6.8,-0.2,-2.86,36,44,8,13,-0.015
 driver,PER,Sergio Perez,Cadillac,2026-06-08,2026-06-19,6.8,6.2,-0.6,-8.82,44,52,8,11,-0.055
 driver,PER,Sergio Perez,Cadillac,2026-06-19,2026-06-29,6.2,5.6,-0.6,-9.68,52,35,-17,10,-0.060
 driver,PER,Sergio Perez,Cadillac,2026-06-29,2026-07-06,5.6,5.0,-0.6,-10.71,35,42,7,7,-0.086
+driver,PER,Sergio Perez,Cadillac,2026-07-06,2026-07-20,5.0,4.4,-0.6,-12.00,42,25,-17,14,-0.043
 driver,PIA,Oscar Piastri,McLaren,2026-05-16,2026-05-26,24.7,25.0,0.3,1.21,63,75,12,10,0.030
 driver,PIA,Oscar Piastri,McLaren,2026-05-26,2026-06-08,25.0,25.1,0.1,0.40,75,84,9,13,0.008
 driver,PIA,Oscar Piastri,McLaren,2026-06-08,2026-06-19,25.1,25.0,-0.1,-0.40,84,110,26,11,-0.009
 driver,PIA,Oscar Piastri,McLaren,2026-06-19,2026-06-29,25.0,24.9,-0.1,-0.40,110,133,23,10,-0.010
 driver,PIA,Oscar Piastri,McLaren,2026-06-29,2026-07-06,24.9,24.8,-0.1,-0.40,133,152,19,7,-0.014
+driver,PIA,Oscar Piastri,McLaren,2026-07-06,2026-07-20,24.8,24.7,-0.1,-0.40,152,171,19,14,-0.007
 driver,RUS,George Russell,Mercedes,2026-05-16,2026-05-26,28.6,28.5,-0.1,-0.35,153,157,4,10,-0.010
 driver,RUS,George Russell,Mercedes,2026-05-26,2026-06-08,28.5,28.2,-0.3,-1.05,157,157,0,13,-0.023
 driver,RUS,George Russell,Mercedes,2026-06-08,2026-06-19,28.2,27.9,-0.3,-1.06,157,185,28,11,-0.027
 driver,RUS,George Russell,Mercedes,2026-06-19,2026-06-29,27.9,27.8,-0.1,-0.36,185,220,35,10,-0.010
 driver,RUS,George Russell,Mercedes,2026-06-29,2026-07-06,27.8,28.1,0.3,1.08,220,264,44,7,0.043
+driver,RUS,George Russell,Mercedes,2026-07-06,2026-07-20,28.1,28.0,-0.1,-0.36,264,253,-11,14,-0.007
 driver,SAI,Carlos Sainz,Williams,2026-05-16,2026-05-26,13.0,12.8,-0.2,-1.54,60,71,11,10,-0.020
 driver,SAI,Carlos Sainz,Williams,2026-05-26,2026-06-08,12.8,12.6,-0.2,-1.56,71,68,-3,13,-0.015
 driver,SAI,Carlos Sainz,Williams,2026-06-08,2026-06-19,12.6,12.0,-0.6,-4.76,68,79,11,11,-0.055
 driver,SAI,Carlos Sainz,Williams,2026-06-19,2026-06-29,12.0,11.4,-0.6,-5.00,79,62,-17,10,-0.060
 driver,SAI,Carlos Sainz,Williams,2026-06-29,2026-07-06,11.4,10.8,-0.6,-5.26,62,70,8,7,-0.086
+driver,SAI,Carlos Sainz,Williams,2026-07-06,2026-07-20,10.8,10.2,-0.6,-5.56,70,80,10,14,-0.043
 driver,STR,Lance Stroll,Aston Martin,2026-05-16,2026-05-26,5.6,5.4,-0.2,-3.57,-37,-26,11,10,-0.020
 driver,STR,Lance Stroll,Aston Martin,2026-05-26,2026-06-08,5.4,4.8,-0.6,-11.11,-26,-46,-20,13,-0.046
 driver,STR,Lance Stroll,Aston Martin,2026-06-08,2026-06-19,4.8,4.2,-0.6,-12.50,-46,-66,-20,11,-0.055
 driver,STR,Lance Stroll,Aston Martin,2026-06-19,2026-06-29,4.2,3.6,-0.6,-14.29,-66,-83,-17,10,-0.060
 driver,STR,Lance Stroll,Aston Martin,2026-06-29,2026-07-06,3.6,3.0,-0.6,-16.67,-83,-76,7,7,-0.086
+driver,STR,Lance Stroll,Aston Martin,2026-07-06,2026-07-20,3.0,3.0,0.0,0.00,-76,-95,-19,14,0.000
 driver,VER,Max Verstappen,Red Bull Racing,2026-05-16,2026-05-26,28.3,28.4,0.1,0.35,129,155,26,10,0.010
 driver,VER,Max Verstappen,Red Bull Racing,2026-05-26,2026-06-08,28.4,28.3,-0.1,-0.35,155,144,-11,13,-0.008
 driver,VER,Max Verstappen,Red Bull Racing,2026-06-08,2026-06-19,28.3,28.0,-0.3,-1.06,144,166,22,11,-0.027
 driver,VER,Max Verstappen,Red Bull Racing,2026-06-19,2026-06-29,28.0,27.9,-0.1,-0.36,166,209,43,10,-0.010
 driver,VER,Max Verstappen,Red Bull Racing,2026-06-29,2026-07-06,27.9,27.8,-0.1,-0.36,209,206,-3,7,-0.014
+driver,VER,Max Verstappen,Red Bull Racing,2026-07-06,2026-07-20,27.8,27.7,-0.1,-0.36,206,232,26,14,-0.007
