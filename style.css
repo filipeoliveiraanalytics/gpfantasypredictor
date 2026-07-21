@@ -263,6 +263,10 @@ h1 {
   margin: 0;
 }
 
+.model-adjustment[hidden] {
+  display: none;
+}
+
 .model-adjustment::before {
   background: #f0c84b;
   border-radius: 50%;

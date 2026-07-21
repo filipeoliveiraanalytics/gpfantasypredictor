@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260721-hungary-pre-weekend";
+const ASSET_VERSION = "20260721-hungary-context-v2";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -2170,6 +2170,25 @@ function trackContext(team, recommendation) {
         [
           "Track logic",
           "Kemmel rewards straight-line efficiency and creates overtaking chances, while Eau Rouge/Raidillon and Pouhon still demand high-speed stability. The strongest setup has to do both.",
+        ],
+        ["Constructor logic", constructorContext(team)],
+        ["Chip logic", chipContext(team, recommendation)],
+        ["Price logic", priceContext(team)],
+        ["Transfer logic", transferContext(team)],
+        ["Budget logic", budgetContext(team)],
+      ],
+    };
+  }
+
+  if (gpKey.includes("hungary") || gpKey.includes("hungarian") || gpKey.includes("hungaroring")) {
+    return {
+      title: "Hungary context: qualifying, traction and tyre control",
+      summary:
+        "The Hungaroring is a tight, technical lap where overtaking is limited, so the optimizer places extra value on qualifying pace, clean traction and reliable race execution.",
+      insights: [
+        [
+          "Track logic",
+          "Track position matters here: getting the tyres working through the slow-to-medium-speed corners and avoiding mistakes in qualifying are more valuable than pure straight-line speed.",
         ],
         ["Constructor logic", constructorContext(team)],
         ["Chip logic", chipContext(team, recommendation)],
