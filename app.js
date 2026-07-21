@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260718-spa-after-practice-penalties";
+const ASSET_VERSION = "20260721-hungary-pre-weekend";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
