@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260725-hungary-after-practice";
+const ASSET_VERSION = "20260725-hungary-fp3";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
