@@ -3,6 +3,7 @@ const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 const AVAILABLE_CHIPS_KEY = "gp_fantasy_predictor_available_chips";
+const SAVED_TEAM_KEY = "gp_fantasy_predictor_saved_team";
 
 const CHIP_CONFIG = {
   none: { label: "No chip" },
@@ -148,6 +149,9 @@ const state = {
   constructorLogoBasePath: "assets/constructors",
   pickerType: null,
   pickerSelection: new Set(),
+  savedTeam: null,
+  savedTeamRestorePending: false,
+  savedTeamRestoreTracked: false,
 };
 
 const els = {
@@ -170,6 +174,7 @@ const els = {
   strategyNote: document.querySelector("#strategy-note"),
   availableChipInputs: [...document.querySelectorAll("#available-chip-options input[type='checkbox']")],
   chipStatus: document.querySelector("#chip-status"),
+  saveTeamToggle: document.querySelector("#save-team-toggle"),
   openDriverPicker: document.querySelector("#open-driver-picker"),
   openConstructorPicker: document.querySelector("#open-constructor-picker"),
   driverPickerSummary: document.querySelector("#driver-picker-summary"),
@@ -249,6 +254,7 @@ function initConsent() {
   const consent = localStorage.getItem(CONSENT_KEY);
   if (consent === "accepted") {
     loadAnalytics();
+    trackSavedTeamRestore();
     return;
   }
   if (consent !== "declined") {
@@ -389,6 +395,136 @@ function syncChipAvailability() {
     available.size === 0
       ? "No chips available. The model will keep standard rules."
       : `${available.size} ${available.size === 1 ? "chip" : "chips"} available. The model will recommend whether to use one.`;
+}
+
+function savedTeamSnapshot() {
+  return {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    budget: els.budget.value.trim(),
+    freeTransfers: els.freeTransfers.value.trim(),
+    drivers: [...parseKeys(els.drivers.value)],
+    constructors: [...parseKeys(els.constructors.value)],
+    strategy: els.strategy.value,
+    availableChips: [...getAvailableChips()],
+  };
+}
+
+function savedTeamEventParams(snapshot) {
+  const sample = state.projections[0];
+  return {
+    next_gp: sample?.next_gp ?? "",
+    model_mode: sample?.mode ?? "",
+    strategy: snapshot.strategy,
+    budget: toNumber(snapshot.budget),
+    free_transfers: Math.max(0, Math.floor(toNumber(snapshot.freeTransfers))),
+    saved_drivers: snapshot.drivers.join("|"),
+    saved_constructors: snapshot.constructors.join("|"),
+    available_chips: snapshot.availableChips.join("|"),
+  };
+}
+
+function updateSavedTeamUi() {
+  els.saveTeamToggle.checked = Boolean(state.savedTeam);
+}
+
+function trackSavedTeamRestore() {
+  if (!state.savedTeamRestorePending || state.savedTeamRestoreTracked || typeof window.gtag !== "function") return;
+  state.savedTeamRestoreTracked = true;
+  trackEvent("restore_team_local", savedTeamEventParams(state.savedTeam));
+}
+
+function restoreSavedTeam() {
+  let saved;
+  try {
+    saved = JSON.parse(localStorage.getItem(SAVED_TEAM_KEY));
+  } catch {
+    return;
+  }
+
+  if (!saved || !Array.isArray(saved.drivers) || !Array.isArray(saved.constructors)) return;
+  if (saved.drivers.length !== 5 || saved.constructors.length !== 2 || toNumber(saved.budget) <= 0) return;
+
+  els.budget.value = String(saved.budget);
+  els.freeTransfers.value = String(saved.freeTransfers ?? "");
+  els.drivers.value = saved.drivers.join(", ");
+  els.constructors.value = saved.constructors.join(", ");
+
+  if (Object.hasOwn(STRATEGY_NOTES, saved.strategy)) {
+    els.strategy.value = saved.strategy;
+  }
+
+  if (Array.isArray(saved.availableChips)) {
+    const available = new Set(saved.availableChips);
+    els.availableChipInputs.forEach((input) => {
+      input.checked = available.has(input.value);
+    });
+    saveAvailableChips();
+  }
+
+  state.savedTeam = saved;
+  state.savedTeamRestorePending = true;
+  updatePickerSummaries();
+  updateStrategyNote();
+  syncChipAvailability();
+  updateBudgetValidation();
+  updateSavedTeamUi();
+  els.status.textContent = "Saved team restored. Update it for this GP, then run the optimizer.";
+  trackSavedTeamRestore();
+}
+
+function persistSavedTeamIfEnabled() {
+  if (!els.saveTeamToggle.checked) return false;
+
+  const snapshot = savedTeamSnapshot();
+  if (toNumber(snapshot.budget) <= 0 || snapshot.drivers.length !== 5 || snapshot.constructors.length !== 2) {
+    return false;
+  }
+
+  try {
+    localStorage.setItem(SAVED_TEAM_KEY, JSON.stringify(snapshot));
+  } catch {
+    return false;
+  }
+
+  state.savedTeam = snapshot;
+  state.savedTeamRestorePending = false;
+  updateSavedTeamUi();
+  return true;
+}
+
+function saveTeamLocally() {
+  if (!persistSavedTeamIfEnabled()) {
+    els.saveTeamToggle.checked = false;
+    els.status.textContent = "Add your budget, 5 drivers and 2 constructors before saving your team.";
+    return;
+  }
+
+  els.status.textContent = "Team saved on this device. It will be restored when you return.";
+  trackEvent("save_team_local", savedTeamEventParams(state.savedTeam));
+}
+
+function clearSavedTeam() {
+  try {
+    localStorage.removeItem(SAVED_TEAM_KEY);
+  } catch {
+    updateSavedTeamUi();
+    els.status.textContent = "This browser could not clear the saved team.";
+    return;
+  }
+
+  const saved = state.savedTeam;
+  state.savedTeam = null;
+  state.savedTeamRestorePending = false;
+  state.savedTeamRestoreTracked = false;
+  updateSavedTeamUi();
+  els.status.textContent = "Saved team cleared from this device.";
+  trackEvent("clear_team_local", saved ? savedTeamEventParams(saved) : {});
+}
+
+function handleSaveTeamToggle() {
+  if (els.saveTeamToggle.checked) saveTeamLocally();
+  else clearSavedTeam();
 }
 
 function hasUnlimitedTransfers(chip) {
@@ -2423,6 +2559,7 @@ function applyPicker() {
   if (isDriver) els.drivers.value = value;
   else els.constructors.value = value;
   updatePickerSummaries();
+  persistSavedTeamIfEnabled();
   els.status.textContent = "Selection applied. Click Optimize Team to refresh the recommendation.";
   trackEvent("apply_selection", { asset_type: isDriver ? "driver" : "constructor" });
   closePicker();
@@ -2503,10 +2640,12 @@ async function init() {
   const sample = state.projections[0];
   updateModelCopy(sample);
   els.status.textContent = `${sample?.next_gp ?? "Next GP"} ${sample?.mode ? `| ${sample.mode}` : ""} model ready. Click Optimize Team to run it.`;
-  updatePickerSummaries();
   loadAvailableChips();
+  restoreSavedTeam();
+  updatePickerSummaries();
   syncChipAvailability();
   updateBudgetValidation();
+  updateSavedTeamUi();
 }
 
 els.form.addEventListener("submit", (event) => {
@@ -2516,14 +2655,23 @@ els.form.addEventListener("submit", (event) => {
 
 els.openDriverPicker.addEventListener("click", () => openPicker("driver"));
 els.openConstructorPicker.addEventListener("click", () => openPicker("constructor"));
-els.budget.addEventListener("input", updateBudgetValidation);
-els.strategy.addEventListener("change", updateStrategyNote);
+els.budget.addEventListener("input", () => {
+  updateBudgetValidation();
+  persistSavedTeamIfEnabled();
+});
+els.freeTransfers.addEventListener("input", persistSavedTeamIfEnabled);
+els.strategy.addEventListener("change", () => {
+  updateStrategyNote();
+  persistSavedTeamIfEnabled();
+});
 els.availableChipInputs.forEach((input) =>
   input.addEventListener("change", () => {
     saveAvailableChips();
     syncChipAvailability();
+    persistSavedTeamIfEnabled();
   })
 );
+els.saveTeamToggle.addEventListener("change", handleSaveTeamToggle);
 els.closePicker.addEventListener("click", closePicker);
 els.applyPicker.addEventListener("click", applyPicker);
 els.acceptAnalytics.addEventListener("click", () => {
@@ -2531,6 +2679,7 @@ els.acceptAnalytics.addEventListener("click", () => {
   els.cookieBanner.hidden = true;
   loadAnalytics();
   trackEvent("analytics_consent", { choice: "accepted" });
+  trackSavedTeamRestore();
 });
 els.declineAnalytics.addEventListener("click", () => {
   localStorage.setItem(CONSENT_KEY, "declined");

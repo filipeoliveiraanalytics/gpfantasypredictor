@@ -32,7 +32,7 @@
   <meta name="twitter:description"
     content="A fan-made F1 Fantasy predictor powered by GP prediction modelling." />
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png" />
-  <link rel="stylesheet" href="style.css?v=20260721-hungary-published-thresholds" />
+    <link rel="stylesheet" href="style.css?v=20260817-save-team-v2" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -190,6 +190,12 @@
           <p class="field-note" id="chip-status">All chips available. The model will recommend whether to use one.</p>
         </div>
 
+        <label class="save-team-toggle" for="save-team-toggle">
+          <input id="save-team-toggle" type="checkbox" />
+          <span class="save-team-toggle__switch" aria-hidden="true"></span>
+          <span>Save my team</span>
+        </label>
+
         <button id="optimize-button" type="submit">Optimize Team</button>
         <p class="disclaimer">Not affiliated with Formula 1. Projections are model estimates, not guarantees.</p>
       </form>
@@ -315,7 +321,7 @@
   <script>
     window.GA_MEASUREMENT_ID = "G-0GCZQDW467";
   </script>
-  <script src="app.js?v=20260721-hungary-published-thresholds"></script>
+  <script src="app.js?v=20260817-save-toggle"></script>
 </body>
 
 </html>

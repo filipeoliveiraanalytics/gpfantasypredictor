@@ -501,6 +501,62 @@ select:focus {
   margin: 4px 0 18px;
 }
 
+.save-team-toggle {
+  align-items: center;
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 800;
+  gap: 8px;
+  margin: 0 0 18px;
+  user-select: none;
+}
+
+.save-team-toggle input {
+  height: 1px;
+  opacity: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.save-team-toggle__switch {
+  background: #101727;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  height: 20px;
+  position: relative;
+  transition: background 160ms ease, border-color 160ms ease;
+  width: 36px;
+}
+
+.save-team-toggle__switch::after {
+  background: #8791a6;
+  border-radius: 50%;
+  content: "";
+  height: 12px;
+  left: 3px;
+  position: absolute;
+  top: 3px;
+  transition: transform 160ms ease, background 160ms ease;
+  width: 12px;
+}
+
+.save-team-toggle input:focus-visible + .save-team-toggle__switch {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.save-team-toggle input:checked + .save-team-toggle__switch {
+  background: rgba(20, 200, 189, 0.18);
+  border-color: var(--teal);
+}
+
+.save-team-toggle input:checked + .save-team-toggle__switch::after {
+  background: var(--teal);
+  transform: translateX(16px);
+}
+
 .chip-section-heading {
   align-items: end;
   display: flex;
