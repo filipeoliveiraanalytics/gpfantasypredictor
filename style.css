@@ -495,24 +495,6 @@ select:focus {
   padding: 9px 10px;
 }
 
-.budget-sync-button {
-  align-self: start;
-  background: transparent;
-  border: 1px solid rgba(20, 200, 189, 0.72);
-  border-radius: 6px;
-  color: var(--teal);
-  cursor: pointer;
-  font-size: 0.76rem;
-  font-weight: 800;
-  margin: -2px 0 4px;
-  padding: 7px 10px;
-}
-
-.budget-sync-button:hover,
-.budget-sync-button:focus-visible {
-  background: rgba(20, 200, 189, 0.12);
-}
-
 .chip-controls {
   display: grid;
   gap: 10px;
