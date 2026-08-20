@@ -5,126 +5,168 @@ constructor,ALP,Alpine,Alpine,16.1,172,2026-06-08,TRUE
 constructor,ALP,Alpine,Alpine,16.7,216,2026-06-19,TRUE
 constructor,ALP,Alpine,Alpine,17.3,237,2026-06-29,TRUE
 constructor,ALP,Alpine,Alpine,17.9,290,2026-07-06,TRUE
+constructor,ALP,Alpine,Alpine,18.5,309,2026-07-20,TRUE
+constructor,ALP,Alpine,Alpine,18.8,332,2026-07-27,TRUE
 constructor,AMR,Aston Martin,Aston Martin,7.9,-32,2026-05-16,TRUE
 constructor,AMR,Aston Martin,Aston Martin,7.3,-46,2026-05-26,TRUE
 constructor,AMR,Aston Martin,Aston Martin,7.5,-50,2026-06-08,TRUE
 constructor,AMR,Aston Martin,Aston Martin,6.9,-86,2026-06-19,TRUE
 constructor,AMR,Aston Martin,Aston Martin,6.3,-97,2026-06-29,TRUE
 constructor,AMR,Aston Martin,Aston Martin,5.7,-81,2026-07-06,TRUE
+constructor,AMR,Aston Martin,Aston Martin,5.1,-94,2026-07-20,TRUE
+constructor,AMR,Aston Martin,Aston Martin,5.7,-58,2026-07-27,TRUE
 constructor,AUD,Audi,Audi,5.0,-8,2026-05-16,TRUE
 constructor,AUD,Audi,Audi,4.4,3,2026-05-26,TRUE
 constructor,AUD,Audi,Audi,3.8,24,2026-06-08,TRUE
 constructor,AUD,Audi,Audi,4.4,26,2026-06-19,TRUE
 constructor,AUD,Audi,Audi,5.0,41,2026-06-29,TRUE
 constructor,AUD,Audi,Audi,5.6,58,2026-07-06,TRUE
+constructor,AUD,Audi,Audi,6.2,77,2026-07-20,TRUE
+constructor,AUD,Audi,Audi,6.8,106,2026-07-27,TRUE
 constructor,CAD,Cadillac,Cadillac,5.6,38,2026-05-16,TRUE
 constructor,CAD,Cadillac,Cadillac,6.2,40,2026-05-26,TRUE
 constructor,CAD,Cadillac,Cadillac,6.0,27,2026-06-08,TRUE
 constructor,CAD,Cadillac,Cadillac,5.4,18,2026-06-19,TRUE
 constructor,CAD,Cadillac,Cadillac,4.8,-17,2026-06-29,TRUE
 constructor,CAD,Cadillac,Cadillac,4.2,-4,2026-07-06,TRUE
+constructor,CAD,Cadillac,Cadillac,3.6,-21,2026-07-20,TRUE
+constructor,CAD,Cadillac,Cadillac,3.6,-58,2026-07-27,TRUE
 constructor,FER,Ferrari,Ferrari,24.5,320,2026-05-16,TRUE
 constructor,FER,Ferrari,Ferrari,24.8,389,2026-05-26,TRUE
 constructor,FER,Ferrari,Ferrari,25.1,418,2026-06-08,TRUE
 constructor,FER,Ferrari,Ferrari,25.4,476,2026-06-19,TRUE
 constructor,FER,Ferrari,Ferrari,25.7,532,2026-06-29,TRUE
 constructor,FER,Ferrari,Ferrari,26.0,624,2026-07-06,TRUE
+constructor,FER,Ferrari,Ferrari,26.3,695,2026-07-20,TRUE
+constructor,FER,Ferrari,Ferrari,26.6,766,2026-07-27,TRUE
 constructor,HAA,Haas F1 Team,Haas F1 Team,9.8,118,2026-05-16,TRUE
 constructor,HAA,Haas F1 Team,Haas F1 Team,10.4,137,2026-05-26,TRUE
 constructor,HAA,Haas F1 Team,Haas F1 Team,10.6,129,2026-06-08,TRUE
 constructor,HAA,Haas F1 Team,Haas F1 Team,10.4,145,2026-06-19,TRUE
 constructor,HAA,Haas F1 Team,Haas F1 Team,10.2,158,2026-06-29,TRUE
 constructor,HAA,Haas F1 Team,Haas F1 Team,10.8,191,2026-07-06,TRUE
+constructor,HAA,Haas F1 Team,Haas F1 Team,11.4,206,2026-07-20,TRUE
+constructor,HAA,Haas F1 Team,Haas F1 Team,12.0,216,2026-07-27,TRUE
 constructor,MCL,McLaren,McLaren,28.9,194,2026-05-16,TRUE
 constructor,MCL,McLaren,McLaren,29.2,227,2026-05-26,TRUE
 constructor,MCL,McLaren,McLaren,29.5,244,2026-06-08,TRUE
 constructor,MCL,McLaren,McLaren,29.8,308,2026-06-19,TRUE
 constructor,MCL,McLaren,McLaren,30.1,357,2026-06-29,TRUE
 constructor,MCL,McLaren,McLaren,30.4,429,2026-07-06,TRUE
+constructor,MCL,McLaren,McLaren,30.7,500,2026-07-20,TRUE
+constructor,MCL,McLaren,McLaren,31.0,538,2026-07-27,TRUE
 constructor,MER,Mercedes,Mercedes,30.5,407,2026-05-16,TRUE
 constructor,MER,Mercedes,Mercedes,30.8,483,2026-05-26,TRUE
 constructor,MER,Mercedes,Mercedes,31.1,553,2026-06-08,TRUE
 constructor,MER,Mercedes,Mercedes,31.4,592,2026-06-19,TRUE
 constructor,MER,Mercedes,Mercedes,31.7,677,2026-06-29,TRUE
 constructor,MER,Mercedes,Mercedes,32.0,769,2026-07-06,TRUE
+constructor,MER,Mercedes,Mercedes,32.3,811,2026-07-20,TRUE
+constructor,MER,Mercedes,Mercedes,32.6,882,2026-07-27,TRUE
 constructor,RBL,Racing Bulls,Racing Bulls,8.7,105,2026-05-16,TRUE
 constructor,RBL,Racing Bulls,Racing Bulls,9.3,127,2026-05-26,TRUE
 constructor,RBL,Racing Bulls,Racing Bulls,9.9,169,2026-06-08,TRUE
 constructor,RBL,Racing Bulls,Racing Bulls,10.5,189,2026-06-19,TRUE
 constructor,RBL,Racing Bulls,Racing Bulls,11.1,227,2026-06-29,TRUE
 constructor,RBL,Racing Bulls,Racing Bulls,11.7,282,2026-07-06,TRUE
+constructor,RBL,Racing Bulls,Racing Bulls,12.3,297,2026-07-20,TRUE
+constructor,RBL,Racing Bulls,Racing Bulls,12.9,344,2026-07-27,TRUE
 constructor,RBR,Red Bull Racing,Red Bull Racing,29.2,143,2026-05-16,TRUE
 constructor,RBR,Red Bull Racing,Red Bull Racing,29.3,187,2026-05-26,TRUE
 constructor,RBR,Red Bull Racing,Red Bull Racing,29.4,209,2026-06-08,TRUE
 constructor,RBR,Red Bull Racing,Red Bull Racing,29.7,264,2026-06-19,TRUE
 constructor,RBR,Red Bull Racing,Red Bull Racing,30.0,332,2026-06-29,TRUE
 constructor,RBR,Red Bull Racing,Red Bull Racing,30.3,364,2026-07-06,TRUE
+constructor,RBR,Red Bull Racing,Red Bull Racing,30.6,443,2026-07-20,TRUE
+constructor,RBR,Red Bull Racing,Red Bull Racing,30.9,502,2026-07-27,TRUE
 constructor,WIL,Williams,Williams,14.4,93,2026-05-16,TRUE
 constructor,WIL,Williams,Williams,15.0,99,2026-05-26,TRUE
 constructor,WIL,Williams,Williams,15.6,108,2026-06-08,TRUE
 constructor,WIL,Williams,Williams,15.0,109,2026-06-19,TRUE
 constructor,WIL,Williams,Williams,14.4,103,2026-06-29,TRUE
 constructor,WIL,Williams,Williams,13.8,103,2026-07-06,TRUE
+constructor,WIL,Williams,Williams,13.2,122,2026-07-20,TRUE
+constructor,WIL,Williams,Williams,13.0,132,2026-07-27,TRUE
 driver,ALB,Alexander Albon,Williams,9.6,20,2026-05-16,TRUE
 driver,ALB,Alexander Albon,Williams,9.0,12,2026-05-26,TRUE
 driver,ALB,Alexander Albon,Williams,8.8,21,2026-06-08,TRUE
 driver,ALB,Alexander Albon,Williams,8.2,5,2026-06-19,TRUE
 driver,ALB,Alexander Albon,Williams,7.6,12,2026-06-29,TRUE
 driver,ALB,Alexander Albon,Williams,7.0,-1,2026-07-06,TRUE
+driver,ALB,Alexander Albon,Williams,6.4,2,2026-07-20,TRUE
+driver,ALB,Alexander Albon,Williams,5.8,6,2026-07-27,TRUE
 driver,ALO,Fernando Alonso,Aston Martin,8.0,3,2026-05-16,TRUE
 driver,ALO,Fernando Alonso,Aston Martin,7.4,-23,2026-05-26,TRUE
 driver,ALO,Fernando Alonso,Aston Martin,6.8,-8,2026-06-08,TRUE
 driver,ALO,Fernando Alonso,Aston Martin,6.2,-25,2026-06-19,TRUE
 driver,ALO,Fernando Alonso,Aston Martin,5.6,-18,2026-06-29,TRUE
 driver,ALO,Fernando Alonso,Aston Martin,5.0,-10,2026-07-06,TRUE
+driver,ALO,Fernando Alonso,Aston Martin,5.6,-5,2026-07-20,TRUE
+driver,ALO,Fernando Alonso,Aston Martin,6.2,5,2026-07-27,TRUE
 driver,ANT,Kimi Antonelli,Mercedes,24.4,192,2026-05-16,TRUE
 driver,ANT,Kimi Antonelli,Mercedes,24.7,254,2026-05-26,TRUE
 driver,ANT,Kimi Antonelli,Mercedes,25.0,309,2026-06-08,TRUE
 driver,ANT,Kimi Antonelli,Mercedes,25.3,305,2026-06-19,TRUE
 driver,ANT,Kimi Antonelli,Mercedes,25.4,340,2026-06-29,TRUE
 driver,ANT,Kimi Antonelli,Mercedes,25.3,363,2026-07-06,TRUE
+driver,ANT,Kimi Antonelli,Mercedes,25.6,401,2026-07-20,TRUE
+driver,ANT,Kimi Antonelli,Mercedes,25.7,429,2026-07-27,TRUE
 driver,BEA,Oliver Bearman,Haas F1 Team,9.4,46,2026-05-16,TRUE
 driver,BEA,Oliver Bearman,Haas F1 Team,8.8,56,2026-05-26,TRUE
 driver,BEA,Oliver Bearman,Haas F1 Team,8.2,37,2026-06-08,TRUE
 driver,BEA,Oliver Bearman,Haas F1 Team,7.6,44,2026-06-19,TRUE
 driver,BEA,Oliver Bearman,Haas F1 Team,7.0,45,2026-06-29,TRUE
 driver,BEA,Oliver Bearman,Haas F1 Team,7.2,58,2026-07-06,TRUE
+driver,BEA,Oliver Bearman,Haas F1 Team,7.4,66,2026-07-20,TRUE
+driver,BEA,Oliver Bearman,Haas F1 Team,7.6,69,2026-07-27,TRUE
 driver,BOR,Gabriel Bortoleto,Audi,5.2,9,2026-05-16,TRUE
 driver,BOR,Gabriel Bortoleto,Audi,5.4,14,2026-05-26,TRUE
 driver,BOR,Gabriel Bortoleto,Audi,5.6,19,2026-06-08,TRUE
 driver,BOR,Gabriel Bortoleto,Audi,5.8,26,2026-06-19,TRUE
 driver,BOR,Gabriel Bortoleto,Audi,6.0,31,2026-06-29,TRUE
 driver,BOR,Gabriel Bortoleto,Audi,6.6,47,2026-07-06,TRUE
+driver,BOR,Gabriel Bortoleto,Audi,7.2,55,2026-07-20,TRUE
+driver,BOR,Gabriel Bortoleto,Audi,7.8,65,2026-07-27,TRUE
 driver,BOT,Valtteri Bottas,Cadillac,3.9,-7,2026-05-16,TRUE
 driver,BOT,Valtteri Bottas,Cadillac,4.5,5,2026-05-26,TRUE
 driver,BOT,Valtteri Bottas,Cadillac,3.9,-15,2026-06-08,TRUE
 driver,BOT,Valtteri Bottas,Cadillac,3.3,-33,2026-06-19,TRUE
 driver,BOT,Valtteri Bottas,Cadillac,3.0,-50,2026-06-29,TRUE
 driver,BOT,Valtteri Bottas,Cadillac,3.0,-45,2026-07-06,TRUE
+driver,BOT,Valtteri Bottas,Cadillac,3.0,-44,2026-07-20,TRUE
+driver,BOT,Valtteri Bottas,Cadillac,3.0,-60,2026-07-27,TRUE
 driver,COL,Franco Colapinto,Alpine,8.2,41,2026-05-16,TRUE
 driver,COL,Franco Colapinto,Alpine,8.8,66,2026-05-26,TRUE
 driver,COL,Franco Colapinto,Alpine,9.4,66,2026-06-08,TRUE
 driver,COL,Franco Colapinto,Alpine,10.0,75,2026-06-19,TRUE
 driver,COL,Franco Colapinto,Alpine,9.8,85,2026-06-29,TRUE
 driver,COL,Franco Colapinto,Alpine,10.4,112,2026-07-06,TRUE
+driver,COL,Franco Colapinto,Alpine,11.0,120,2026-07-20,TRUE
+driver,COL,Franco Colapinto,Alpine,11.2,123,2026-07-27,TRUE
 driver,GAS,Pierre Gasly,Alpine,12.8,37,2026-05-16,TRUE
 driver,GAS,Pierre Gasly,Alpine,12.2,53,2026-05-26,TRUE
 driver,GAS,Pierre Gasly,Alpine,11.6,65,2026-06-08,TRUE
 driver,GAS,Pierre Gasly,Alpine,12.2,95,2026-06-19,TRUE
 driver,GAS,Pierre Gasly,Alpine,12.8,98,2026-06-29,TRUE
 driver,GAS,Pierre Gasly,Alpine,13.0,121,2026-07-06,TRUE
+driver,GAS,Pierre Gasly,Alpine,12.8,129,2026-07-20,TRUE
+driver,GAS,Pierre Gasly,Alpine,13.0,135,2026-07-27,TRUE
 driver,HAD,Isack Hadjar,Red Bull Racing,12.7,0,2026-05-16,TRUE
 driver,HAD,Isack Hadjar,Red Bull Racing,12.1,6,2026-05-26,TRUE
 driver,HAD,Isack Hadjar,Red Bull Racing,11.5,29,2026-06-08,TRUE
 driver,HAD,Isack Hadjar,Red Bull Racing,12.1,47,2026-06-19,TRUE
 driver,HAD,Isack Hadjar,Red Bull Racing,12.7,62,2026-06-29,TRUE
 driver,HAD,Isack Hadjar,Red Bull Racing,13.3,85,2026-07-06,TRUE
+driver,HAD,Isack Hadjar,Red Bull Racing,13.9,123,2026-07-20,TRUE
+driver,HAD,Isack Hadjar,Red Bull Racing,14.5,138,2026-07-27,TRUE
 driver,HAM,Lewis Hamilton,Ferrari,23.5,112,2026-05-16,TRUE
 driver,HAM,Lewis Hamilton,Ferrari,23.6,154,2026-05-26,TRUE
 driver,HAM,Lewis Hamilton,Ferrari,23.9,181,2026-06-08,TRUE
 driver,HAM,Lewis Hamilton,Ferrari,24.2,237,2026-06-19,TRUE
 driver,HAM,Lewis Hamilton,Ferrari,24.5,264,2026-06-29,TRUE
 driver,HAM,Lewis Hamilton,Ferrari,24.8,297,2026-07-06,TRUE
+driver,HAM,Lewis Hamilton,Ferrari,24.9,319,2026-07-20,TRUE
+driver,HAM,Lewis Hamilton,Ferrari,25.0,344,2026-07-27,TRUE
 driver,HUL,Nico Hulkenberg,Audi,4.4,-32,2026-05-16,TRUE
 driver,HUL,Nico Hulkenberg,Audi,3.8,-31,2026-05-26,TRUE
 driver,HUL,Nico Hulkenberg,Audi,3.5,-28,2026-06-08,TRUE
@@ -132,69 +174,96 @@ driver,HUL,Nico Hulkenberg,Audi,3.2,-28,2026-06-11,TRUE
 driver,HUL,Nico Hulkenberg,Audi,3.0,-43,2026-06-19,TRUE
 driver,HUL,Nico Hulkenberg,Audi,3.0,-38,2026-06-29,TRUE
 driver,HUL,Nico Hulkenberg,Audi,3.0,-45,2026-07-06,TRUE
+driver,HUL,Nico Hulkenberg,Audi,3.0,-41,2026-07-20,TRUE
+driver,HUL,Nico Hulkenberg,Audi,3.0,-32,2026-07-27,TRUE
 driver,LAW,Liam Lawson,Racing Bulls,8.1,38,2026-05-16,TRUE
 driver,LAW,Liam Lawson,Racing Bulls,7.9,61,2026-05-26,TRUE
 driver,LAW,Liam Lawson,Racing Bulls,8.1,77,2026-06-08,TRUE
 driver,LAW,Liam Lawson,Racing Bulls,8.7,83,2026-06-19,TRUE
 driver,LAW,Liam Lawson,Racing Bulls,8.9,90,2026-06-29,TRUE
 driver,LAW,Liam Lawson,Racing Bulls,9.5,112,2026-07-06,TRUE
+driver,LAW,Liam Lawson,Racing Bulls,9.7,115,2026-07-20,TRUE
+driver,LAW,Liam Lawson,Racing Bulls,10.3,128,2026-07-27,TRUE
 driver,LEC,Charles Leclerc,Ferrari,24.0,138,2026-05-16,TRUE
 driver,LEC,Charles Leclerc,Ferrari,24.1,165,2026-05-26,TRUE
 driver,LEC,Charles Leclerc,Ferrari,23.8,152,2026-06-08,TRUE
 driver,LEC,Charles Leclerc,Ferrari,23.5,152,2026-06-19,TRUE
 driver,LEC,Charles Leclerc,Ferrari,23.2,161,2026-06-29,TRUE
 driver,LEC,Charles Leclerc,Ferrari,23.3,215,2026-07-06,TRUE
+driver,LEC,Charles Leclerc,Ferrari,23.6,254,2026-07-20,TRUE
+driver,LEC,Charles Leclerc,Ferrari,23.9,285,2026-07-27,TRUE
 driver,LIN,Arvid Lindblad,Racing Bulls,7.0,19,2026-05-16,TRUE
 driver,LIN,Arvid Lindblad,Racing Bulls,6.4,3,2026-05-26,TRUE
 driver,LIN,Arvid Lindblad,Racing Bulls,5.8,24,2026-06-08,TRUE
 driver,LIN,Arvid Lindblad,Racing Bulls,5.6,31,2026-06-19,TRUE
 driver,LIN,Arvid Lindblad,Racing Bulls,6.2,37,2026-06-29,TRUE
 driver,LIN,Arvid Lindblad,Racing Bulls,6.8,55,2026-07-06,TRUE
+driver,LIN,Arvid Lindblad,Racing Bulls,7.4,60,2026-07-20,TRUE
+driver,LIN,Arvid Lindblad,Racing Bulls,8.0,64,2026-07-27,TRUE
 driver,NOR,Lando Norris,McLaren,26.4,89,2026-05-16,TRUE
 driver,NOR,Lando Norris,McLaren,26.5,95,2026-05-26,TRUE
 driver,NOR,Lando Norris,McLaren,26.2,78,2026-06-08,TRUE
 driver,NOR,Lando Norris,McLaren,25.9,101,2026-06-19,TRUE
 driver,NOR,Lando Norris,McLaren,25.6,112,2026-06-29,TRUE
 driver,NOR,Lando Norris,McLaren,25.7,150,2026-07-06,TRUE
+driver,NOR,Lando Norris,McLaren,25.8,190,2026-07-20,TRUE
+driver,NOR,Lando Norris,McLaren,26.1,227,2026-07-27,TRUE
 driver,OCO,Esteban Ocon,Haas F1 Team,9.7,56,2026-05-16,TRUE
 driver,OCO,Esteban Ocon,Haas F1 Team,9.9,64,2026-05-26,TRUE
 driver,OCO,Esteban Ocon,Haas F1 Team,10.1,76,2026-06-08,TRUE
 driver,OCO,Esteban Ocon,Haas F1 Team,10.3,84,2026-06-19,TRUE
 driver,OCO,Esteban Ocon,Haas F1 Team,10.1,91,2026-06-29,TRUE
 driver,OCO,Esteban Ocon,Haas F1 Team,10.3,110,2026-07-06,TRUE
+driver,OCO,Esteban Ocon,Haas F1 Team,10.5,116,2026-07-20,TRUE
+driver,OCO,Esteban Ocon,Haas F1 Team,10.7,120,2026-07-27,TRUE
 driver,PER,Sergio Perez,Cadillac,7.6,47,2026-05-16,TRUE
 driver,PER,Sergio Perez,Cadillac,7.0,36,2026-05-26,TRUE
 driver,PER,Sergio Perez,Cadillac,6.8,44,2026-06-08,TRUE
 driver,PER,Sergio Perez,Cadillac,6.2,52,2026-06-19,TRUE
 driver,PER,Sergio Perez,Cadillac,5.6,35,2026-06-29,TRUE
 driver,PER,Sergio Perez,Cadillac,5.0,42,2026-07-06,TRUE
+driver,PER,Sergio Perez,Cadillac,4.4,25,2026-07-20,TRUE
+driver,PER,Sergio Perez,Cadillac,3.8,5,2026-07-27,TRUE
 driver,PIA,Oscar Piastri,McLaren,24.7,63,2026-05-16,TRUE
 driver,PIA,Oscar Piastri,McLaren,25.0,75,2026-05-26,TRUE
 driver,PIA,Oscar Piastri,McLaren,25.1,84,2026-06-08,TRUE
 driver,PIA,Oscar Piastri,McLaren,25.0,110,2026-06-19,TRUE
 driver,PIA,Oscar Piastri,McLaren,24.9,133,2026-06-29,TRUE
 driver,PIA,Oscar Piastri,McLaren,24.8,152,2026-07-06,TRUE
+driver,PIA,Oscar Piastri,McLaren,24.7,171,2026-07-20,TRUE
+driver,PIA,Oscar Piastri,McLaren,24.4,160,2026-07-27,TRUE
 driver,RUS,George Russell,Mercedes,28.6,153,2026-05-16,TRUE
 driver,RUS,George Russell,Mercedes,28.5,157,2026-05-26,TRUE
 driver,RUS,George Russell,Mercedes,28.2,157,2026-06-08,TRUE
 driver,RUS,George Russell,Mercedes,27.9,185,2026-06-19,TRUE
 driver,RUS,George Russell,Mercedes,27.8,220,2026-06-29,TRUE
 driver,RUS,George Russell,Mercedes,28.1,264,2026-07-06,TRUE
+driver,RUS,George Russell,Mercedes,28.0,253,2026-07-20,TRUE
+driver,RUS,George Russell,Mercedes,27.9,276,2026-07-27,TRUE
 driver,SAI,Carlos Sainz,Williams,13.0,60,2026-05-16,TRUE
 driver,SAI,Carlos Sainz,Williams,12.8,71,2026-05-26,TRUE
 driver,SAI,Carlos Sainz,Williams,12.6,68,2026-06-08,TRUE
 driver,SAI,Carlos Sainz,Williams,12.0,79,2026-06-19,TRUE
 driver,SAI,Carlos Sainz,Williams,11.4,62,2026-06-29,TRUE
 driver,SAI,Carlos Sainz,Williams,10.8,70,2026-07-06,TRUE
+driver,SAI,Carlos Sainz,Williams,10.2,80,2026-07-20,TRUE
+driver,SAI,Carlos Sainz,Williams,10.0,82,2026-07-27,TRUE
 driver,STR,Lance Stroll,Aston Martin,5.6,-37,2026-05-16,TRUE
 driver,STR,Lance Stroll,Aston Martin,5.4,-26,2026-05-26,TRUE
 driver,STR,Lance Stroll,Aston Martin,4.8,-46,2026-06-08,TRUE
 driver,STR,Lance Stroll,Aston Martin,4.2,-66,2026-06-19,TRUE
 driver,STR,Lance Stroll,Aston Martin,3.6,-83,2026-06-29,TRUE
 driver,STR,Lance Stroll,Aston Martin,3.0,-76,2026-07-06,TRUE
+driver,STR,Lance Stroll,Aston Martin,3.0,-95,2026-07-20,TRUE
+driver,STR,Lance Stroll,Aston Martin,3.0,-80,2026-07-27,TRUE
 driver,VER,Max Verstappen,Red Bull Racing,28.3,129,2026-05-16,TRUE
 driver,VER,Max Verstappen,Red Bull Racing,28.4,155,2026-05-26,TRUE
 driver,VER,Max Verstappen,Red Bull Racing,28.3,144,2026-06-08,TRUE
 driver,VER,Max Verstappen,Red Bull Racing,28.0,166,2026-06-19,TRUE
 driver,VER,Max Verstappen,Red Bull Racing,27.9,209,2026-06-29,TRUE
 driver,VER,Max Verstappen,Red Bull Racing,27.8,206,2026-07-06,TRUE
+driver,VER,Max Verstappen,Red Bull Racing,27.7,232,2026-07-20,TRUE
+driver,VER,Max Verstappen,Red Bull Racing,27.6,271,2026-07-27,TRUE
+driver,LAW,Liam Lawson,Red Bull Racing,14.5,128,2026-08-20,TRUE
+driver,HAD,Isack Hadjar,Red Bull Racing,14.5,138,2026-08-20,FALSE
+driver,TSU,Yuki Tsunoda,Racing Bulls,10.3,0,2026-08-20,TRUE

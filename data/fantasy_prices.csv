@@ -1,34 +1,35 @@
 entity_type,key,name,team,price_m,season_points,price_date,active
-driver,ANT,Kimi Antonelli,Mercedes,25.3,363,2026-07-06,TRUE
-driver,RUS,George Russell,Mercedes,28.1,264,2026-07-06,TRUE
-driver,LEC,Charles Leclerc,Ferrari,23.3,215,2026-07-06,TRUE
-driver,VER,Max Verstappen,Red Bull Racing,27.8,206,2026-07-06,TRUE
-driver,HAM,Lewis Hamilton,Ferrari,24.8,297,2026-07-06,TRUE
-driver,NOR,Lando Norris,McLaren,25.7,150,2026-07-06,TRUE
-driver,PIA,Oscar Piastri,McLaren,24.8,152,2026-07-06,TRUE
-driver,SAI,Carlos Sainz,Williams,10.8,70,2026-07-06,TRUE
-driver,OCO,Esteban Ocon,Haas F1 Team,10.3,110,2026-07-06,TRUE
-driver,PER,Sergio Perez,Cadillac,5.0,42,2026-07-06,TRUE
-driver,BEA,Oliver Bearman,Haas F1 Team,7.2,58,2026-07-06,TRUE
-driver,COL,Franco Colapinto,Alpine,10.4,112,2026-07-06,TRUE
-driver,LAW,Liam Lawson,Racing Bulls,9.5,112,2026-07-06,TRUE
-driver,GAS,Pierre Gasly,Alpine,13.0,121,2026-07-06,TRUE
-driver,ALB,Alexander Albon,Williams,7.0,-1,2026-07-06,TRUE
-driver,LIN,Arvid Lindblad,Racing Bulls,6.8,55,2026-07-06,TRUE
-driver,BOR,Gabriel Bortoleto,Audi,6.6,47,2026-07-06,TRUE
-driver,ALO,Fernando Alonso,Aston Martin,5.0,-10,2026-07-06,TRUE
-driver,HAD,Isack Hadjar,Red Bull Racing,13.3,85,2026-07-06,TRUE
-driver,BOT,Valtteri Bottas,Cadillac,3.0,-45,2026-07-06,TRUE
-driver,HUL,Nico Hulkenberg,Audi,3.0,-45,2026-07-06,TRUE
-driver,STR,Lance Stroll,Aston Martin,3.0,-76,2026-07-06,TRUE
-constructor,MER,Mercedes,Mercedes,32.0,769,2026-07-06,TRUE
-constructor,FER,Ferrari,Ferrari,26.0,624,2026-07-06,TRUE
-constructor,MCL,McLaren,McLaren,30.4,429,2026-07-06,TRUE
-constructor,RBR,Red Bull Racing,Red Bull Racing,30.3,364,2026-07-06,TRUE
-constructor,HAA,Haas F1 Team,Haas F1 Team,10.8,191,2026-07-06,TRUE
-constructor,ALP,Alpine,Alpine,17.9,290,2026-07-06,TRUE
-constructor,RBL,Racing Bulls,Racing Bulls,11.7,282,2026-07-06,TRUE
-constructor,WIL,Williams,Williams,13.8,103,2026-07-06,TRUE
-constructor,CAD,Cadillac,Cadillac,4.2,-4,2026-07-06,TRUE
-constructor,AUD,Audi,Audi,5.6,58,2026-07-06,TRUE
-constructor,AMR,Aston Martin,Aston Martin,5.7,-81,2026-07-06,TRUE
+driver,ANT,Kimi Antonelli,Mercedes,25.7,429,2026-07-27,TRUE
+driver,RUS,George Russell,Mercedes,27.9,276,2026-07-27,TRUE
+driver,LEC,Charles Leclerc,Ferrari,23.9,285,2026-07-27,TRUE
+driver,VER,Max Verstappen,Red Bull Racing,27.6,271,2026-07-27,TRUE
+driver,HAM,Lewis Hamilton,Ferrari,25.0,344,2026-07-27,TRUE
+driver,NOR,Lando Norris,McLaren,26.1,227,2026-07-27,TRUE
+driver,PIA,Oscar Piastri,McLaren,24.4,160,2026-07-27,TRUE
+driver,SAI,Carlos Sainz,Williams,10.0,82,2026-07-27,TRUE
+driver,OCO,Esteban Ocon,Haas F1 Team,10.7,120,2026-07-27,TRUE
+driver,PER,Sergio Perez,Cadillac,3.8,5,2026-07-27,TRUE
+driver,BEA,Oliver Bearman,Haas F1 Team,7.6,69,2026-07-27,TRUE
+driver,COL,Franco Colapinto,Alpine,11.2,123,2026-07-27,TRUE
+driver,LAW,Liam Lawson,Red Bull Racing,14.5,128,2026-08-20,TRUE
+driver,GAS,Pierre Gasly,Alpine,13.0,135,2026-07-27,TRUE
+driver,ALB,Alexander Albon,Williams,5.8,6,2026-07-27,TRUE
+driver,LIN,Arvid Lindblad,Racing Bulls,8.0,64,2026-07-27,TRUE
+driver,BOR,Gabriel Bortoleto,Audi,7.8,65,2026-07-27,TRUE
+driver,ALO,Fernando Alonso,Aston Martin,6.2,5,2026-07-27,TRUE
+driver,HAD,Isack Hadjar,Red Bull Racing,14.5,138,2026-08-20,FALSE
+driver,TSU,Yuki Tsunoda,Racing Bulls,10.3,0,2026-08-20,TRUE
+driver,BOT,Valtteri Bottas,Cadillac,3.0,-60,2026-07-27,TRUE
+driver,HUL,Nico Hulkenberg,Audi,3.0,-32,2026-07-27,TRUE
+driver,STR,Lance Stroll,Aston Martin,3.0,-80,2026-07-27,TRUE
+constructor,MER,Mercedes,Mercedes,32.6,882,2026-07-27,TRUE
+constructor,FER,Ferrari,Ferrari,26.6,766,2026-07-27,TRUE
+constructor,MCL,McLaren,McLaren,31.0,538,2026-07-27,TRUE
+constructor,RBR,Red Bull Racing,Red Bull Racing,30.9,502,2026-07-27,TRUE
+constructor,HAA,Haas F1 Team,Haas F1 Team,12.0,216,2026-07-27,TRUE
+constructor,ALP,Alpine,Alpine,18.8,332,2026-07-27,TRUE
+constructor,RBL,Racing Bulls,Racing Bulls,12.9,344,2026-07-27,TRUE
+constructor,WIL,Williams,Williams,13.0,132,2026-07-27,TRUE
+constructor,CAD,Cadillac,Cadillac,3.6,-58,2026-07-27,TRUE
+constructor,AUD,Audi,Audi,6.8,106,2026-07-27,TRUE
+constructor,AMR,Aston Martin,Aston Martin,5.7,-58,2026-07-27,TRUE
