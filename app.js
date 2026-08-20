@@ -168,6 +168,7 @@ const els = {
   gpWeekendType: document.querySelector("#gp-weekend-type"),
   budget: document.querySelector("#budget"),
   budgetValidation: document.querySelector("#budget-validation"),
+  useCurrentSquadValue: document.querySelector("#use-current-squad-value"),
   freeTransfers: document.querySelector("#free-transfers"),
   drivers: document.querySelector("#drivers"),
   constructors: document.querySelector("#constructors"),
@@ -989,17 +990,24 @@ function updateBudgetValidation() {
   const currentCost = currentSelectionCost(inputs);
   if (!els.budgetValidation || currentCost === null || inputs.budget <= 0) {
     els.budgetValidation.hidden = true;
+    if (els.useCurrentSquadValue) els.useCurrentSquadValue.hidden = true;
     return null;
   }
 
   const shortfall = currentCost - inputs.budget;
   if (shortfall > 0.01) {
     els.budgetValidation.hidden = false;
-    els.budgetValidation.textContent = `Current selection costs ${formatNumber(currentCost, 1)}M, which is ${formatNumber(shortfall, 1)}M above this budget. Enter your full current squad value, not only unused cash.`;
+    els.budgetValidation.textContent = `Your selected squad is worth ${formatNumber(currentCost, 1)}M, ${formatNumber(shortfall, 1)}M above this budget. Use that total plus any spare cash.`;
+    if (els.useCurrentSquadValue) {
+      els.useCurrentSquadValue.hidden = false;
+      els.useCurrentSquadValue.dataset.value = currentCost.toFixed(1);
+      els.useCurrentSquadValue.textContent = `Use ${formatNumber(currentCost, 1)}M`;
+    }
     return currentCost;
   }
 
   els.budgetValidation.hidden = true;
+  if (els.useCurrentSquadValue) els.useCurrentSquadValue.hidden = true;
   return currentCost;
 }
 
@@ -2662,6 +2670,20 @@ els.openConstructorPicker.addEventListener("click", () => openPicker("constructo
 els.budget.addEventListener("input", () => {
   updateBudgetValidation();
   persistSavedTeamIfEnabled();
+});
+els.useCurrentSquadValue?.addEventListener("click", () => {
+  const newBudget = toNumber(els.useCurrentSquadValue.dataset.value);
+  if (newBudget <= 0) return;
+
+  const previousBudget = toNumber(els.budget.value);
+  els.budget.value = newBudget.toFixed(1);
+  updateBudgetValidation();
+  persistSavedTeamIfEnabled();
+  els.status.textContent = "Budget updated to your current squad value. You can optimize now.";
+  trackEvent("budget_synced_to_squad_value", {
+    previous_budget: previousBudget,
+    squad_value: newBudget,
+  });
 });
 els.freeTransfers.addEventListener("input", persistSavedTeamIfEnabled);
 els.strategy.addEventListener("change", () => {
