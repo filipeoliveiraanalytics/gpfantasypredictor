@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260803-zandvoort-sprint-pre-weekend";
+const ASSET_VERSION = "20260820-netherlands-lawson-tsunoda";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -117,6 +117,7 @@ const DRIVER_AVATAR_PROFILES = {
   BEA: { skin: "#dfaa80", hair: "#3b241a", hairline: 28, tilt: -2, beard: 0 },
   GAS: { skin: "#d7a17a", hair: "#201612", hairline: 33, tilt: 2, beard: 0.45 },
   HAD: { skin: "#c88b67", hair: "#17110f", hairline: 30, tilt: -3, beard: 0.18 },
+  TSU: { skin: "#d1a07e", hair: "#1d1511", hairline: 31, tilt: -1, beard: 0 },
   ALO: { skin: "#c28a66", hair: "#261914", hairline: 35, tilt: 2, beard: 0.7 },
   OCO: { skin: "#d4a17e", hair: "#1b1512", hairline: 32, tilt: -2, beard: 0.16 },
   SAI: { skin: "#c78d68", hair: "#201512", hairline: 30, tilt: 1, beard: 0.55 },
@@ -620,10 +621,13 @@ function updateModelCopy(sample) {
 
   if (els.modelAdjustment) {
     const hasSpaPenalties = gpName.toLowerCase().includes("belgium");
-    els.modelAdjustment.hidden = !hasSpaPenalties;
+    const hasNetherlandsSubstitution = gpName.toLowerCase().includes("netherlands");
+    els.modelAdjustment.hidden = !hasSpaPenalties && !hasNetherlandsSubstitution;
     els.modelAdjustment.textContent = hasSpaPenalties
       ? "Grid penalties for Norris, Hadjar, Stroll and Alonso are included in this model."
-      : "";
+      : hasNetherlandsSubstitution
+        ? "Lawson is modelled at Red Bull Racing; Tsunoda replaces him at Racing Bulls. Hadjar is unavailable."
+        : "";
   }
 
   if (els.modelNoteCopy) {
