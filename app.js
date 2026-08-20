@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260820-netherlands-lawson-tsunoda";
+const ASSET_VERSION = "20260820-netherlands-roster-note";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -621,7 +621,7 @@ function updateModelCopy(sample) {
 
   if (els.modelAdjustment) {
     const hasSpaPenalties = gpName.toLowerCase().includes("belgium");
-    const hasNetherlandsSubstitution = gpName.toLowerCase().includes("netherlands");
+    const hasNetherlandsSubstitution = /netherlands|zandvoort|dutch/.test(gpName.toLowerCase());
     els.modelAdjustment.hidden = !hasSpaPenalties && !hasNetherlandsSubstitution;
     els.modelAdjustment.textContent = hasSpaPenalties
       ? "Grid penalties for Norris, Hadjar, Stroll and Alonso are included in this model."
