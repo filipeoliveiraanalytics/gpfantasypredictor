@@ -1,9 +1,10 @@
-const ASSET_VERSION = "20260820-netherlands-roster-note";
+const ASSET_VERSION = "20260821-netherlands-preweekend";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 const AVAILABLE_CHIPS_KEY = "gp_fantasy_predictor_available_chips";
 const SAVED_TEAM_KEY = "gp_fantasy_predictor_saved_team";
+const ROSTER_VERSION = "2026-08-lawson-red-bull";
 
 const CHIP_CONFIG = {
   none: { label: "No chip" },
@@ -135,7 +136,9 @@ const DRIVER_AVATAR_PROFILES = {
 const state = {
   projections: [],
   drivers: [],
+  availableDrivers: [],
   constructors: [],
+  availableConstructors: [],
   driverCombos: [],
   constructorCombos: [],
   driverComboMetaCache: new Map(),
@@ -315,6 +318,14 @@ function parseKeys(value) {
   );
 }
 
+function displayAssetKey(key) {
+  return key === "LAW_RB" ? "LAW (RB asset)" : key;
+}
+
+function isAvailableAsset(row) {
+  return String(row?.is_available ?? "TRUE").trim().toUpperCase() !== "FALSE";
+}
+
 function combinations(items, size) {
   const output = [];
   const combo = [];
@@ -400,7 +411,8 @@ function syncChipAvailability() {
 
 function savedTeamSnapshot() {
   return {
-    version: 1,
+    version: 2,
+    rosterVersion: ROSTER_VERSION,
     savedAt: new Date().toISOString(),
     budget: els.budget.value.trim(),
     freeTransfers: els.freeTransfers.value.trim(),
@@ -446,6 +458,13 @@ function restoreSavedTeam() {
   if (!saved || !Array.isArray(saved.drivers) || !Array.isArray(saved.constructors)) return;
   if (saved.drivers.length !== 5 || saved.constructors.length !== 2 || toNumber(saved.budget) <= 0) return;
 
+  const hasLegacyLawsonAsset = state.drivers.some((row) => row.key === "LAW_RB");
+  const needsLawsonMigration =
+    hasLegacyLawsonAsset && saved.rosterVersion !== ROSTER_VERSION && saved.drivers.includes("LAW");
+  if (needsLawsonMigration) {
+    saved.drivers = saved.drivers.map((key) => (key === "LAW" ? "LAW_RB" : key));
+  }
+
   els.budget.value = String(saved.budget);
   els.freeTransfers.value = String(saved.freeTransfers ?? "");
   els.drivers.value = saved.drivers.join(", ");
@@ -470,7 +489,9 @@ function restoreSavedTeam() {
   syncChipAvailability();
   updateBudgetValidation();
   updateSavedTeamUi();
-  els.status.textContent = "Saved team restored. Update it for this GP, then run the optimizer.";
+  els.status.textContent = needsLawsonMigration
+    ? "Saved team restored. Your old Racing Bulls Lawson asset is inactive and will be counted as a required transfer."
+    : "Saved team restored. Update it for this GP, then run the optimizer.";
   trackSavedTeamRestore();
 }
 
@@ -626,7 +647,7 @@ function updateModelCopy(sample) {
     els.modelAdjustment.textContent = hasSpaPenalties
       ? "Grid penalties for Norris, Hadjar, Stroll and Alonso are included in this model."
       : hasNetherlandsSubstitution
-        ? "Lawson is modelled at Red Bull Racing; Tsunoda replaces him at Racing Bulls. Hadjar is unavailable."
+        ? "Lawson is modelled at Red Bull Racing; Tsunoda replaces him at Racing Bulls. The previous Racing Bulls Lawson asset is inactive and must be transferred out."
         : "";
   }
 
@@ -664,7 +685,7 @@ function driverAvatar(row, size = "default") {
   const brow = 0.38 + Math.min(0.38, beard * 0.26 + (hash % 4) * 0.035);
   const hairHeight = 22 + (hash % 8);
   const hairWidth = 52 + (hash % 8);
-  const photoKey = row.key.toLowerCase();
+  const photoKey = row.key === "LAW_RB" ? "law" : row.key.toLowerCase();
   const hasPhoto = state.driverPhotos.has(photoKey);
   const photoClass = hasPhoto ? "driver-avatar--photo" : "";
   const photoMarkup = hasPhoto
@@ -685,7 +706,7 @@ function driverAvatar(row, size = "default") {
       <span class="driver-avatar__nose"></span>
       <span class="driver-avatar__beard"></span>
       <span class="driver-avatar__smile"></span>
-      <span class="driver-avatar__code">${escapeHtml(row.key)}</span>
+      <span class="driver-avatar__code">${escapeHtml(displayAssetKey(row.key))}</span>
     </span>`;
 }
 
@@ -761,16 +782,16 @@ function buildComboCaches() {
   state.projections.forEach(cacheProjectionNumbers);
   state.driverKeyBits = new Map();
   state.constructorKeyBits = new Map();
-  state.drivers.forEach((row, index) => {
+  state.availableDrivers.forEach((row, index) => {
     row._bit = 1 << index;
     state.driverKeyBits.set(row.key, row._bit);
   });
-  state.constructors.forEach((row, index) => {
+  state.availableConstructors.forEach((row, index) => {
     row._bit = 1 << index;
     state.constructorKeyBits.set(row.key, row._bit);
   });
-  state.driverCombos = combinations(state.drivers, 5).map((rows) => comboFromRows(rows, "driver"));
-  state.constructorCombos = combinations(state.constructors, 2).map((rows) => comboFromRows(rows, "constructor"));
+  state.driverCombos = combinations(state.availableDrivers, 5).map((rows) => comboFromRows(rows, "driver"));
+  state.constructorCombos = combinations(state.availableConstructors, 2).map((rows) => comboFromRows(rows, "constructor"));
   state.driverComboMetaCache = new Map();
   state.constructorComboMetaCache = new Map();
 }
@@ -1042,7 +1063,7 @@ function entityPoolScore(row, inputs) {
 
 function pickDriverPool(inputs) {
   const currentKeys = inputs.currentDrivers;
-  const byKey = new Map(state.drivers.map((row) => [row.key, row]));
+  const byKey = new Map(state.availableDrivers.map((row) => [row.key, row]));
   const selected = new Map();
   const poolLimit = inputs.strategy === "budget_growth" ? 16 : 15;
 
@@ -1051,8 +1072,8 @@ function pickDriverPool(inputs) {
     if (row) selected.set(key, row);
   });
 
-  const cheapest = [...state.drivers].sort((a, b) => toNumber(a.price_m) - toNumber(b.price_m));
-  const ranked = [...state.drivers].sort((a, b) => entityPoolScore(b, inputs) - entityPoolScore(a, inputs));
+  const cheapest = [...state.availableDrivers].sort((a, b) => toNumber(a.price_m) - toNumber(b.price_m));
+  const ranked = [...state.availableDrivers].sort((a, b) => entityPoolScore(b, inputs) - entityPoolScore(a, inputs));
 
   // Keep realistic funding paths before filling the remaining places with the
   // best model targets. This caps the expensive 5-driver search without
@@ -1080,12 +1101,12 @@ function pickDriverPool(inputs) {
 function currentNearbyDriverCombos(inputs) {
   if (inputs.currentDrivers.size !== 5) return [];
 
-  const byKey = new Map(state.drivers.map((row) => [row.key, row]));
+  const byKey = new Map(state.availableDrivers.map((row) => [row.key, row]));
   const currentRows = [...inputs.currentDrivers].map((key) => byKey.get(key)).filter(Boolean);
   if (currentRows.length !== 5) return [];
 
   const currentKeys = new Set(currentRows.map((row) => row.key));
-  const alternatives = state.drivers.filter((row) => !currentKeys.has(row.key));
+  const alternatives = state.availableDrivers.filter((row) => !currentKeys.has(row.key));
   const maxDriverChanges = Math.min(3, Math.max(1, inputs.freeTransfers));
   const combos = [];
 
@@ -1155,7 +1176,7 @@ function findTopTeams(inputs) {
 
   const driverCandidates = state.driverCombos
     .filter((combo) => (combo.mask & driverPoolMask) === combo.mask)
-    .map((combo) => cachedComboRunMeta(combo, "driver", currentDriverMask, state.drivers))
+    .map((combo) => cachedComboRunMeta(combo, "driver", currentDriverMask, state.availableDrivers))
     .filter(
       (meta) =>
         meta.combo.cost <= budgetLimit &&
@@ -1163,7 +1184,7 @@ function findTopTeams(inputs) {
         !blocksProtectedPriceTradeoff(meta.protectedPriceTradeoff, inputs)
     );
   const constructorCandidates = state.constructorCombos
-    .map((combo) => cachedComboRunMeta(combo, "constructor", currentConstructorMask, state.constructors))
+    .map((combo) => cachedComboRunMeta(combo, "constructor", currentConstructorMask, state.availableConstructors))
     .filter((meta) => !blocksProtectedPriceTradeoff(meta.protectedPriceTradeoff, inputs));
 
   for (const driverMeta of driverCandidates) {
@@ -2161,7 +2182,7 @@ function protectedHoldExplanation(team, type) {
   const selectedRows = type === "driver" ? team.drivers : team.constructors;
   const currentKeys = new Set(type === "driver" ? team.currentDriverKeys : team.currentConstructorKeys);
   const selectedKeys = new Set(selectedRows.map((row) => row.key));
-  const sourceRows = type === "driver" ? state.drivers : state.constructors;
+  const sourceRows = type === "driver" ? state.availableDrivers : state.availableConstructors;
   const keptRows = selectedRows.filter((row) => currentKeys.has(row.key) && strongPriceRiseAsset(row));
   if (!keptRows.length) return null;
 
@@ -2393,7 +2414,7 @@ function render(teams, chipRecommendation = { chip: "none", confidence: "Hold", 
   els.driverList.innerHTML = sortByValue(best.drivers).map(chip).join("");
   els.constructorList.innerHTML = sortByValue(best.constructors).map(chip).join("");
   els.transfersIn.textContent = [...best.driversIn, ...best.constructorsIn].join(", ") || "None";
-  els.transfersOut.textContent = [...best.driversOut, ...best.constructorsOut].join(", ") || "None";
+  els.transfersOut.textContent = [...best.driversOut, ...best.constructorsOut].map(displayAssetKey).join(", ") || "None";
   els.transferPenalty.textContent = `${best.transferPenalty.toFixed(0)} pts`;
   renderWhyLineup(best, chipRecommendation);
 
@@ -2493,7 +2514,7 @@ function lineupList(rows, type) {
           (row) => `
           <span class="lineup-token" title="${escapeHtml(`${row.name} | ${formatNumber(rowValue(row), 2)} value/million`)}">
             ${entityMark(row, "mini")}
-            <span>${escapeHtml(row.key)}</span>
+            <span>${escapeHtml(displayAssetKey(row.key))}</span>
           </span>`
         )
         .join("")}
@@ -2501,7 +2522,8 @@ function lineupList(rows, type) {
 }
 
 function updatePickerSummaries() {
-  els.driverPickerSummary.textContent = [...parseKeys(els.drivers.value)].join(", ") || "Choose drivers";
+  const driverKeys = [...parseKeys(els.drivers.value)];
+  els.driverPickerSummary.textContent = driverKeys.map(displayAssetKey).join(", ") || "Choose drivers";
   els.constructorPickerSummary.textContent = [...parseKeys(els.constructors.value)].join(", ") || "Choose constructors";
   updateBudgetValidation();
 }
@@ -2509,8 +2531,9 @@ function updatePickerSummaries() {
 function openPicker(type) {
   state.pickerType = type;
   const isDriver = type === "driver";
-  const rows = isDriver ? state.drivers : state.constructors;
   const selected = parseKeys(isDriver ? els.drivers.value : els.constructors.value);
+  const sourceRows = isDriver ? state.drivers : state.constructors;
+  const rows = sourceRows.filter((row) => isAvailableAsset(row) || selected.has(row.key));
   const max = isDriver ? 5 : 2;
   state.pickerSelection = new Set(selected);
   els.pickerTitle.textContent = isDriver ? "Choose current drivers" : "Choose current constructors";
@@ -2521,7 +2544,7 @@ function openPicker(type) {
 }
 
 function renderPickerOptions(rows) {
-  els.pickerList.innerHTML = rows
+  els.pickerList.innerHTML = [...rows]
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((row) => pickerOption(row, state.pickerSelection.has(row.key)))
     .join("");
@@ -2529,12 +2552,13 @@ function renderPickerOptions(rows) {
 
 function pickerOption(row, selected) {
   const color = teamColor(row.team);
+  const inactive = !isAvailableAsset(row);
   return `
-    <button class="picker-option ${selected ? "selected" : ""}" type="button" data-key="${row.key}" style="--team-color:${color}">
+    <button class="picker-option ${selected ? "selected" : ""} ${inactive ? "picker-option--inactive" : ""}" type="button" data-key="${row.key}" style="--team-color:${color}" ${inactive && !selected ? "disabled" : ""}>
       ${entityMark(row, "picker")}
       <span>
         <strong>${escapeHtml(row.name)}</strong>
-        <small>${escapeHtml(row.team)} | ${formatNumber(toNumber(row.price_m), 1)}M</small>
+        <small>${escapeHtml(row.team)} | ${formatNumber(toNumber(row.price_m), 1)}M${inactive ? " | Inactive: transfer required" : ""}</small>
       </span>
     </button>`;
 }
@@ -2632,6 +2656,8 @@ async function init() {
   state.projections = parseCsv(await response.text());
   state.drivers = state.projections.filter((row) => row.entity_type === "driver");
   state.constructors = state.projections.filter((row) => row.entity_type === "constructor");
+  state.availableDrivers = state.drivers.filter(isAvailableAsset);
+  state.availableConstructors = state.constructors.filter(isAvailableAsset);
   buildComboCaches();
   const sample = state.projections[0];
   updateModelCopy(sample);
@@ -2698,7 +2724,8 @@ els.pickerList.addEventListener("click", (event) => {
     state.pickerSelection.add(key);
   }
   els.pickerHelp.textContent = `Selected ${state.pickerSelection.size} of ${max}.`;
-  const rows = state.pickerType === "driver" ? state.drivers : state.constructors;
+  const sourceRows = state.pickerType === "driver" ? state.drivers : state.constructors;
+  const rows = sourceRows.filter((row) => isAvailableAsset(row) || state.pickerSelection.has(row.key));
   renderPickerOptions(rows);
 });
 
