@@ -1,6 +1,7 @@
-const ASSET_VERSION = "20260826-italy-netherlands-price-calibration";
+const ASSET_VERSION = "20260826-forecast-tracker";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
+const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 const AVAILABLE_CHIPS_KEY = "gp_fantasy_predictor_available_chips";
 const SAVED_TEAM_KEY = "gp_fantasy_predictor_saved_team";
@@ -148,6 +149,7 @@ const state = {
   driverPhotos: new Set(),
   driverPhotoBasePath: "assets/drivers",
   priceMovements: new Map(),
+  forecastAudits: [],
   constructorLogos: new Set(),
   constructorLogoFiles: new Map(),
   constructorLogoBasePath: "assets/constructors",
@@ -209,6 +211,18 @@ const els = {
   forecastLink: document.querySelector("#forecast-link"),
   forecastTitle: document.querySelector("#forecast-title"),
   forecastCopy: document.querySelector("#forecast-copy"),
+  forecastTracker: document.querySelector("#forecast-tracker"),
+  forecastTrackerCopy: document.querySelector("#forecast-tracker-copy"),
+  forecastTrackerScope: document.querySelector("#forecast-tracker-scope"),
+  forecastEstimateLabel: document.querySelector("#forecast-estimate-label"),
+  forecastEstimateValue: document.querySelector("#forecast-estimate-value"),
+  forecastEstimateDetail: document.querySelector("#forecast-estimate-detail"),
+  forecastActualLabel: document.querySelector("#forecast-actual-label"),
+  forecastActualValue: document.querySelector("#forecast-actual-value"),
+  forecastActualDetail: document.querySelector("#forecast-actual-detail"),
+  forecastErrorLabel: document.querySelector("#forecast-error-label"),
+  forecastErrorValue: document.querySelector("#forecast-error-value"),
+  forecastErrorDetail: document.querySelector("#forecast-error-detail"),
 };
 
 function hasAnalyticsId() {
@@ -2017,6 +2031,71 @@ function formatNumber(value, decimals = 1) {
   return value.toLocaleString(undefined, { maximumFractionDigits: decimals, minimumFractionDigits: decimals });
 }
 
+function trackerNumber(value) {
+  const parsed = Number(String(value ?? "").replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function trackerPoints(value) {
+  const parsed = trackerNumber(value);
+  return parsed === null ? "--" : `${formatNumber(parsed, 1)} pts`;
+}
+
+function latestScoredForecastAudit() {
+  const auditedRows = [...state.forecastAudits]
+    .filter((row) => String(row.status || "").trim().toLowerCase() === "scored")
+    .filter((row) => trackerNumber(row.estimated_points) !== null && trackerNumber(row.actual_points) !== null);
+  return auditedRows.length ? auditedRows[auditedRows.length - 1] : null;
+}
+
+function renderForecastTracker() {
+  if (!els.forecastTracker) return;
+
+  const sample = state.projections[0] || {};
+  const gpName = displayGpName(sample.next_gp || "Next GP");
+  const modeName = displayModeName(sample.mode || "Forecast");
+  const audit = latestScoredForecastAudit();
+  els.forecastTracker.hidden = false;
+
+  if (audit) {
+    const auditGp = audit.gp_display || displayGpName(audit.gp_key) || "Completed GP";
+    const auditMode = audit.mode || "Forecast";
+    const assetCount = trackerNumber(audit.asset_count);
+    els.forecastTracker.dataset.status = "scored";
+    els.forecastTrackerCopy.textContent = `${auditGp} | ${auditMode} audit. The locked forecast is compared with official F1 Fantasy scoring, with no retroactive model changes.`;
+    els.forecastTrackerScope.textContent = audit.scope || `${assetCount ? `${assetCount} eligible assets` : "Eligible drivers and constructors"} compared in the completed GP.`;
+    els.forecastEstimateLabel.textContent = "Average estimate";
+    els.forecastEstimateValue.textContent = trackerPoints(audit.estimated_points);
+    els.forecastEstimateDetail.textContent = "Locked pre-race forecast";
+    els.forecastActualLabel.textContent = "Average actual";
+    els.forecastActualValue.textContent = trackerPoints(audit.actual_points);
+    els.forecastActualDetail.textContent = "Official F1 Fantasy scoring";
+    els.forecastErrorLabel.textContent = "Mean absolute error";
+    els.forecastErrorValue.textContent = trackerPoints(audit.mean_absolute_error);
+    els.forecastErrorDetail.textContent = "Lower is closer";
+  } else {
+    els.forecastTracker.dataset.status = "pending";
+    els.forecastTrackerCopy.textContent = `${gpName} | ${modeName} forecast is locked before the race. Official F1 Fantasy scoring will be compared with the same eligible driver and constructor set after results are final.`;
+    els.forecastTrackerScope.textContent = "No retroactive tuning. The audit is published after official scoring.";
+    els.forecastEstimateLabel.textContent = "Average estimate";
+    els.forecastEstimateValue.textContent = "Locked";
+    els.forecastEstimateDetail.textContent = "Pre-race snapshot";
+    els.forecastActualLabel.textContent = "Actual points";
+    els.forecastActualValue.textContent = "After race";
+    els.forecastActualDetail.textContent = "Official scoring pending";
+    els.forecastErrorLabel.textContent = "Forecast error";
+    els.forecastErrorValue.textContent = "Pending";
+    els.forecastErrorDetail.textContent = "Asset-level audit";
+  }
+
+  trackEvent("view_forecast_tracker", {
+    next_gp: gpName,
+    model_mode: modeName,
+    tracker_status: audit ? "scored" : "pending",
+    audited_asset_count: audit?.asset_count || "",
+  });
+}
+
 function budgetLeftLabel(team) {
   if (team.activeChip === "limitless") return "Limitless";
   return `${formatNumber(team.budgetRemaining, 1)}M left`;
@@ -2651,9 +2730,19 @@ async function loadPriceMovements() {
   }
 }
 
+async function loadForecastTracker() {
+  try {
+    const response = await fetch(FORECAST_TRACKER_PATH, { cache: "no-store" });
+    if (!response.ok) return;
+    state.forecastAudits = parseCsv(await response.text());
+  } catch {
+    state.forecastAudits = [];
+  }
+}
+
 async function init() {
   updateStrategyNote();
-  await Promise.all([loadDriverPhotoManifest(), loadConstructorLogoManifest(), loadPriceMovements()]);
+  await Promise.all([loadDriverPhotoManifest(), loadConstructorLogoManifest(), loadPriceMovements(), loadForecastTracker()]);
   const response = await fetch(DATA_PATH);
   if (!response.ok) throw new Error(`Could not load ${DATA_PATH}`);
   state.projections = parseCsv(await response.text());
@@ -2664,6 +2753,7 @@ async function init() {
   buildComboCaches();
   const sample = state.projections[0];
   updateModelCopy(sample);
+  renderForecastTracker();
   els.status.textContent = `${sample?.next_gp ?? "Next GP"} ${sample?.mode ? `| ${sample.mode}` : ""} model ready. Click Optimize Team to run it.`;
   loadAvailableChips();
   restoreSavedTeam();

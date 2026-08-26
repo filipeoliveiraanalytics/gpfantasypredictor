@@ -100,6 +100,32 @@
       </div>
     </section>
 
+    <section class="forecast-tracker" id="forecast-tracker" aria-labelledby="forecast-tracker-title" hidden>
+      <div class="forecast-tracker__copy">
+        <p class="eyebrow">Forecast tracker</p>
+        <h2 id="forecast-tracker-title">Estimated vs actual points</h2>
+        <p id="forecast-tracker-copy"></p>
+        <p class="forecast-tracker__scope" id="forecast-tracker-scope"></p>
+      </div>
+      <dl class="forecast-tracker__metrics">
+        <div>
+          <dt id="forecast-estimate-label">Model estimate</dt>
+          <dd id="forecast-estimate-value">Locked</dd>
+          <small id="forecast-estimate-detail">Pre-race snapshot</small>
+        </div>
+        <div>
+          <dt id="forecast-actual-label">Actual points</dt>
+          <dd id="forecast-actual-value">After race</dd>
+          <small id="forecast-actual-detail">Official scoring pending</small>
+        </div>
+        <div>
+          <dt id="forecast-error-label">Forecast error</dt>
+          <dd id="forecast-error-value">Pending</dd>
+          <small id="forecast-error-detail">Asset-level audit</small>
+        </div>
+      </dl>
+    </section>
+
     <section class="grid">
       <form class="panel controls" id="optimizer-form">
         <div class="panel-heading">
