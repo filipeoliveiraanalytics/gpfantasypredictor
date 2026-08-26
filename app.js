@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260822-netherlands-after-practice";
+const ASSET_VERSION = "20260826-italy-netherlands-price-calibration";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
@@ -643,12 +643,15 @@ function updateModelCopy(sample) {
   if (els.modelAdjustment) {
     const hasSpaPenalties = gpName.toLowerCase().includes("belgium");
     const hasNetherlandsSubstitution = /netherlands|zandvoort|dutch/.test(gpName.toLowerCase());
-    els.modelAdjustment.hidden = !hasSpaPenalties && !hasNetherlandsSubstitution;
+    const hasItalyAntonelliPenalty = /italy|italian|monza/.test(gpName.toLowerCase());
+    els.modelAdjustment.hidden = !hasSpaPenalties && !hasNetherlandsSubstitution && !hasItalyAntonelliPenalty;
     els.modelAdjustment.textContent = hasSpaPenalties
       ? "Grid penalties for Norris, Hadjar, Stroll and Alonso are included in this model."
       : hasNetherlandsSubstitution
         ? "Lawson is modelled at Red Bull Racing; Tsunoda replaces him at Racing Bulls. The previous Racing Bulls Lawson asset is inactive and must be transferred out."
-        : "";
+        : hasItalyAntonelliPenalty
+          ? "Antonelli's expected back-of-grid power-unit penalty is included in this model."
+          : "";
   }
 
   if (els.modelNoteCopy) {
