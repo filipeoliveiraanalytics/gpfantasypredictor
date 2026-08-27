@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260826-forecast-tracker";
+const ASSET_VERSION = "20260827-netherlands-audit";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
@@ -2062,8 +2062,9 @@ function renderForecastTracker() {
     const auditMode = audit.mode || "Forecast";
     const assetCount = trackerNumber(audit.asset_count);
     els.forecastTracker.dataset.status = "scored";
-    els.forecastTrackerCopy.textContent = `${auditGp} | ${auditMode} audit. The locked forecast is compared with official F1 Fantasy scoring, with no retroactive model changes.`;
-    els.forecastTrackerScope.textContent = audit.scope || `${assetCount ? `${assetCount} eligible assets` : "Eligible drivers and constructors"} compared in the completed GP.`;
+    els.forecastTrackerCopy.textContent = `${auditGp} | ${auditMode} audit. Locked forecast compared with official F1 Fantasy scoring.`;
+    const completedScope = audit.scope || `${assetCount ? `${assetCount} eligible assets` : "Eligible drivers and constructors"} compared in the completed GP.`;
+    els.forecastTrackerScope.textContent = `${completedScope} Next: ${gpName} | ${modeName} forecast is locked.`;
     els.forecastEstimateLabel.textContent = "Average estimate";
     els.forecastEstimateValue.textContent = trackerPoints(audit.estimated_points);
     els.forecastEstimateDetail.textContent = "Locked pre-race forecast";
