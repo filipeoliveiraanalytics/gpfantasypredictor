@@ -100,57 +100,7 @@
       </div>
     </section>
 
-    <section class="forecast-tracker" id="forecast-tracker" aria-labelledby="forecast-tracker-title" hidden>
-      <div class="forecast-tracker__copy">
-        <p class="eyebrow">Forecast tracker</p>
-        <h2 id="forecast-tracker-title">Estimated vs actual points</h2>
-        <p id="forecast-tracker-copy"></p>
-        <p class="forecast-tracker__scope" id="forecast-tracker-scope"></p>
-      </div>
-      <dl class="forecast-tracker__metrics">
-        <div>
-          <dt id="forecast-estimate-label">Model estimate</dt>
-          <dd id="forecast-estimate-value">Locked</dd>
-          <small id="forecast-estimate-detail">Pre-race snapshot</small>
-        </div>
-        <div>
-          <dt id="forecast-actual-label">Actual points</dt>
-          <dd id="forecast-actual-value">After race</dd>
-          <small id="forecast-actual-detail">Official scoring pending</small>
-        </div>
-        <div>
-          <dt id="forecast-error-label">Forecast error</dt>
-          <dd id="forecast-error-value">Pending</dd>
-          <small id="forecast-error-detail">Asset-level audit</small>
-        </div>
-      </dl>
-      <div class="forecast-tracker__breakdown" id="forecast-tracker-breakdown" hidden aria-label="Forecast audit by asset type">
-        <p class="forecast-tracker__breakdown-title" id="forecast-breakdown-title">Completed GP audit by asset type</p>
-        <div class="forecast-tracker__breakdown-grid">
-          <section class="forecast-tracker__asset-type forecast-tracker__asset-type--drivers" aria-label="Driver audit">
-            <div class="forecast-tracker__asset-heading">
-              <strong>Drivers</strong>
-              <span id="forecast-driver-count">--</span>
-            </div>
-            <dl>
-              <div><dt>Estimate</dt><dd id="forecast-driver-estimate">--</dd></div>
-              <div><dt>Actual</dt><dd id="forecast-driver-actual">--</dd></div>
-              <div><dt>MAE</dt><dd id="forecast-driver-error">--</dd></div>
-            </dl>
-          </section>
-          <section class="forecast-tracker__asset-type forecast-tracker__asset-type--constructors" aria-label="Constructor audit">
-            <div class="forecast-tracker__asset-heading">
-              <strong>Constructors</strong>
-              <span id="forecast-constructor-count">--</span>
-            </div>
-            <dl>
-              <div><dt>Estimate</dt><dd id="forecast-constructor-estimate">--</dd></div>
-              <div><dt>Actual</dt><dd id="forecast-constructor-actual">--</dd></div>
-              <div><dt>MAE</dt><dd id="forecast-constructor-error">--</dd></div>
-            </dl>
-          </section>
-        </div>
-      </div>
+    <section class="forecast-tracker" id="forecast-tracker" aria-label="Forecast audit" hidden>
       <div class="forecast-tracker__asset-audit" id="forecast-asset-audit" hidden>
         <details class="forecast-tracker__asset-details">
           <summary>
@@ -161,7 +111,7 @@
             <span class="forecast-tracker__asset-details-hint">View estimates vs actual points</span>
           </summary>
           <div class="forecast-tracker__asset-details-content">
-            <p class="forecast-tracker__asset-audit-copy">Locked forecast compared with official F1 Fantasy scoring for the completed GP.</p>
+              <p class="forecast-tracker__asset-audit-copy">Locked forecast compared with official F1 Fantasy scoring for the completed GP. <span class="forecast-tracker__dnf-key"><span aria-hidden="true">&#9733;</span> DNF affected the actual score.</span></p>
             <div class="forecast-tracker__asset-grid">
               <section class="forecast-tracker__asset-section" aria-labelledby="forecast-driver-audit-title">
                 <h3 id="forecast-driver-audit-title">Drivers</h3>
