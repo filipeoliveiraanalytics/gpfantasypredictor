@@ -485,30 +485,73 @@ button {
   padding-top: 16px;
 }
 
-.forecast-tracker__asset-audit-heading {
-  align-items: end;
+.forecast-tracker__asset-details > summary {
+  align-items: center;
+  cursor: pointer;
   display: flex;
-  gap: 20px;
+  gap: 16px;
   justify-content: space-between;
-  margin-bottom: 14px;
+  list-style: none;
+  min-height: 38px;
 }
 
-.forecast-tracker__asset-audit-heading .eyebrow {
+.forecast-tracker__asset-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.forecast-tracker__asset-details > summary::after {
+  color: var(--accent);
+  content: ">";
+  flex: 0 0 auto;
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-left: 2px;
+  transition: transform 160ms ease;
+}
+
+.forecast-tracker__asset-details[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.forecast-tracker__asset-details > summary:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.forecast-tracker__asset-details > summary > span:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.forecast-tracker__asset-details .eyebrow {
   margin: 0 0 3px;
 }
 
-.forecast-tracker__asset-audit-heading h3 {
+.forecast-tracker__asset-details strong {
   font-size: 1rem;
   margin: 0;
 }
 
-.forecast-tracker__asset-audit-heading > p {
+.forecast-tracker__asset-details-hint,
+.forecast-tracker__asset-audit-copy {
   color: var(--muted);
   font-size: 0.78rem;
   line-height: 1.45;
   margin: 0;
+}
+
+.forecast-tracker__asset-details-hint {
   max-width: 400px;
   text-align: right;
+}
+
+.forecast-tracker__asset-details-content {
+  padding-top: 14px;
+}
+
+.forecast-tracker__asset-audit-copy {
+  margin-bottom: 14px;
 }
 
 .forecast-tracker__asset-grid {
@@ -2043,15 +2086,12 @@ tr.is-best td {
     grid-template-columns: 1fr;
   }
 
-  .forecast-tracker__asset-audit-heading {
+  .forecast-tracker__asset-details > summary {
     align-items: flex-start;
-    display: block;
   }
 
-  .forecast-tracker__asset-audit-heading > p {
-    margin-top: 8px;
-    max-width: none;
-    text-align: left;
+  .forecast-tracker__asset-details-hint {
+    display: none;
   }
 
   .forecast-tracker__asset-grid {
