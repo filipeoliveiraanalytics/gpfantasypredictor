@@ -2136,8 +2136,9 @@ function renderForecastAssetAudit(audit) {
   }
 
   const rowDelta = (row) => trackerNumber(row.actual_points) - trackerNumber(row.estimated_points);
+  const absoluteDelta = (row) => Math.abs(rowDelta(row));
   const sortedRows = (rows) =>
-    [...rows].sort((left, right) => rowDelta(left) - rowDelta(right) || String(left.name).localeCompare(String(right.name)));
+    [...rows].sort((left, right) => absoluteDelta(left) - absoluteDelta(right) || String(left.name).localeCompare(String(right.name)));
 
   els.forecastDriverAuditRows.innerHTML = sortedRows(auditRows.filter((row) => row.entity_type === "driver"))
     .map(forecastAuditRow)
