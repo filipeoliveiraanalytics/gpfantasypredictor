@@ -1,0 +1,34 @@
+gp_key,gp_display,mode,entity_type,key,name,team,estimated_points,actual_points
+Netherlands,Dutch Grand Prix,Post-Quali,driver,ANT,Kimi Antonelli,Mercedes,32.73,37
+Netherlands,Dutch Grand Prix,Post-Quali,driver,HAM,Lewis Hamilton,Ferrari,23.39,23
+Netherlands,Dutch Grand Prix,Post-Quali,driver,LEC,Charles Leclerc,Ferrari,19.61,39
+Netherlands,Dutch Grand Prix,Post-Quali,driver,RUS,George Russell,Mercedes,35.03,32
+Netherlands,Dutch Grand Prix,Post-Quali,driver,NOR,Lando Norris,McLaren,39.13,57
+Netherlands,Dutch Grand Prix,Post-Quali,driver,VER,Max Verstappen,Red Bull Racing,14.52,-13
+Netherlands,Dutch Grand Prix,Post-Quali,driver,PIA,Oscar Piastri,McLaren,21.71,21
+Netherlands,Dutch Grand Prix,Post-Quali,driver,GAS,Pierre Gasly,Alpine,4.23,8
+Netherlands,Dutch Grand Prix,Post-Quali,driver,COL,Franco Colapinto,Alpine,1.78,6
+Netherlands,Dutch Grand Prix,Post-Quali,driver,OCO,Esteban Ocon,Haas F1 Team,1.96,-10
+Netherlands,Dutch Grand Prix,Post-Quali,driver,SAI,Carlos Sainz,Williams,0.81,7
+Netherlands,Dutch Grand Prix,Post-Quali,driver,LIN,Arvid Lindblad,Racing Bulls,3.97,7
+Netherlands,Dutch Grand Prix,Post-Quali,driver,BOR,Gabriel Bortoleto,Audi,1.83,5
+Netherlands,Dutch Grand Prix,Post-Quali,driver,BEA,Oliver Bearman,Haas F1 Team,0.76,-13
+Netherlands,Dutch Grand Prix,Post-Quali,driver,ALO,Fernando Alonso,Aston Martin,0.52,24
+Netherlands,Dutch Grand Prix,Post-Quali,driver,PER,Sergio Perez,Cadillac,-0.29,8
+Netherlands,Dutch Grand Prix,Post-Quali,driver,LAW,Liam Lawson,Red Bull Racing,9.04,12
+Netherlands,Dutch Grand Prix,Post-Quali,driver,ALB,Alexander Albon,Williams,0.76,2
+Netherlands,Dutch Grand Prix,Post-Quali,driver,TSU,Yuki Tsunoda,Racing Bulls,0.95,5
+Netherlands,Dutch Grand Prix,Post-Quali,driver,HUL,Nico Hulkenberg,Audi,1.95,5
+Netherlands,Dutch Grand Prix,Post-Quali,driver,BOT,Valtteri Bottas,Cadillac,0.32,-18
+Netherlands,Dutch Grand Prix,Post-Quali,driver,STR,Lance Stroll,Aston Martin,-0.53,-10
+Netherlands,Dutch Grand Prix,Post-Quali,constructor,MER,Mercedes,Mercedes,77.76,84
+Netherlands,Dutch Grand Prix,Post-Quali,constructor,FER,Ferrari,Ferrari,53,74
+Netherlands,Dutch Grand Prix,Post-Quali,constructor,MCL,McLaren,McLaren,70.84,80
+Netherlands,Dutch Grand Prix,Post-Quali,constructor,RBR,Red Bull Racing,Red Bull Racing,33.56,11
+Netherlands,Dutch Grand Prix,Post-Quali,constructor,RBL,Racing Bulls,Racing Bulls,9.92,22
+Netherlands,Dutch Grand Prix,Post-Quali,constructor,ALP,Alpine,Alpine,11.01,19
+Netherlands,Dutch Grand Prix,Post-Quali,constructor,HAA,Haas F1 Team,Haas F1 Team,3.72,-20
+Netherlands,Dutch Grand Prix,Post-Quali,constructor,WIL,Williams,Williams,0.57,15
+Netherlands,Dutch Grand Prix,Post-Quali,constructor,AUD,Audi,Audi,6.78,25
+Netherlands,Dutch Grand Prix,Post-Quali,constructor,AMR,Aston Martin,Aston Martin,-1.01,18
+Netherlands,Dutch Grand Prix,Post-Quali,constructor,CAD,Cadillac,Cadillac,-0.97,-9
