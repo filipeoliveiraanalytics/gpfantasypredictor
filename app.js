@@ -2,6 +2,7 @@ const ASSET_VERSION = "20260827-netherlands-audit-detail";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
+const FORECAST_ASSET_AUDIT_PATH = `data/fantasy_forecast_asset_audit.csv?v=${ASSET_VERSION}`;
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 const AVAILABLE_CHIPS_KEY = "gp_fantasy_predictor_available_chips";
 const SAVED_TEAM_KEY = "gp_fantasy_predictor_saved_team";
@@ -150,6 +151,7 @@ const state = {
   driverPhotoBasePath: "assets/drivers",
   priceMovements: new Map(),
   forecastAudits: [],
+  forecastAssetAudit: [],
   constructorLogos: new Set(),
   constructorLogoFiles: new Map(),
   constructorLogoBasePath: "assets/constructors",
@@ -233,6 +235,9 @@ const els = {
   forecastConstructorEstimate: document.querySelector("#forecast-constructor-estimate"),
   forecastConstructorActual: document.querySelector("#forecast-constructor-actual"),
   forecastConstructorError: document.querySelector("#forecast-constructor-error"),
+  forecastAssetAudit: document.querySelector("#forecast-asset-audit"),
+  forecastDriverAuditRows: document.querySelector("#forecast-driver-audit-rows"),
+  forecastConstructorAuditRows: document.querySelector("#forecast-constructor-audit-rows"),
 };
 
 function hasAnalyticsId() {
@@ -2090,6 +2095,64 @@ function setForecastAuditBreakdown(audit, auditGp) {
   els.forecastConstructorError.textContent = trackerPoints(audit.constructor_mean_absolute_error);
 }
 
+function formatAuditDelta(value) {
+  const parsed = trackerNumber(value);
+  if (parsed === null) return "--";
+  return `${parsed > 0 ? "+" : ""}${formatNumber(parsed, 1)} pts`;
+}
+
+function forecastAuditRow(row) {
+  const estimate = trackerNumber(row.estimated_points);
+  const actual = trackerNumber(row.actual_points);
+  const delta = estimate === null || actual === null ? null : actual - estimate;
+  const error = delta === null ? null : Math.abs(delta);
+  const deltaClass = delta === null ? "" : delta > 0 ? "forecast-tracker__delta--up" : delta < 0 ? "forecast-tracker__delta--down" : "";
+
+  return `
+    <tr>
+      <td>
+        <span class="forecast-tracker__asset-name">${escapeHtml(row.name)}</span>
+        <span class="forecast-tracker__asset-meta">${escapeHtml(row.team)}</span>
+      </td>
+      <td>${trackerPoints(estimate)}</td>
+      <td>${trackerPoints(actual)}</td>
+      <td class="${deltaClass}">${formatAuditDelta(delta)}</td>
+      <td>${trackerPoints(error)}</td>
+    </tr>`;
+}
+
+function renderForecastAssetAudit(audit) {
+  if (!els.forecastAssetAudit || !els.forecastDriverAuditRows || !els.forecastConstructorAuditRows) return;
+
+  const auditRows = state.forecastAssetAudit.filter(
+    (row) =>
+      row.gp_key === audit.gp_key &&
+      row.mode === audit.mode &&
+      trackerNumber(row.estimated_points) !== null &&
+      trackerNumber(row.actual_points) !== null
+  );
+
+  if (!auditRows.length) {
+    els.forecastAssetAudit.hidden = true;
+    return;
+  }
+
+  const sortedRows = (rows) =>
+    [...rows].sort(
+      (left, right) =>
+        trackerNumber(right.actual_points) - trackerNumber(left.actual_points) ||
+        String(left.name).localeCompare(String(right.name))
+    );
+
+  els.forecastDriverAuditRows.innerHTML = sortedRows(auditRows.filter((row) => row.entity_type === "driver"))
+    .map(forecastAuditRow)
+    .join("");
+  els.forecastConstructorAuditRows.innerHTML = sortedRows(auditRows.filter((row) => row.entity_type === "constructor"))
+    .map(forecastAuditRow)
+    .join("");
+  els.forecastAssetAudit.hidden = false;
+}
+
 function renderForecastTracker() {
   if (!els.forecastTracker) return;
 
@@ -2117,6 +2180,7 @@ function renderForecastTracker() {
     els.forecastErrorValue.textContent = trackerPoints(audit.mean_absolute_error);
     els.forecastErrorDetail.textContent = "Lower is closer";
     setForecastAuditBreakdown(audit, auditGp);
+    renderForecastAssetAudit(audit);
   } else {
     els.forecastTracker.dataset.status = "pending";
     els.forecastTrackerCopy.textContent = `${gpName} | ${modeName} forecast is locked before the race. Official F1 Fantasy scoring will be compared with the same eligible driver and constructor set after results are final.`;
@@ -2131,6 +2195,7 @@ function renderForecastTracker() {
     els.forecastErrorValue.textContent = "Pending";
     els.forecastErrorDetail.textContent = "Asset-level audit";
     if (els.forecastTrackerBreakdown) els.forecastTrackerBreakdown.hidden = true;
+    if (els.forecastAssetAudit) els.forecastAssetAudit.hidden = true;
   }
 
   trackEvent("view_forecast_tracker", {
@@ -2785,9 +2850,19 @@ async function loadForecastTracker() {
   }
 }
 
+async function loadForecastAssetAudit() {
+  try {
+    const response = await fetch(FORECAST_ASSET_AUDIT_PATH, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Could not load ${FORECAST_ASSET_AUDIT_PATH}`);
+    state.forecastAssetAudit = parseCsv(await response.text());
+  } catch {
+    state.forecastAssetAudit = [];
+  }
+}
+
 async function init() {
   updateStrategyNote();
-  await Promise.all([loadDriverPhotoManifest(), loadConstructorLogoManifest(), loadPriceMovements(), loadForecastTracker()]);
+  await Promise.all([loadDriverPhotoManifest(), loadConstructorLogoManifest(), loadPriceMovements(), loadForecastTracker(), loadForecastAssetAudit()]);
   const response = await fetch(DATA_PATH);
   if (!response.ok) throw new Error(`Could not load ${DATA_PATH}`);
   state.projections = parseCsv(await response.text());

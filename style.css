@@ -478,6 +478,112 @@ button {
   margin: 0;
 }
 
+.forecast-tracker__asset-audit {
+  border-top: 1px solid var(--line);
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  padding-top: 16px;
+}
+
+.forecast-tracker__asset-audit-heading {
+  align-items: end;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.forecast-tracker__asset-audit-heading .eyebrow {
+  margin: 0 0 3px;
+}
+
+.forecast-tracker__asset-audit-heading h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.forecast-tracker__asset-audit-heading > p {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  margin: 0;
+  max-width: 400px;
+  text-align: right;
+}
+
+.forecast-tracker__asset-grid {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+}
+
+.forecast-tracker__asset-section > h3 {
+  color: var(--accent);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.forecast-tracker__asset-table-wrap {
+  overflow-x: auto;
+}
+
+.forecast-tracker__asset-table {
+  border-collapse: collapse;
+  font-size: 0.76rem;
+  min-width: 420px;
+  width: 100%;
+}
+
+.forecast-tracker__asset-table th,
+.forecast-tracker__asset-table td {
+  border-bottom: 1px solid rgba(154, 176, 221, 0.12);
+  padding: 9px 7px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.forecast-tracker__asset-table th:first-child,
+.forecast-tracker__asset-table td:first-child {
+  text-align: left;
+  white-space: normal;
+}
+
+.forecast-tracker__asset-table th {
+  color: var(--muted);
+  font-size: 0.64rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.forecast-tracker__asset-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.forecast-tracker__asset-name {
+  color: var(--text);
+  display: block;
+  font-weight: 800;
+}
+
+.forecast-tracker__asset-meta {
+  color: var(--muted);
+  display: block;
+  font-size: 0.68rem;
+  margin-top: 2px;
+}
+
+.forecast-tracker__delta--up {
+  color: var(--teal);
+  font-weight: 800;
+}
+
+.forecast-tracker__delta--down {
+  color: #ff8ca0;
+  font-weight: 800;
+}
+
 .forecast-tracker__metrics dt {
   color: var(--muted);
   font-size: 0.76rem;
@@ -1934,6 +2040,21 @@ tr.is-best td {
   }
 
   .forecast-tracker__breakdown-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .forecast-tracker__asset-audit-heading {
+    align-items: flex-start;
+    display: block;
+  }
+
+  .forecast-tracker__asset-audit-heading > p {
+    margin-top: 8px;
+    max-width: none;
+    text-align: left;
+  }
+
+  .forecast-tracker__asset-grid {
     grid-template-columns: 1fr;
   }
 
