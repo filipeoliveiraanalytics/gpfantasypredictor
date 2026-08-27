@@ -1,2 +1,3 @@
 gp_key,gp_display,mode,status,scope,estimated_points,actual_points,mean_absolute_error,asset_count,scored_at
+Netherlands,Dutch Grand Prix,Post-Quali,scored,Average points across 22 drivers and 11 constructors,14.5,16.8,10.7,33,
 Italy,Italian Grand Prix,Pre-Weekend,pending,Average points across eligible drivers and constructors,,,,33,
