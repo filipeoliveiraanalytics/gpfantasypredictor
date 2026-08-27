@@ -2105,7 +2105,6 @@ function forecastAuditRow(row) {
   const estimate = trackerNumber(row.estimated_points);
   const actual = trackerNumber(row.actual_points);
   const delta = estimate === null || actual === null ? null : actual - estimate;
-  const error = delta === null ? null : Math.abs(delta);
   const deltaClass = delta === null ? "" : delta > 0 ? "forecast-tracker__delta--up" : delta < 0 ? "forecast-tracker__delta--down" : "";
 
   return `
@@ -2117,7 +2116,6 @@ function forecastAuditRow(row) {
       <td>${trackerPoints(estimate)}</td>
       <td>${trackerPoints(actual)}</td>
       <td class="${deltaClass}">${formatAuditDelta(delta)}</td>
-      <td>${trackerPoints(error)}</td>
     </tr>`;
 }
 
@@ -2137,12 +2135,9 @@ function renderForecastAssetAudit(audit) {
     return;
   }
 
+  const rowDelta = (row) => trackerNumber(row.actual_points) - trackerNumber(row.estimated_points);
   const sortedRows = (rows) =>
-    [...rows].sort(
-      (left, right) =>
-        trackerNumber(right.actual_points) - trackerNumber(left.actual_points) ||
-        String(left.name).localeCompare(String(right.name))
-    );
+    [...rows].sort((left, right) => rowDelta(left) - rowDelta(right) || String(left.name).localeCompare(String(right.name)));
 
   els.forecastDriverAuditRows.innerHTML = sortedRows(auditRows.filter((row) => row.entity_type === "driver"))
     .map(forecastAuditRow)
