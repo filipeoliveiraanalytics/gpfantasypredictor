@@ -124,6 +124,33 @@
           <small id="forecast-error-detail">Asset-level audit</small>
         </div>
       </dl>
+      <div class="forecast-tracker__breakdown" id="forecast-tracker-breakdown" hidden aria-label="Forecast audit by asset type">
+        <p class="forecast-tracker__breakdown-title" id="forecast-breakdown-title">Completed GP audit by asset type</p>
+        <div class="forecast-tracker__breakdown-grid">
+          <section class="forecast-tracker__asset-type forecast-tracker__asset-type--drivers" aria-label="Driver audit">
+            <div class="forecast-tracker__asset-heading">
+              <strong>Drivers</strong>
+              <span id="forecast-driver-count">--</span>
+            </div>
+            <dl>
+              <div><dt>Estimate</dt><dd id="forecast-driver-estimate">--</dd></div>
+              <div><dt>Actual</dt><dd id="forecast-driver-actual">--</dd></div>
+              <div><dt>MAE</dt><dd id="forecast-driver-error">--</dd></div>
+            </dl>
+          </section>
+          <section class="forecast-tracker__asset-type forecast-tracker__asset-type--constructors" aria-label="Constructor audit">
+            <div class="forecast-tracker__asset-heading">
+              <strong>Constructors</strong>
+              <span id="forecast-constructor-count">--</span>
+            </div>
+            <dl>
+              <div><dt>Estimate</dt><dd id="forecast-constructor-estimate">--</dd></div>
+              <div><dt>Actual</dt><dd id="forecast-constructor-actual">--</dd></div>
+              <div><dt>MAE</dt><dd id="forecast-constructor-error">--</dd></div>
+            </dl>
+          </section>
+        </div>
+      </div>
     </section>
 
     <section class="grid">

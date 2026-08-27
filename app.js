@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260827-netherlands-audit";
+const ASSET_VERSION = "20260827-netherlands-audit-detail";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
@@ -223,6 +223,16 @@ const els = {
   forecastErrorLabel: document.querySelector("#forecast-error-label"),
   forecastErrorValue: document.querySelector("#forecast-error-value"),
   forecastErrorDetail: document.querySelector("#forecast-error-detail"),
+  forecastTrackerBreakdown: document.querySelector("#forecast-tracker-breakdown"),
+  forecastBreakdownTitle: document.querySelector("#forecast-breakdown-title"),
+  forecastDriverCount: document.querySelector("#forecast-driver-count"),
+  forecastDriverEstimate: document.querySelector("#forecast-driver-estimate"),
+  forecastDriverActual: document.querySelector("#forecast-driver-actual"),
+  forecastDriverError: document.querySelector("#forecast-driver-error"),
+  forecastConstructorCount: document.querySelector("#forecast-constructor-count"),
+  forecastConstructorEstimate: document.querySelector("#forecast-constructor-estimate"),
+  forecastConstructorActual: document.querySelector("#forecast-constructor-actual"),
+  forecastConstructorError: document.querySelector("#forecast-constructor-error"),
 };
 
 function hasAnalyticsId() {
@@ -2032,6 +2042,7 @@ function formatNumber(value, decimals = 1) {
 }
 
 function trackerNumber(value) {
+  if (String(value ?? "").trim() === "") return null;
   const parsed = Number(String(value ?? "").replace(",", "."));
   return Number.isFinite(parsed) ? parsed : null;
 }
@@ -2046,6 +2057,37 @@ function latestScoredForecastAudit() {
     .filter((row) => String(row.status || "").trim().toLowerCase() === "scored")
     .filter((row) => trackerNumber(row.estimated_points) !== null && trackerNumber(row.actual_points) !== null);
   return auditedRows.length ? auditedRows[auditedRows.length - 1] : null;
+}
+
+function setForecastAuditBreakdown(audit, auditGp) {
+  if (!els.forecastTrackerBreakdown) return;
+
+  const values = [
+    audit.driver_estimated_points,
+    audit.driver_actual_points,
+    audit.driver_mean_absolute_error,
+    audit.constructor_estimated_points,
+    audit.constructor_actual_points,
+    audit.constructor_mean_absolute_error,
+  ].map(trackerNumber);
+
+  if (values.some((value) => value === null)) {
+    els.forecastTrackerBreakdown.hidden = true;
+    return;
+  }
+
+  const driverCount = trackerNumber(audit.driver_asset_count);
+  const constructorCount = trackerNumber(audit.constructor_asset_count);
+  els.forecastTrackerBreakdown.hidden = false;
+  els.forecastBreakdownTitle.textContent = `${auditGp} audit by asset type`;
+  els.forecastDriverCount.textContent = driverCount ? `${driverCount} drivers` : "Drivers";
+  els.forecastDriverEstimate.textContent = trackerPoints(audit.driver_estimated_points);
+  els.forecastDriverActual.textContent = trackerPoints(audit.driver_actual_points);
+  els.forecastDriverError.textContent = trackerPoints(audit.driver_mean_absolute_error);
+  els.forecastConstructorCount.textContent = constructorCount ? `${constructorCount} constructors` : "Constructors";
+  els.forecastConstructorEstimate.textContent = trackerPoints(audit.constructor_estimated_points);
+  els.forecastConstructorActual.textContent = trackerPoints(audit.constructor_actual_points);
+  els.forecastConstructorError.textContent = trackerPoints(audit.constructor_mean_absolute_error);
 }
 
 function renderForecastTracker() {
@@ -2074,6 +2116,7 @@ function renderForecastTracker() {
     els.forecastErrorLabel.textContent = "Mean absolute error";
     els.forecastErrorValue.textContent = trackerPoints(audit.mean_absolute_error);
     els.forecastErrorDetail.textContent = "Lower is closer";
+    setForecastAuditBreakdown(audit, auditGp);
   } else {
     els.forecastTracker.dataset.status = "pending";
     els.forecastTrackerCopy.textContent = `${gpName} | ${modeName} forecast is locked before the race. Official F1 Fantasy scoring will be compared with the same eligible driver and constructor set after results are final.`;
@@ -2087,6 +2130,7 @@ function renderForecastTracker() {
     els.forecastErrorLabel.textContent = "Forecast error";
     els.forecastErrorValue.textContent = "Pending";
     els.forecastErrorDetail.textContent = "Asset-level audit";
+    if (els.forecastTrackerBreakdown) els.forecastTrackerBreakdown.hidden = true;
   }
 
   trackEvent("view_forecast_tracker", {
