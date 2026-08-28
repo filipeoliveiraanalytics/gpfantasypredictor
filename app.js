@@ -214,27 +214,6 @@ const els = {
   forecastTitle: document.querySelector("#forecast-title"),
   forecastCopy: document.querySelector("#forecast-copy"),
   forecastTracker: document.querySelector("#forecast-tracker"),
-  forecastTrackerCopy: document.querySelector("#forecast-tracker-copy"),
-  forecastTrackerScope: document.querySelector("#forecast-tracker-scope"),
-  forecastEstimateLabel: document.querySelector("#forecast-estimate-label"),
-  forecastEstimateValue: document.querySelector("#forecast-estimate-value"),
-  forecastEstimateDetail: document.querySelector("#forecast-estimate-detail"),
-  forecastActualLabel: document.querySelector("#forecast-actual-label"),
-  forecastActualValue: document.querySelector("#forecast-actual-value"),
-  forecastActualDetail: document.querySelector("#forecast-actual-detail"),
-  forecastErrorLabel: document.querySelector("#forecast-error-label"),
-  forecastErrorValue: document.querySelector("#forecast-error-value"),
-  forecastErrorDetail: document.querySelector("#forecast-error-detail"),
-  forecastTrackerBreakdown: document.querySelector("#forecast-tracker-breakdown"),
-  forecastBreakdownTitle: document.querySelector("#forecast-breakdown-title"),
-  forecastDriverCount: document.querySelector("#forecast-driver-count"),
-  forecastDriverEstimate: document.querySelector("#forecast-driver-estimate"),
-  forecastDriverActual: document.querySelector("#forecast-driver-actual"),
-  forecastDriverError: document.querySelector("#forecast-driver-error"),
-  forecastConstructorCount: document.querySelector("#forecast-constructor-count"),
-  forecastConstructorEstimate: document.querySelector("#forecast-constructor-estimate"),
-  forecastConstructorActual: document.querySelector("#forecast-constructor-actual"),
-  forecastConstructorError: document.querySelector("#forecast-constructor-error"),
   forecastAssetAudit: document.querySelector("#forecast-asset-audit"),
   forecastDriverAuditRows: document.querySelector("#forecast-driver-audit-rows"),
   forecastConstructorAuditRows: document.querySelector("#forecast-constructor-audit-rows"),
@@ -2064,41 +2043,14 @@ function latestScoredForecastAudit() {
   return auditedRows.length ? auditedRows[auditedRows.length - 1] : null;
 }
 
-function setForecastAuditBreakdown(audit, auditGp) {
-  if (!els.forecastTrackerBreakdown) return;
-
-  const values = [
-    audit.driver_estimated_points,
-    audit.driver_actual_points,
-    audit.driver_mean_absolute_error,
-    audit.constructor_estimated_points,
-    audit.constructor_actual_points,
-    audit.constructor_mean_absolute_error,
-  ].map(trackerNumber);
-
-  if (values.some((value) => value === null)) {
-    els.forecastTrackerBreakdown.hidden = true;
-    return;
-  }
-
-  const driverCount = trackerNumber(audit.driver_asset_count);
-  const constructorCount = trackerNumber(audit.constructor_asset_count);
-  els.forecastTrackerBreakdown.hidden = false;
-  els.forecastBreakdownTitle.textContent = `${auditGp} audit by asset type`;
-  els.forecastDriverCount.textContent = driverCount ? `${driverCount} drivers` : "Drivers";
-  els.forecastDriverEstimate.textContent = trackerPoints(audit.driver_estimated_points);
-  els.forecastDriverActual.textContent = trackerPoints(audit.driver_actual_points);
-  els.forecastDriverError.textContent = trackerPoints(audit.driver_mean_absolute_error);
-  els.forecastConstructorCount.textContent = constructorCount ? `${constructorCount} constructors` : "Constructors";
-  els.forecastConstructorEstimate.textContent = trackerPoints(audit.constructor_estimated_points);
-  els.forecastConstructorActual.textContent = trackerPoints(audit.constructor_actual_points);
-  els.forecastConstructorError.textContent = trackerPoints(audit.constructor_mean_absolute_error);
-}
-
 function formatAuditDelta(value) {
   const parsed = trackerNumber(value);
   if (parsed === null) return "--";
   return `${parsed > 0 ? "+" : ""}${formatNumber(parsed, 1)} pts`;
+}
+
+function auditHasDnfImpact(row) {
+  return String(row.actual_dnf_affected ?? "").trim().toLowerCase() === "yes";
 }
 
 function forecastAuditRow(row) {
@@ -2106,11 +2058,14 @@ function forecastAuditRow(row) {
   const actual = trackerNumber(row.actual_points);
   const delta = estimate === null || actual === null ? null : actual - estimate;
   const deltaClass = delta === null ? "" : delta > 0 ? "forecast-tracker__delta--up" : delta < 0 ? "forecast-tracker__delta--down" : "";
+  const dnfMarker = auditHasDnfImpact(row)
+    ? '<span class="forecast-tracker__dnf-marker" title="DNF affected the actual score" aria-label="DNF affected the actual score">&#9733;</span>'
+    : "";
 
   return `
     <tr>
       <td>
-        <span class="forecast-tracker__asset-name">${escapeHtml(row.name)}</span>
+        <span class="forecast-tracker__asset-name">${escapeHtml(row.name)}${dnfMarker}</span>
         <span class="forecast-tracker__asset-meta">${escapeHtml(row.team)}</span>
       </td>
       <td>${trackerPoints(estimate)}</td>
@@ -2152,53 +2107,22 @@ function renderForecastAssetAudit(audit) {
 function renderForecastTracker() {
   if (!els.forecastTracker) return;
 
-  const sample = state.projections[0] || {};
-  const gpName = displayGpName(sample.next_gp || "Next GP");
-  const modeName = displayModeName(sample.mode || "Forecast");
   const audit = latestScoredForecastAudit();
-  els.forecastTracker.hidden = false;
+  els.forecastTracker.hidden = !audit;
 
-  if (audit) {
-    const auditGp = audit.gp_display || displayGpName(audit.gp_key) || "Completed GP";
-    const auditMode = audit.mode || "Forecast";
-    const assetCount = trackerNumber(audit.asset_count);
-    els.forecastTracker.dataset.status = "scored";
-    els.forecastTrackerCopy.textContent = `${auditGp} | ${auditMode} audit. Locked forecast compared with official F1 Fantasy scoring.`;
-    const completedScope = audit.scope || `${assetCount ? `${assetCount} eligible assets` : "Eligible drivers and constructors"} compared in the completed GP.`;
-    els.forecastTrackerScope.textContent = `${completedScope} Next: ${gpName} | ${modeName} forecast is locked.`;
-    els.forecastEstimateLabel.textContent = "Average estimate";
-    els.forecastEstimateValue.textContent = trackerPoints(audit.estimated_points);
-    els.forecastEstimateDetail.textContent = "Locked pre-race forecast";
-    els.forecastActualLabel.textContent = "Average actual";
-    els.forecastActualValue.textContent = trackerPoints(audit.actual_points);
-    els.forecastActualDetail.textContent = "Official F1 Fantasy scoring";
-    els.forecastErrorLabel.textContent = "Mean absolute error";
-    els.forecastErrorValue.textContent = trackerPoints(audit.mean_absolute_error);
-    els.forecastErrorDetail.textContent = "Lower is closer";
-    setForecastAuditBreakdown(audit, auditGp);
-    renderForecastAssetAudit(audit);
-  } else {
-    els.forecastTracker.dataset.status = "pending";
-    els.forecastTrackerCopy.textContent = `${gpName} | ${modeName} forecast is locked before the race. Official F1 Fantasy scoring will be compared with the same eligible driver and constructor set after results are final.`;
-    els.forecastTrackerScope.textContent = "No retroactive tuning. The audit is published after official scoring.";
-    els.forecastEstimateLabel.textContent = "Average estimate";
-    els.forecastEstimateValue.textContent = "Locked";
-    els.forecastEstimateDetail.textContent = "Pre-race snapshot";
-    els.forecastActualLabel.textContent = "Actual points";
-    els.forecastActualValue.textContent = "After race";
-    els.forecastActualDetail.textContent = "Official scoring pending";
-    els.forecastErrorLabel.textContent = "Forecast error";
-    els.forecastErrorValue.textContent = "Pending";
-    els.forecastErrorDetail.textContent = "Asset-level audit";
-    if (els.forecastTrackerBreakdown) els.forecastTrackerBreakdown.hidden = true;
+  if (!audit) {
     if (els.forecastAssetAudit) els.forecastAssetAudit.hidden = true;
+    return;
   }
 
+  els.forecastTracker.dataset.status = "scored";
+  renderForecastAssetAudit(audit);
+
   trackEvent("view_forecast_tracker", {
-    next_gp: gpName,
-    model_mode: modeName,
-    tracker_status: audit ? "scored" : "pending",
-    audited_asset_count: audit?.asset_count || "",
+    next_gp: audit.gp_key || "",
+    model_mode: audit.mode || "",
+    tracker_status: "scored",
+    audited_asset_count: audit.asset_count || "",
   });
 }
 
