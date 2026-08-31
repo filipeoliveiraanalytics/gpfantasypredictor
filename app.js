@@ -2061,12 +2061,14 @@ function forecastAuditRow(row) {
   const dnfMarker = auditHasDnfImpact(row)
     ? '<span class="forecast-tracker__dnf-marker" title="DNF affected the actual score" aria-label="DNF affected the actual score">&#9733;</span>'
     : "";
+  const isConstructor = row.entity_type === "constructor";
+  const assetMeta = isConstructor ? "" : `<span class="forecast-tracker__asset-meta">${escapeHtml(row.team)}</span>`;
 
   return `
     <tr>
       <td>
         <span class="forecast-tracker__asset-name">${escapeHtml(row.name)}${dnfMarker}</span>
-        <span class="forecast-tracker__asset-meta">${escapeHtml(row.team)}</span>
+        ${assetMeta}
       </td>
       <td>${trackerPoints(estimate)}</td>
       <td>${trackerPoints(actual)}</td>
