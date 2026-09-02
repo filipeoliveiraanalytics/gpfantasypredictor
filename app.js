@@ -2091,7 +2091,7 @@ function forecastAuditRow(row) {
   const delta = estimate === null || actual === null ? null : actual - estimate;
   const deltaClass = delta === null ? "" : delta > 0 ? "forecast-tracker__delta--up" : delta < 0 ? "forecast-tracker__delta--down" : "";
   const dnfMarker = auditHasDnfImpact(row)
-    ? '<span class="forecast-tracker__dnf-marker" title="DNF affected the actual score" aria-label="DNF affected the actual score">&#9733;</span>'
+    ? '<span class="forecast-tracker__dnf-marker" title="DNF affected the actual score" aria-label="DNF affected the actual score">*</span>'
     : "";
   const isConstructor = row.entity_type === "constructor";
   const assetMeta = isConstructor ? "" : `<span class="forecast-tracker__asset-meta">${escapeHtml(row.team)}</span>`;
@@ -2099,7 +2099,7 @@ function forecastAuditRow(row) {
   return `
     <tr>
       <td>
-        <span class="forecast-tracker__asset-name">${escapeHtml(row.name)}${dnfMarker}</span>
+        <span class="forecast-tracker__asset-name">${dnfMarker}${escapeHtml(row.name)}</span>
         ${assetMeta}
       </td>
       <td>${trackerPoints(estimate)}</td>
@@ -2193,7 +2193,7 @@ function renderForecastTracker() {
   if (els.forecastAuditStatus) els.forecastAuditStatus.textContent = scored ? "Official scoring complete" : "Official scoring pending";
   if (els.forecastAssetAuditCopy) {
     els.forecastAssetAuditCopy.innerHTML = scored
-      ? `Locked forecast compared with official F1 Fantasy scoring for the completed GP. <span class="forecast-tracker__dnf-key"><span aria-hidden="true">&#9733;</span> DNF affected the actual score.</span>`
+      ? `Locked forecast compared with official F1 Fantasy scoring for the completed GP. <span class="forecast-tracker__dnf-key"><span aria-hidden="true">*</span> DNF affected the actual score.</span>`
       : "This forecast is locked before the weekend. Actual F1 Fantasy points and the delta will appear after official scoring is final.";
   }
   renderForecastAssetAudit(audit);
@@ -2435,23 +2435,6 @@ function trackDemand(profile, key) {
   return Number.isFinite(value) ? value : null;
 }
 
-function circuitProfileSummary(profile) {
-  const trackName = profile?.track_name || "Current circuit";
-  const metrics = [
-    ["High-speed", "high_speed_corner_demand"],
-    ["Straights", "straight_line_demand"],
-    ["Traction", "traction_demand"],
-    ["Qualifying", "quali_importance"],
-  ]
-    .map(([label, key]) => {
-      const value = trackDemand(profile, key);
-      return value === null ? "" : `${label} ${formatNumber(value, 1)}/10`;
-    })
-    .filter(Boolean);
-
-  return metrics.length ? `${trackName} | ${metrics.join(" | ")}` : `${trackName} | Circuit-specific model profile`;
-}
-
 function dynamicTrackLogic(profile) {
   const priorities = [
     ["high-speed corner stability", "high_speed_corner_demand"],
@@ -2642,7 +2625,6 @@ function trackContext(team, recommendation) {
 function renderWhyLineup(team, recommendation) {
   const context = trackContext(team, recommendation);
   const recommendationLabel = recommendation?.chip === "none" ? "Save chips" : `Use ${chipLabel(recommendation?.chip)}`;
-  const insights = [["Circuit profile", circuitProfileSummary(team.drivers[0])], ...context.insights];
 
   els.whyLineup.hidden = false;
   els.whyLineup.innerHTML = `
@@ -2653,7 +2635,7 @@ function renderWhyLineup(team, recommendation) {
       <p>${escapeHtml(context.summary)}</p>
     </div>
     <ul>
-      ${insights
+      ${context.insights
         .map(
           ([label, value]) => `
           <li>
