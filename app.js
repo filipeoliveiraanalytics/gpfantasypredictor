@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260827-netherlands-audit-detail";
+const ASSET_VERSION = "20260901-gp-audits-and-track-profile";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
@@ -152,6 +152,7 @@ const state = {
   priceMovements: new Map(),
   forecastAudits: [],
   forecastAssetAudit: [],
+  selectedForecastAuditKey: "",
   constructorLogos: new Set(),
   constructorLogoFiles: new Map(),
   constructorLogoBasePath: "assets/constructors",
@@ -215,6 +216,9 @@ const els = {
   forecastCopy: document.querySelector("#forecast-copy"),
   forecastTracker: document.querySelector("#forecast-tracker"),
   forecastAssetAudit: document.querySelector("#forecast-asset-audit"),
+  forecastAuditGp: document.querySelector("#forecast-audit-gp"),
+  forecastAuditStatus: document.querySelector("#forecast-audit-status"),
+  forecastAssetAuditCopy: document.querySelector("#forecast-asset-audit-copy"),
   forecastDriverAuditRows: document.querySelector("#forecast-driver-audit-rows"),
   forecastConstructorAuditRows: document.querySelector("#forecast-constructor-audit-rows"),
 };
@@ -2033,14 +2037,42 @@ function trackerNumber(value) {
 
 function trackerPoints(value) {
   const parsed = trackerNumber(value);
-  return parsed === null ? "--" : `${formatNumber(parsed, 1)} pts`;
+  const displayValue = parsed !== null && Math.abs(parsed) < 0.05 ? 0 : parsed;
+  return displayValue === null ? "--" : `${formatNumber(displayValue, 1)} pts`;
 }
 
-function latestScoredForecastAudit() {
-  const auditedRows = [...state.forecastAudits]
-    .filter((row) => String(row.status || "").trim().toLowerCase() === "scored")
-    .filter((row) => trackerNumber(row.estimated_points) !== null && trackerNumber(row.actual_points) !== null);
-  return auditedRows.length ? auditedRows[auditedRows.length - 1] : null;
+function forecastAuditKey(audit) {
+  return [audit.gp_key, audit.mode, audit.status].map((value) => String(value || "").trim()).join("|");
+}
+
+function availableForecastAudits() {
+  return state.forecastAudits.filter((audit) => audit.gp_key && audit.gp_display && audit.mode);
+}
+
+function selectedForecastAudit() {
+  const audits = availableForecastAudits();
+  if (!audits.length) return null;
+  return (
+    audits.find((audit) => forecastAuditKey(audit) === state.selectedForecastAuditKey) ||
+    audits.find((audit) => String(audit.status || "").toLowerCase() === "scored") ||
+    audits[audits.length - 1]
+  );
+}
+
+function isScoredForecastAudit(audit) {
+  return String(audit.status || "").trim().toLowerCase() === "scored";
+}
+
+function populateForecastAuditSelect(audits, selectedAudit) {
+  if (!els.forecastAuditGp) return;
+  const selectedKey = forecastAuditKey(selectedAudit);
+  els.forecastAuditGp.innerHTML = audits
+    .map((audit) => {
+      const status = isScoredForecastAudit(audit) ? "Scored" : "Locked forecast";
+      return `<option value="${escapeHtml(forecastAuditKey(audit))}">${escapeHtml(audit.gp_display)} | ${escapeHtml(audit.mode)} | ${status}</option>`;
+    })
+    .join("");
+  els.forecastAuditGp.value = selectedKey;
 }
 
 function formatAuditDelta(value) {
@@ -2076,26 +2108,62 @@ function forecastAuditRow(row) {
     </tr>`;
 }
 
+function forecastRowsForAudit(audit) {
+  if (isScoredForecastAudit(audit)) {
+    return state.forecastAssetAudit.filter(
+      (row) =>
+        row.gp_key === audit.gp_key &&
+        row.mode === audit.mode &&
+        trackerNumber(row.estimated_points) !== null &&
+        trackerNumber(row.actual_points) !== null
+    );
+  }
+
+  return state.projections
+    .filter(
+      (row) =>
+        row.next_gp === audit.gp_key &&
+        row.mode === audit.mode &&
+        String(row.is_available || "").toUpperCase() === "TRUE"
+    )
+    .map((row) => ({
+      entity_type: row.entity_type,
+      name: row.name,
+      team: row.team,
+      estimated_points: row.expected_fantasy_points,
+      actual_points: "",
+      actual_dnf_affected: "No",
+    }));
+}
+
 function renderForecastAssetAudit(audit) {
   if (!els.forecastAssetAudit || !els.forecastDriverAuditRows || !els.forecastConstructorAuditRows) return;
 
-  const auditRows = state.forecastAssetAudit.filter(
-    (row) =>
-      row.gp_key === audit.gp_key &&
-      row.mode === audit.mode &&
-      trackerNumber(row.estimated_points) !== null &&
-      trackerNumber(row.actual_points) !== null
-  );
+  const auditRows = forecastRowsForAudit(audit);
 
   if (!auditRows.length) {
     els.forecastAssetAudit.hidden = true;
     return;
   }
 
-  const rowDelta = (row) => trackerNumber(row.actual_points) - trackerNumber(row.estimated_points);
-  const absoluteDelta = (row) => Math.abs(rowDelta(row));
+  const rowDelta = (row) => {
+    const estimate = trackerNumber(row.estimated_points);
+    const actual = trackerNumber(row.actual_points);
+    return estimate === null || actual === null ? null : actual - estimate;
+  };
+  const absoluteDelta = (row) => {
+    const delta = rowDelta(row);
+    return delta === null ? null : Math.abs(delta);
+  };
   const sortedRows = (rows) =>
-    [...rows].sort((left, right) => absoluteDelta(left) - absoluteDelta(right) || String(left.name).localeCompare(String(right.name)));
+    [...rows].sort((left, right) => {
+      const leftDelta = absoluteDelta(left);
+      const rightDelta = absoluteDelta(right);
+      if (leftDelta !== null && rightDelta !== null) return leftDelta - rightDelta || String(left.name).localeCompare(String(right.name));
+      const rightEstimate = trackerNumber(right.estimated_points) ?? Number.NEGATIVE_INFINITY;
+      const leftEstimate = trackerNumber(left.estimated_points) ?? Number.NEGATIVE_INFINITY;
+      return rightEstimate - leftEstimate || String(left.name).localeCompare(String(right.name));
+    });
 
   els.forecastDriverAuditRows.innerHTML = sortedRows(auditRows.filter((row) => row.entity_type === "driver"))
     .map(forecastAuditRow)
@@ -2109,7 +2177,8 @@ function renderForecastAssetAudit(audit) {
 function renderForecastTracker() {
   if (!els.forecastTracker) return;
 
-  const audit = latestScoredForecastAudit();
+  const audits = availableForecastAudits();
+  const audit = selectedForecastAudit();
   els.forecastTracker.hidden = !audit;
 
   if (!audit) {
@@ -2117,13 +2186,22 @@ function renderForecastTracker() {
     return;
   }
 
-  els.forecastTracker.dataset.status = "scored";
+  state.selectedForecastAuditKey = forecastAuditKey(audit);
+  populateForecastAuditSelect(audits, audit);
+  const scored = isScoredForecastAudit(audit);
+  els.forecastTracker.dataset.status = scored ? "scored" : "pending";
+  if (els.forecastAuditStatus) els.forecastAuditStatus.textContent = scored ? "Official scoring complete" : "Official scoring pending";
+  if (els.forecastAssetAuditCopy) {
+    els.forecastAssetAuditCopy.innerHTML = scored
+      ? `Locked forecast compared with official F1 Fantasy scoring for the completed GP. <span class="forecast-tracker__dnf-key"><span aria-hidden="true">&#9733;</span> DNF affected the actual score.</span>`
+      : "This forecast is locked before the weekend. Actual F1 Fantasy points and the delta will appear after official scoring is final.";
+  }
   renderForecastAssetAudit(audit);
 
   trackEvent("view_forecast_tracker", {
     next_gp: audit.gp_key || "",
     model_mode: audit.mode || "",
-    tracker_status: "scored",
+    tracker_status: audit.status || "",
     audited_asset_count: audit.asset_count || "",
   });
 }
@@ -2352,9 +2430,90 @@ function transferContext(team) {
   return `${transferSummary(team)} clear the projected-points and transfer-penalty checks for this strategy.`;
 }
 
+function trackDemand(profile, key) {
+  const value = Number(profile?.[key]);
+  return Number.isFinite(value) ? value : null;
+}
+
+function circuitProfileSummary(profile) {
+  const trackName = profile?.track_name || "Current circuit";
+  const metrics = [
+    ["High-speed", "high_speed_corner_demand"],
+    ["Straights", "straight_line_demand"],
+    ["Traction", "traction_demand"],
+    ["Qualifying", "quali_importance"],
+  ]
+    .map(([label, key]) => {
+      const value = trackDemand(profile, key);
+      return value === null ? "" : `${label} ${formatNumber(value, 1)}/10`;
+    })
+    .filter(Boolean);
+
+  return metrics.length ? `${trackName} | ${metrics.join(" | ")}` : `${trackName} | Circuit-specific model profile`;
+}
+
+function dynamicTrackLogic(profile) {
+  const priorities = [
+    ["high-speed corner stability", "high_speed_corner_demand"],
+    ["straight-line efficiency", "straight_line_demand"],
+    ["traction from slow corners", "traction_demand"],
+    ["qualifying and track position", "quali_importance"],
+    ["braking stability", "style_braking_aggression_demand"],
+    ["tyre management", "style_tyre_saving_demand"],
+  ]
+    .map(([label, key]) => ({ label, value: trackDemand(profile, key) }))
+    .filter(({ value }) => value !== null)
+    .sort((left, right) => right.value - left.value)
+    .slice(0, 3)
+    .map(({ label }) => label);
+  const overtakingDifficulty = trackDemand(profile, "overtaking_difficulty");
+  const overtakeEffectiveness = trackDemand(profile, "overtake_mode_effectiveness");
+  const passingRead =
+    overtakingDifficulty !== null && overtakingDifficulty >= 7
+      ? "Passing is constrained, so clean qualifying and converting track position are weighted more heavily."
+      : overtakeEffectiveness !== null && overtakeEffectiveness >= 7
+        ? "There is real recovery potential, so the model retains meaningful position-change and overtake upside."
+        : "The model balances starting position with race pace, position change and reliability.";
+  const priorityRead = priorities.length ? `The key model demands are ${priorities.join(", ")}.` : "The model uses the circuit profile alongside pace and reliability inputs.";
+  return `${priorityRead} ${passingRead}`;
+}
+
 function trackContext(team, recommendation) {
   const gp = team.drivers[0]?.next_gp ?? "this GP";
   const gpKey = gp.toLowerCase();
+  const profile = team.drivers[0] || {};
+  if (gpKey.includes("italy") || gpKey.includes("monza")) {
+    return {
+      title: "Italy context: Monza's low-drag speed and heavy braking",
+      summary:
+        "Monza combines maximum straight-line demand with big braking zones and genuine overtaking opportunities. The optimizer rewards efficient cars that can defend and recover, without ignoring traction and reliability through the chicanes.",
+      insights: [
+        ["Track logic", dynamicTrackLogic(profile)],
+        ["Constructor logic", constructorContext(team)],
+        ["Chip logic", chipContext(team, recommendation)],
+        ["Price logic", priceContext(team)],
+        ["Transfer logic", transferContext(team)],
+        ["Budget logic", budgetContext(team)],
+      ],
+    };
+  }
+
+  if (gpKey.includes("netherlands") || gpKey.includes("dutch") || gpKey.includes("zandvoort")) {
+    return {
+      title: "Netherlands context: banked high-speed corners and a narrow circuit",
+      summary:
+        "Zandvoort is flowing, narrow and difficult to pass on. The optimizer places extra value on high-speed confidence, tyre control and qualifying because track position is unusually hard to recover once the race starts.",
+      insights: [
+        ["Track logic", dynamicTrackLogic(profile)],
+        ["Constructor logic", constructorContext(team)],
+        ["Chip logic", chipContext(team, recommendation)],
+        ["Price logic", priceContext(team)],
+        ["Transfer logic", transferContext(team)],
+        ["Budget logic", budgetContext(team)],
+      ],
+    };
+  }
+
   if (gp.toLowerCase().includes("monaco")) {
     return {
       title: "Monaco context: qualifying and track position carry extra weight",
@@ -2467,11 +2626,10 @@ function trackContext(team, recommendation) {
   }
 
   return {
-    title: `${gp} context: model fit and transfer value`,
-    summary:
-      "The recommendation balances expected fantasy points with the cost of changing your current team.",
+    title: `${gp} context: circuit profile and transfer value`,
+    summary: `The recommendation combines the ${profile.track_name || "current circuit"} profile with expected fantasy points and the cost of changing your current team.`,
     insights: [
-      ["Track logic", "The model weights qualifying, race finish, position-change and reliability estimates for this GP."],
+      ["Track logic", dynamicTrackLogic(profile)],
       ["Constructor logic", constructorContext(team)],
       ["Chip logic", chipContext(team, recommendation)],
       ["Price logic", priceContext(team)],
@@ -2484,6 +2642,7 @@ function trackContext(team, recommendation) {
 function renderWhyLineup(team, recommendation) {
   const context = trackContext(team, recommendation);
   const recommendationLabel = recommendation?.chip === "none" ? "Save chips" : `Use ${chipLabel(recommendation?.chip)}`;
+  const insights = [["Circuit profile", circuitProfileSummary(team.drivers[0])], ...context.insights];
 
   els.whyLineup.hidden = false;
   els.whyLineup.innerHTML = `
@@ -2494,7 +2653,7 @@ function renderWhyLineup(team, recommendation) {
       <p>${escapeHtml(context.summary)}</p>
     </div>
     <ul>
-      ${context.insights
+      ${insights
         .map(
           ([label, value]) => `
           <li>
@@ -2844,6 +3003,16 @@ els.declineAnalytics.addEventListener("click", () => {
 });
 els.forecastLink.addEventListener("click", () => {
   trackEvent("open_full_gp_forecast");
+});
+els.forecastAuditGp.addEventListener("change", () => {
+  state.selectedForecastAuditKey = els.forecastAuditGp.value;
+  renderForecastTracker();
+  const audit = selectedForecastAudit();
+  trackEvent("select_forecast_audit_gp", {
+    next_gp: audit?.gp_key || "",
+    model_mode: audit?.mode || "",
+    tracker_status: audit?.status || "",
+  });
 });
 els.modal.addEventListener("click", (event) => {
   if (event.target === els.modal) closePicker();

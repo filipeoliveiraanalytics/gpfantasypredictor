@@ -110,7 +110,13 @@
             <span class="forecast-tracker__asset-details-hint">View estimates vs actual points</span>
           </summary>
           <div class="forecast-tracker__asset-details-content">
-              <p class="forecast-tracker__asset-audit-copy">Locked forecast compared with official F1 Fantasy scoring for the completed GP. <span class="forecast-tracker__dnf-key"><span aria-hidden="true">&#9733;</span> DNF affected the actual score.</span></p>
+            <div class="forecast-tracker__audit-toolbar">
+              <label for="forecast-audit-gp">Grand Prix
+                <select id="forecast-audit-gp" aria-label="Select Grand Prix forecast audit"></select>
+              </label>
+              <span class="forecast-tracker__audit-status" id="forecast-audit-status"></span>
+            </div>
+            <p class="forecast-tracker__asset-audit-copy" id="forecast-asset-audit-copy"></p>
             <div class="forecast-tracker__asset-grid">
               <section class="forecast-tracker__asset-section" aria-labelledby="forecast-driver-audit-title">
                 <h3 id="forecast-driver-audit-title">Drivers</h3>
