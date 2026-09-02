@@ -1,8 +1,21 @@
-const ASSET_VERSION = "20260901-gp-audits-and-track-profile";
+const ASSET_VERSION = "20260902-dnf-audit-fallback";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
 const FORECAST_ASSET_AUDIT_PATH = `data/fantasy_forecast_asset_audit.csv?v=${ASSET_VERSION}`;
+const KNOWN_AUDIT_DNFS = {
+  Netherlands: new Set([
+    "driver|Max Verstappen",
+    "driver|Esteban Ocon",
+    "driver|Oliver Bearman",
+    "driver|Valtteri Bottas",
+    "driver|Lance Stroll",
+    "constructor|Red Bull Racing",
+    "constructor|Haas F1 Team",
+    "constructor|Aston Martin",
+    "constructor|Cadillac",
+  ]),
+};
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 const AVAILABLE_CHIPS_KEY = "gp_fantasy_predictor_available_chips";
 const SAVED_TEAM_KEY = "gp_fantasy_predictor_saved_team";
@@ -2082,7 +2095,9 @@ function formatAuditDelta(value) {
 }
 
 function auditHasDnfImpact(row) {
-  return String(row.actual_dnf_affected ?? "").trim().toLowerCase() === "yes";
+  if (String(row.actual_dnf_affected ?? "").trim().toLowerCase() === "yes") return true;
+  const knownDnfs = KNOWN_AUDIT_DNFS[String(row.gp_key || "").trim()];
+  return knownDnfs ? knownDnfs.has(`${row.entity_type}|${row.name}`) : false;
 }
 
 function forecastAuditRow(row) {
