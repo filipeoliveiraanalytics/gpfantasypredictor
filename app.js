@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260904-italy-fp2-concise-label";
+const ASSET_VERSION = "20260904-italy-fp2-after-practice-labels";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
@@ -2941,7 +2941,7 @@ async function loadForecastAssetAudit() {
 async function init() {
   updateStrategyNote();
   await Promise.all([loadDriverPhotoManifest(), loadConstructorLogoManifest(), loadPriceMovements(), loadForecastTracker(), loadForecastAssetAudit()]);
-  const response = await fetch(DATA_PATH);
+  const response = await fetch(DATA_PATH, { cache: "no-store" });
   if (!response.ok) throw new Error(`Could not load ${DATA_PATH}`);
   state.projections = parseCsv(await response.text());
   state.drivers = state.projections.filter((row) => row.entity_type === "driver");
