@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260904-italy-fp2-normalized";
+const ASSET_VERSION = "20260904-italy-fp2-final-labels";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
@@ -668,14 +668,14 @@ function updateModelCopy(sample) {
   if (els.modelAdjustment) {
     const hasSpaPenalties = gpName.toLowerCase().includes("belgium");
     const hasNetherlandsSubstitution = /netherlands|zandvoort|dutch/.test(gpName.toLowerCase());
-    const hasItalyAntonelliPenalty = /italy|italian|monza/.test(gpName.toLowerCase());
-    els.modelAdjustment.hidden = !hasSpaPenalties && !hasNetherlandsSubstitution && !hasItalyAntonelliPenalty;
+    const hasItalyWeekendAdjustments = /italy|italian|monza/.test(gpName.toLowerCase());
+    els.modelAdjustment.hidden = !hasSpaPenalties && !hasNetherlandsSubstitution && !hasItalyWeekendAdjustments;
     els.modelAdjustment.textContent = hasSpaPenalties
       ? "Grid penalties for Norris, Hadjar, Stroll and Alonso are included in this model."
       : hasNetherlandsSubstitution
         ? "Lawson is modelled at Red Bull Racing; Tsunoda replaces him at Racing Bulls. The previous Racing Bulls Lawson asset is inactive and must be transferred out."
-        : hasItalyAntonelliPenalty
-          ? "Antonelli's expected back-of-grid power-unit penalty is included in this model."
+        : hasItalyWeekendAdjustments
+          ? "FP1 and FP2 data are included. Antonelli and Albon's grid penalties, reduced rookie FP1 signals, and Hadjar's absence are included in this model."
           : "";
   }
 
