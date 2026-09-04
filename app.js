@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260902-dnf-audit-fallback";
+const ASSET_VERSION = "20260904-italy-fp2-normalized";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
