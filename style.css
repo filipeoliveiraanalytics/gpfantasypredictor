@@ -37,6 +37,43 @@ body.is-optimizing * {
   padding: 42px 0;
 }
 
+.site-footer {
+  align-items: end;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin: 0 auto 48px;
+  padding: 26px 0 0;
+  width: min(1180px, calc(100% - 32px));
+}
+
+.site-footer .eyebrow {
+  margin-bottom: 8px;
+}
+
+.site-footer__story {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 720px;
+}
+
+.site-footer__email {
+  color: var(--teal);
+  font-size: 0.92rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.site-footer__email:hover,
+.site-footer__email:focus-visible {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 .hero {
   align-items: start;
   display: grid;
@@ -2104,6 +2141,13 @@ tr.is-best td {
   .shell {
     width: min(100% - 22px, 1180px);
     padding: 24px 0;
+  }
+
+  .site-footer {
+    align-items: start;
+    grid-template-columns: 1fr;
+    margin-bottom: 32px;
+    width: min(100% - 22px, 1180px);
   }
 
   h1 {
