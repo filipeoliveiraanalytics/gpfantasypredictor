@@ -48,8 +48,12 @@ body.is-optimizing * {
   width: min(1180px, calc(100% - 32px));
 }
 
-.site-footer .eyebrow {
-  margin-bottom: 8px;
+.site-footer__byline {
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-style: italic;
+  font-weight: 600;
+  margin: 0 0 8px;
 }
 
 .site-footer__story {
@@ -62,7 +66,7 @@ body.is-optimizing * {
 .site-footer__email {
   color: var(--teal);
   font-size: 0.92rem;
-  font-weight: 800;
+  font-weight: 600;
   overflow-wrap: anywhere;
   text-decoration: none;
 }
