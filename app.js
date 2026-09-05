@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260905-italy-fp3-footer-byline";
+const ASSET_VERSION = "20260905-italy-post-quali-final";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
@@ -675,7 +675,7 @@ function updateModelCopy(sample) {
       : hasNetherlandsSubstitution
         ? "Lawson is modelled at Red Bull Racing; Tsunoda replaces him at Racing Bulls. The previous Racing Bulls Lawson asset is inactive and must be transferred out."
         : hasItalyWeekendAdjustments
-          ? "FP1, FP2 and FP3 data are included. Antonelli and Albon's grid penalties are included in this model."
+          ? "FP1, FP2, FP3 and qualifying data are included. The official final grid is included in this model."
           : "";
   }
 
