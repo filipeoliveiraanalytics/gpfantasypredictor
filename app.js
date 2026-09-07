@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260905-italy-post-quali-final";
+const ASSET_VERSION = "20260907-madrid-pre-weekend";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
