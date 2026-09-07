@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260907-madrid-pre-weekend";
+const ASSET_VERSION = "20260907-madrid-spain-flag-roster-note";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
@@ -80,6 +80,7 @@ const GP_IDENTITY = [
   { aliases: ["miami"], location: "Miami, USA", flag: "us" },
   { aliases: ["canada", "canadian", "montreal"], location: "Montreal, Canada", flag: "ca" },
   { aliases: ["monaco", "monte-carlo", "monte carlo"], location: "Monte-Carlo, Monaco", flag: "mc" },
+  { aliases: ["madrid"], location: "Madrid, Spain", flag: "es" },
   { aliases: ["barcelona", "catalunya", "spain", "spanish"], location: "Barcelona, Spain", flag: "es" },
   { aliases: ["austria", "austrian", "spielberg", "red bull ring"], location: "Spielberg, Austria", flag: "at" },
   { aliases: ["british", "silverstone", "great britain"], location: "Silverstone, UK", flag: "gb" },
@@ -667,16 +668,15 @@ function updateModelCopy(sample) {
 
   if (els.modelAdjustment) {
     const hasSpaPenalties = gpName.toLowerCase().includes("belgium");
-    const hasNetherlandsSubstitution = /netherlands|zandvoort|dutch/.test(gpName.toLowerCase());
     const hasItalyWeekendAdjustments = /italy|italian|monza/.test(gpName.toLowerCase());
-    els.modelAdjustment.hidden = !hasSpaPenalties && !hasNetherlandsSubstitution && !hasItalyWeekendAdjustments;
-    els.modelAdjustment.textContent = hasSpaPenalties
+    const rosterNote = "Lawson continues to replace Hadjar at Red Bull Racing, while Tsunoda replaces Lawson at Racing Bulls.";
+    const weekendNote = hasSpaPenalties
       ? "Grid penalties for Norris, Hadjar, Stroll and Alonso are included in this model."
-      : hasNetherlandsSubstitution
-        ? "Lawson is modelled at Red Bull Racing; Tsunoda replaces him at Racing Bulls. The previous Racing Bulls Lawson asset is inactive and must be transferred out."
-        : hasItalyWeekendAdjustments
-          ? "FP1, FP2, FP3 and qualifying data are included. The official final grid is included in this model."
-          : "";
+      : hasItalyWeekendAdjustments
+        ? "FP1, FP2, FP3 and qualifying data are included. The official final grid is included in this model."
+        : "";
+    els.modelAdjustment.hidden = false;
+    els.modelAdjustment.textContent = weekendNote ? `${weekendNote} ${rosterNote}` : rosterNote;
   }
 
   if (els.modelNoteCopy) {
