@@ -1,3 +1,7 @@
-gp_key,gp_display,mode,status,scope,estimated_points,actual_points,mean_absolute_error,asset_count,scored_at,driver_estimated_points,driver_actual_points,driver_mean_absolute_error,driver_asset_count,constructor_estimated_points,constructor_actual_points,constructor_mean_absolute_error,constructor_asset_count
-Netherlands,Dutch Grand Prix,Post-Quali,scored,Average points across 22 drivers and 11 constructors,14.5,16.8,10.7,33,,9.7,10.6,8.6,22,24.1,29.0,14.8,11
-Italy,Italian Grand Prix,Post-Quali,scored,Average points across 22 drivers and 11 constructors,13.7,25.8,18.5,33,2026-09-07,9.2,18.0,13.8,22,22.8,41.5,27.9,11
+gp_key,gp_display,mode,status,forecast_source,scope,estimated_points,actual_points,mean_absolute_error,asset_count,scored_at,driver_estimated_points,driver_actual_points,driver_mean_absolute_error,driver_asset_count,constructor_estimated_points,constructor_actual_points,constructor_mean_absolute_error,constructor_asset_count
+Netherlands,Dutch Grand Prix,Pre-Weekend,scored,replayed,Average points across 22 drivers and 11 constructors,14.6,16.8,11.3,33,2026-08-23,9.8,10.6,9.1,22,24.4,29.0,15.7,11
+Netherlands,Dutch Grand Prix,After Practice,scored,replayed,Average points across 22 drivers and 11 constructors,14.5,16.8,11.2,33,2026-08-23,9.7,10.6,9.2,22,24.1,29.0,15.1,11
+Netherlands,Dutch Grand Prix,Post-Quali,scored,archived,Average points across 22 drivers and 11 constructors,14.5,16.8,10.7,33,2026-08-23,9.7,10.6,8.6,22,24.1,29.0,14.8,11
+Italy,Italian Grand Prix,Pre-Weekend,scored,archived,Average points across 22 drivers and 11 constructors,12.7,25.8,19.1,33,2026-09-07,8.3,18.0,14.5,22,21.5,41.5,28.5,11
+Italy,Italian Grand Prix,After Practice,scored,replayed,Average points across 22 drivers and 11 constructors,14.3,25.8,17.3,33,2026-09-07,9.6,18.0,13.0,22,23.8,41.5,26.0,11
+Italy,Italian Grand Prix,Post-Quali,scored,archived,Average points across 22 drivers and 11 constructors,13.7,25.8,18.5,33,2026-09-07,9.2,18.0,13.8,22,22.8,41.5,27.9,11

@@ -1,67 +1,199 @@
-gp_key,gp_display,mode,entity_type,key,name,team,estimated_points,actual_points,actual_dnf_affected
-Netherlands,Dutch Grand Prix,Post-Quali,driver,ANT,Kimi Antonelli,Mercedes,32.73,37,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,HAM,Lewis Hamilton,Ferrari,23.39,23,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,LEC,Charles Leclerc,Ferrari,19.61,39,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,RUS,George Russell,Mercedes,35.03,32,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,NOR,Lando Norris,McLaren,39.13,57,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,VER,Max Verstappen,Red Bull Racing,14.52,-13,Yes
-Netherlands,Dutch Grand Prix,Post-Quali,driver,PIA,Oscar Piastri,McLaren,21.71,21,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,GAS,Pierre Gasly,Alpine,4.23,8,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,COL,Franco Colapinto,Alpine,1.78,6,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,OCO,Esteban Ocon,Haas F1 Team,1.96,-10,Yes
-Netherlands,Dutch Grand Prix,Post-Quali,driver,SAI,Carlos Sainz,Williams,0.81,7,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,LIN,Arvid Lindblad,Racing Bulls,3.97,7,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,BOR,Gabriel Bortoleto,Audi,1.83,5,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,BEA,Oliver Bearman,Haas F1 Team,0.76,-13,Yes
-Netherlands,Dutch Grand Prix,Post-Quali,driver,ALO,Fernando Alonso,Aston Martin,0.52,24,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,PER,Sergio Perez,Cadillac,-0.29,8,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,LAW,Liam Lawson,Red Bull Racing,9.04,12,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,ALB,Alexander Albon,Williams,0.76,2,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,TSU,Yuki Tsunoda,Racing Bulls,0.95,5,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,HUL,Nico Hulkenberg,Audi,1.95,5,No
-Netherlands,Dutch Grand Prix,Post-Quali,driver,BOT,Valtteri Bottas,Cadillac,0.32,-18,Yes
-Netherlands,Dutch Grand Prix,Post-Quali,driver,STR,Lance Stroll,Aston Martin,-0.53,-10,Yes
-Netherlands,Dutch Grand Prix,Post-Quali,constructor,MER,Mercedes,Mercedes,77.76,84,No
-Netherlands,Dutch Grand Prix,Post-Quali,constructor,FER,Ferrari,Ferrari,53,74,No
-Netherlands,Dutch Grand Prix,Post-Quali,constructor,MCL,McLaren,McLaren,70.84,80,No
-Netherlands,Dutch Grand Prix,Post-Quali,constructor,RBR,Red Bull Racing,Red Bull Racing,33.56,11,Yes
-Netherlands,Dutch Grand Prix,Post-Quali,constructor,RBL,Racing Bulls,Racing Bulls,9.92,22,No
-Netherlands,Dutch Grand Prix,Post-Quali,constructor,ALP,Alpine,Alpine,11.01,19,No
-Netherlands,Dutch Grand Prix,Post-Quali,constructor,HAA,Haas F1 Team,Haas F1 Team,3.72,-20,Yes
-Netherlands,Dutch Grand Prix,Post-Quali,constructor,WIL,Williams,Williams,0.57,15,No
-Netherlands,Dutch Grand Prix,Post-Quali,constructor,AUD,Audi,Audi,6.78,25,No
-Netherlands,Dutch Grand Prix,Post-Quali,constructor,AMR,Aston Martin,Aston Martin,-1.01,18,Yes
-Netherlands,Dutch Grand Prix,Post-Quali,constructor,CAD,Cadillac,Cadillac,-0.97,-9,Yes
-Italy,Italian Grand Prix,Post-Quali,driver,ANT,Kimi Antonelli,Mercedes,42.32,93,No
-Italy,Italian Grand Prix,Post-Quali,driver,RUS,George Russell,Mercedes,34.89,33,No
-Italy,Italian Grand Prix,Post-Quali,driver,LEC,Charles Leclerc,Ferrari,24.89,-12,Yes
-Italy,Italian Grand Prix,Post-Quali,driver,VER,Max Verstappen,Red Bull Racing,11.6,37,No
-Italy,Italian Grand Prix,Post-Quali,driver,HAM,Lewis Hamilton,Ferrari,23.43,26,No
-Italy,Italian Grand Prix,Post-Quali,driver,NOR,Lando Norris,McLaren,28.84,32,No
-Italy,Italian Grand Prix,Post-Quali,driver,PIA,Oscar Piastri,McLaren,16.1,35,No
-Italy,Italian Grand Prix,Post-Quali,driver,SAI,Carlos Sainz,Williams,-1.21,14,No
-Italy,Italian Grand Prix,Post-Quali,driver,OCO,Esteban Ocon,Haas F1 Team,0.61,10,No
-Italy,Italian Grand Prix,Post-Quali,driver,PER,Sergio Perez,Cadillac,-1.54,13,No
-Italy,Italian Grand Prix,Post-Quali,driver,BEA,Oliver Bearman,Haas F1 Team,-1.2,4,No
-Italy,Italian Grand Prix,Post-Quali,driver,COL,Franco Colapinto,Alpine,-2.54,14,No
-Italy,Italian Grand Prix,Post-Quali,driver,LAW,Liam Lawson,Red Bull Racing,7.57,25,No
-Italy,Italian Grand Prix,Post-Quali,driver,GAS,Pierre Gasly,Alpine,4.67,14,No
-Italy,Italian Grand Prix,Post-Quali,driver,ALB,Alexander Albon,Williams,2.77,17,No
-Italy,Italian Grand Prix,Post-Quali,driver,LIN,Arvid Lindblad,Racing Bulls,4.92,11,No
-Italy,Italian Grand Prix,Post-Quali,driver,BOR,Gabriel Bortoleto,Audi,2.43,14,No
-Italy,Italian Grand Prix,Post-Quali,driver,ALO,Fernando Alonso,Aston Martin,-1.34,-10,Yes
-Italy,Italian Grand Prix,Post-Quali,driver,TSU,Yuki Tsunoda,Racing Bulls,5.36,17,No
-Italy,Italian Grand Prix,Post-Quali,driver,BOT,Valtteri Bottas,Cadillac,-1.75,4,No
-Italy,Italian Grand Prix,Post-Quali,driver,HUL,Nico Hulkenberg,Audi,3.7,14,No
-Italy,Italian Grand Prix,Post-Quali,driver,STR,Lance Stroll,Aston Martin,-2.0,-10,Yes
-Italy,Italian Grand Prix,Post-Quali,constructor,MER,Mercedes,Mercedes,87.21,128,No
-Italy,Italian Grand Prix,Post-Quali,constructor,FER,Ferrari,Ferrari,58.32,24,Yes
-Italy,Italian Grand Prix,Post-Quali,constructor,MCL,McLaren,McLaren,54.94,77,No
-Italy,Italian Grand Prix,Post-Quali,constructor,RBR,Red Bull Racing,Red Bull Racing,24.17,69,No
-Italy,Italian Grand Prix,Post-Quali,constructor,HAA,Haas F1 Team,Haas F1 Team,0.41,17,No
-Italy,Italian Grand Prix,Post-Quali,constructor,ALP,Alpine,Alpine,7.13,38,No
-Italy,Italian Grand Prix,Post-Quali,constructor,RBL,Racing Bulls,Racing Bulls,15.28,33,No
-Italy,Italian Grand Prix,Post-Quali,constructor,WIL,Williams,Williams,0.56,34,No
-Italy,Italian Grand Prix,Post-Quali,constructor,CAD,Cadillac,Cadillac,-4.29,16,No
-Italy,Italian Grand Prix,Post-Quali,constructor,AUD,Audi,Audi,11.13,41,No
-Italy,Italian Grand Prix,Post-Quali,constructor,AMR,Aston Martin,Aston Martin,-4.34,-21,Yes
+gp_key,gp_display,mode,forecast_source,entity_type,key,name,team,estimated_points,actual_points,actual_dnf_affected
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,NOR,Lando Norris,McLaren,35.71,57,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,ANT,Kimi Antonelli,Mercedes,33.85,37,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,RUS,George Russell,Mercedes,33.76,32,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,HAM,Lewis Hamilton,Ferrari,25.08,23,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,LEC,Charles Leclerc,Ferrari,21.32,39,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,PIA,Oscar Piastri,McLaren,18.21,21,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,VER,Max Verstappen,Red Bull Racing,17.82,-13,Yes
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,LAW,Liam Lawson,Red Bull Racing,8.65,12,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,GAS,Pierre Gasly,Alpine,3.78,8,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,BOR,Gabriel Bortoleto,Audi,1.63,5,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,HUL,Nico Hulkenberg,Audi,1.72,5,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,BEA,Oliver Bearman,Haas F1 Team,0.11,-13,Yes
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,OCO,Esteban Ocon,Haas F1 Team,3.69,-10,Yes
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,COL,Franco Colapinto,Alpine,3.38,6,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,SAI,Carlos Sainz,Williams,0.45,7,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,LIN,Arvid Lindblad,Racing Bulls,2.38,7,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,ALB,Alexander Albon,Williams,1.35,2,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,ALO,Fernando Alonso,Aston Martin,1.66,24,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,TSU,Yuki Tsunoda,Racing Bulls,-0.44,5,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,PER,Sergio Perez,Cadillac,0.3,8,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,BOT,Valtteri Bottas,Cadillac,0.44,-18,Yes
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,driver,STR,Lance Stroll,Aston Martin,0.2,-10,Yes
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,constructor,MER,Mercedes,Mercedes,77.61,84,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,constructor,FER,Ferrari,Ferrari,56.4,74,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,constructor,MCL,McLaren,McLaren,63.92,80,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,constructor,RBR,Red Bull Racing,Red Bull Racing,36.47,11,Yes
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,constructor,HAA,Haas F1 Team,Haas F1 Team,6.8,-20,Yes
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,constructor,ALP,Alpine,Alpine,12.16,19,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,constructor,RBL,Racing Bulls,Racing Bulls,2.94,22,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,constructor,WIL,Williams,Williams,2.8,15,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,constructor,CAD,Cadillac,Cadillac,-0.26,-9,Yes
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,constructor,AUD,Audi,Audi,8.35,25,No
+Netherlands,Dutch Grand Prix,Pre-Weekend,replayed,constructor,AMR,Aston Martin,Aston Martin,0.86,18,Yes
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,RUS,George Russell,Mercedes,39.05,32,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,NOR,Lando Norris,McLaren,37.55,57,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,ANT,Kimi Antonelli,Mercedes,27.79,37,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,LEC,Charles Leclerc,Ferrari,24.27,39,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,PIA,Oscar Piastri,McLaren,21.97,21,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,HAM,Lewis Hamilton,Ferrari,19.97,23,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,VER,Max Verstappen,Red Bull Racing,15.29,-13,Yes
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,LAW,Liam Lawson,Red Bull Racing,7.72,12,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,GAS,Pierre Gasly,Alpine,4.48,8,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,LIN,Arvid Lindblad,Racing Bulls,4.07,7,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,BOR,Gabriel Bortoleto,Audi,0.39,5,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,TSU,Yuki Tsunoda,Racing Bulls,0.51,5,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,HUL,Nico Hulkenberg,Audi,1.71,5,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,COL,Franco Colapinto,Alpine,1.25,6,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,OCO,Esteban Ocon,Haas F1 Team,3.11,-10,Yes
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,BEA,Oliver Bearman,Haas F1 Team,1.48,-13,Yes
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,SAI,Carlos Sainz,Williams,1.38,7,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,ALB,Alexander Albon,Williams,1.04,2,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,ALO,Fernando Alonso,Aston Martin,0.6,24,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,PER,Sergio Perez,Cadillac,0.58,8,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,BOT,Valtteri Bottas,Cadillac,-0.4,-18,Yes
+Netherlands,Dutch Grand Prix,After Practice,replayed,driver,STR,Lance Stroll,Aston Martin,0.07,-10,Yes
+Netherlands,Dutch Grand Prix,After Practice,replayed,constructor,MER,Mercedes,Mercedes,76.84,84,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,constructor,FER,Ferrari,Ferrari,54.24,74,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,constructor,MCL,McLaren,McLaren,69.52,80,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,constructor,RBR,Red Bull Racing,Red Bull Racing,33.01,11,Yes
+Netherlands,Dutch Grand Prix,After Practice,replayed,constructor,HAA,Haas F1 Team,Haas F1 Team,5.59,-20,Yes
+Netherlands,Dutch Grand Prix,After Practice,replayed,constructor,ALP,Alpine,Alpine,10.73,19,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,constructor,RBL,Racing Bulls,Racing Bulls,9.58,22,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,constructor,WIL,Williams,Williams,1.42,15,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,constructor,CAD,Cadillac,Cadillac,-0.82,-9,Yes
+Netherlands,Dutch Grand Prix,After Practice,replayed,constructor,AUD,Audi,Audi,5.1,25,No
+Netherlands,Dutch Grand Prix,After Practice,replayed,constructor,AMR,Aston Martin,Aston Martin,-0.33,18,Yes
+Netherlands,Dutch Grand Prix,Post-Quali,archived,constructor,MER,Mercedes,Mercedes,77.76,84,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,constructor,MCL,McLaren,McLaren,70.84,80,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,constructor,FER,Ferrari,Ferrari,53.0,74,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,constructor,RBR,Red Bull Racing,Red Bull Racing,33.56,11,Yes
+Netherlands,Dutch Grand Prix,Post-Quali,archived,constructor,ALP,Alpine,Alpine,11.01,19,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,constructor,RBL,Racing Bulls,Racing Bulls,9.92,22,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,constructor,AUD,Audi,Audi,6.78,25,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,constructor,HAA,Haas F1 Team,Haas F1 Team,3.72,-20,Yes
+Netherlands,Dutch Grand Prix,Post-Quali,archived,constructor,WIL,Williams,Williams,0.57,15,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,constructor,CAD,Cadillac,Cadillac,-0.97,-9,Yes
+Netherlands,Dutch Grand Prix,Post-Quali,archived,constructor,AMR,Aston Martin,Aston Martin,-1.01,18,Yes
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,NOR,Lando Norris,McLaren,39.13,57,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,RUS,George Russell,Mercedes,35.03,32,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,ANT,Kimi Antonelli,Mercedes,32.73,37,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,HAM,Lewis Hamilton,Ferrari,23.39,23,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,PIA,Oscar Piastri,McLaren,21.71,21,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,LEC,Charles Leclerc,Ferrari,19.61,39,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,VER,Max Verstappen,Red Bull Racing,14.52,-13,Yes
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,LAW,Liam Lawson,Red Bull Racing,9.04,12,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,GAS,Pierre Gasly,Alpine,4.23,8,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,LIN,Arvid Lindblad,Racing Bulls,3.97,7,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,OCO,Esteban Ocon,Haas F1 Team,1.96,-10,Yes
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,HUL,Nico Hulkenberg,Audi,1.95,5,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,BOR,Gabriel Bortoleto,Audi,1.83,5,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,COL,Franco Colapinto,Alpine,1.78,6,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,TSU,Yuki Tsunoda,Racing Bulls,0.95,5,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,SAI,Carlos Sainz,Williams,0.81,7,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,ALB,Alexander Albon,Williams,0.76,2,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,BEA,Oliver Bearman,Haas F1 Team,0.76,-13,Yes
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,ALO,Fernando Alonso,Aston Martin,0.52,24,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,BOT,Valtteri Bottas,Cadillac,0.32,-18,Yes
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,PER,Sergio Perez,Cadillac,-0.29,8,No
+Netherlands,Dutch Grand Prix,Post-Quali,archived,driver,STR,Lance Stroll,Aston Martin,-0.53,-10,Yes
+Italy,Italian Grand Prix,Pre-Weekend,archived,constructor,MER,Mercedes,Mercedes,68.68,128,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,constructor,MCL,McLaren,McLaren,59.82,77,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,constructor,FER,Ferrari,Ferrari,49.68,24,Yes
+Italy,Italian Grand Prix,Pre-Weekend,archived,constructor,RBR,Red Bull Racing,Red Bull Racing,30.48,69,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,constructor,ALP,Alpine,Alpine,10.14,38,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,constructor,AUD,Audi,Audi,8.61,41,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,constructor,HAA,Haas F1 Team,Haas F1 Team,5.33,17,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,constructor,RBL,Racing Bulls,Racing Bulls,2.5,33,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,constructor,WIL,Williams,Williams,1.57,34,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,constructor,AMR,Aston Martin,Aston Martin,0.36,-21,Yes
+Italy,Italian Grand Prix,Pre-Weekend,archived,constructor,CAD,Cadillac,Cadillac,-1.0,16,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,NOR,Lando Norris,McLaren,31.25,32,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,RUS,George Russell,Mercedes,29.48,33,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,ANT,Kimi Antonelli,Mercedes,29.2,93,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,HAM,Lewis Hamilton,Ferrari,19.94,26,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,LEC,Charles Leclerc,Ferrari,19.74,-12,Yes
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,PIA,Oscar Piastri,McLaren,18.57,35,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,VER,Max Verstappen,Red Bull Racing,13.06,37,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,LAW,Liam Lawson,Red Bull Racing,7.42,25,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,HUL,Nico Hulkenberg,Audi,3.19,14,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,GAS,Pierre Gasly,Alpine,3.16,14,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,COL,Franco Colapinto,Alpine,1.98,14,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,ALB,Alexander Albon,Williams,1.44,17,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,ALO,Fernando Alonso,Aston Martin,1.31,-10,Yes
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,BEA,Oliver Bearman,Haas F1 Team,1.24,4,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,SAI,Carlos Sainz,Williams,1.13,14,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,OCO,Esteban Ocon,Haas F1 Team,1.09,10,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,BOR,Gabriel Bortoleto,Audi,0.42,14,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,LIN,Arvid Lindblad,Racing Bulls,0.15,11,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,STR,Lance Stroll,Aston Martin,0.05,-10,Yes
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,PER,Sergio Perez,Cadillac,0.04,13,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,BOT,Valtteri Bottas,Cadillac,-0.04,4,No
+Italy,Italian Grand Prix,Pre-Weekend,archived,driver,TSU,Yuki Tsunoda,Racing Bulls,-0.65,17,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,RUS,George Russell,Mercedes,31.03,33,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,NOR,Lando Norris,McLaren,30.74,32,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,HAM,Lewis Hamilton,Ferrari,20.45,26,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,LEC,Charles Leclerc,Ferrari,19.58,-12,Yes
+Italy,Italian Grand Prix,After Practice,replayed,driver,PIA,Oscar Piastri,McLaren,18.04,35,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,VER,Max Verstappen,Red Bull Racing,12.09,37,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,ANT,Kimi Antonelli,Mercedes,56.44,93,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,LIN,Arvid Lindblad,Racing Bulls,4.8,11,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,TSU,Yuki Tsunoda,Racing Bulls,4.68,17,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,LAW,Liam Lawson,Red Bull Racing,4.73,25,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,GAS,Pierre Gasly,Alpine,1.0,14,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,HUL,Nico Hulkenberg,Audi,3.46,14,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,BOR,Gabriel Bortoleto,Audi,0.07,14,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,COL,Franco Colapinto,Alpine,0.65,14,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,OCO,Esteban Ocon,Haas F1 Team,0.96,10,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,SAI,Carlos Sainz,Williams,0.81,14,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,BEA,Oliver Bearman,Haas F1 Team,1.09,4,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,ALO,Fernando Alonso,Aston Martin,0.56,-10,Yes
+Italy,Italian Grand Prix,After Practice,replayed,driver,ALB,Alexander Albon,Williams,1.16,17,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,PER,Sergio Perez,Cadillac,-0.13,13,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,BOT,Valtteri Bottas,Cadillac,-0.67,4,No
+Italy,Italian Grand Prix,After Practice,replayed,driver,STR,Lance Stroll,Aston Martin,-0.93,-10,Yes
+Italy,Italian Grand Prix,After Practice,replayed,constructor,MER,Mercedes,Mercedes,97.47,128,No
+Italy,Italian Grand Prix,After Practice,replayed,constructor,FER,Ferrari,Ferrari,50.03,24,Yes
+Italy,Italian Grand Prix,After Practice,replayed,constructor,MCL,McLaren,McLaren,58.78,77,No
+Italy,Italian Grand Prix,After Practice,replayed,constructor,RBR,Red Bull Racing,Red Bull Racing,21.82,69,No
+Italy,Italian Grand Prix,After Practice,replayed,constructor,HAA,Haas F1 Team,Haas F1 Team,3.05,17,No
+Italy,Italian Grand Prix,After Practice,replayed,constructor,ALP,Alpine,Alpine,6.65,38,No
+Italy,Italian Grand Prix,After Practice,replayed,constructor,RBL,Racing Bulls,Racing Bulls,19.48,33,No
+Italy,Italian Grand Prix,After Practice,replayed,constructor,WIL,Williams,Williams,0.97,34,No
+Italy,Italian Grand Prix,After Practice,replayed,constructor,CAD,Cadillac,Cadillac,-1.8,16,No
+Italy,Italian Grand Prix,After Practice,replayed,constructor,AUD,Audi,Audi,6.53,41,No
+Italy,Italian Grand Prix,After Practice,replayed,constructor,AMR,Aston Martin,Aston Martin,-1.37,-21,Yes
+Italy,Italian Grand Prix,Post-Quali,archived,driver,ANT,Kimi Antonelli,Mercedes,42.32,93,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,RUS,George Russell,Mercedes,34.89,33,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,LEC,Charles Leclerc,Ferrari,24.89,-12,Yes
+Italy,Italian Grand Prix,Post-Quali,archived,driver,VER,Max Verstappen,Red Bull Racing,11.6,37,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,HAM,Lewis Hamilton,Ferrari,23.43,26,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,NOR,Lando Norris,McLaren,28.84,32,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,PIA,Oscar Piastri,McLaren,16.1,35,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,SAI,Carlos Sainz,Williams,-1.21,14,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,OCO,Esteban Ocon,Haas F1 Team,0.61,10,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,PER,Sergio Perez,Cadillac,-1.54,13,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,BEA,Oliver Bearman,Haas F1 Team,-1.2,4,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,COL,Franco Colapinto,Alpine,-2.54,14,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,LAW,Liam Lawson,Red Bull Racing,7.57,25,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,GAS,Pierre Gasly,Alpine,4.67,14,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,ALB,Alexander Albon,Williams,2.77,17,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,LIN,Arvid Lindblad,Racing Bulls,4.92,11,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,BOR,Gabriel Bortoleto,Audi,2.43,14,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,ALO,Fernando Alonso,Aston Martin,-1.34,-10,Yes
+Italy,Italian Grand Prix,Post-Quali,archived,driver,TSU,Yuki Tsunoda,Racing Bulls,5.36,17,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,BOT,Valtteri Bottas,Cadillac,-1.75,4,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,HUL,Nico Hulkenberg,Audi,3.7,14,No
+Italy,Italian Grand Prix,Post-Quali,archived,driver,STR,Lance Stroll,Aston Martin,-2.0,-10,Yes
+Italy,Italian Grand Prix,Post-Quali,archived,constructor,MER,Mercedes,Mercedes,87.21,128,No
+Italy,Italian Grand Prix,Post-Quali,archived,constructor,FER,Ferrari,Ferrari,58.32,24,Yes
+Italy,Italian Grand Prix,Post-Quali,archived,constructor,MCL,McLaren,McLaren,54.94,77,No
+Italy,Italian Grand Prix,Post-Quali,archived,constructor,RBR,Red Bull Racing,Red Bull Racing,24.17,69,No
+Italy,Italian Grand Prix,Post-Quali,archived,constructor,HAA,Haas F1 Team,Haas F1 Team,0.41,17,No
+Italy,Italian Grand Prix,Post-Quali,archived,constructor,ALP,Alpine,Alpine,7.13,38,No
+Italy,Italian Grand Prix,Post-Quali,archived,constructor,RBL,Racing Bulls,Racing Bulls,15.28,33,No
+Italy,Italian Grand Prix,Post-Quali,archived,constructor,WIL,Williams,Williams,0.56,34,No
+Italy,Italian Grand Prix,Post-Quali,archived,constructor,CAD,Cadillac,Cadillac,-4.29,16,No
+Italy,Italian Grand Prix,Post-Quali,archived,constructor,AUD,Audi,Audi,11.13,41,No
+Italy,Italian Grand Prix,Post-Quali,archived,constructor,AMR,Aston Martin,Aston Martin,-4.34,-21,Yes
