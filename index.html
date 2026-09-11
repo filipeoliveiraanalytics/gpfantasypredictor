@@ -102,24 +102,6 @@
 
     <section class="forecast-tracker" id="forecast-tracker" aria-label="Forecast audit" hidden>
       <div class="forecast-tracker__asset-audit" id="forecast-asset-audit" hidden>
-        <div class="forecast-tracker__accuracy-summary" aria-label="Forecast accuracy summary">
-          <div>
-            <p class="eyebrow">Forecast Accuracy</p>
-            <p class="forecast-tracker__accuracy-note" id="forecast-accuracy-note"></p>
-          </div>
-          <dl class="forecast-tracker__accuracy-metrics">
-            <div>
-              <dt>Drivers avg. error</dt>
-              <dd id="forecast-driver-mae">--</dd>
-              <small id="forecast-driver-mae-detail"></small>
-            </div>
-            <div>
-              <dt>Constructors avg. error</dt>
-              <dd id="forecast-constructor-mae">--</dd>
-              <small id="forecast-constructor-mae-detail"></small>
-            </div>
-          </dl>
-        </div>
         <details class="forecast-tracker__asset-details">
           <summary>
             <span>
@@ -133,6 +115,24 @@
                 <select id="forecast-audit-gp" aria-label="Select Grand Prix forecast audit"></select>
               </label>
               <span class="forecast-tracker__audit-status" id="forecast-audit-status"></span>
+            </div>
+            <div class="forecast-tracker__accuracy-summary" aria-label="Forecast accuracy summary">
+              <div>
+                <p class="eyebrow">Forecast Accuracy</p>
+                <p class="forecast-tracker__accuracy-note" id="forecast-accuracy-note"></p>
+              </div>
+              <dl class="forecast-tracker__accuracy-metrics">
+                <div>
+                  <dt>Drivers avg. error</dt>
+                  <dd id="forecast-driver-mae">--</dd>
+                  <small id="forecast-driver-mae-detail"></small>
+                </div>
+                <div>
+                  <dt>Constructors avg. error</dt>
+                  <dd id="forecast-constructor-mae">--</dd>
+                  <small id="forecast-constructor-mae-detail"></small>
+                </div>
+              </dl>
             </div>
             <p class="forecast-tracker__asset-audit-copy" id="forecast-asset-audit-copy"></p>
             <div class="forecast-tracker__asset-grid">
@@ -396,7 +396,7 @@
   <script>
     window.GA_MEASUREMENT_ID = "G-0GCZQDW467";
   </script>
-  <script src="app.js?v=20260911-historical-forecast-audit"></script>
+  <script src="app.js?v=20260911-forecast-audit-kpis"></script>
 </body>
 
 </html>
