@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260911-madrid-after-practice";
+const ASSET_VERSION = "20260911-madrid-fp1-fp2-label";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
@@ -630,7 +630,7 @@ function weekendTypeLabel(gpName, modeName) {
 function modeFreshnessLabel(mode, gpName = "") {
   const normalized = String(mode || "").toLowerCase();
   if (normalized.includes("practice")) {
-    return sprintOpportunity(gpName).currentSprint ? "FP1 + Sprint Qualifying + Sprint included" : "Free-practice data included";
+    return sprintOpportunity(gpName).currentSprint ? "FP1 + Sprint Qualifying + Sprint included" : "FP1 + FP2 data included";
   }
   if (normalized.includes("quali")) return "Qualifying data included";
   if (normalized.includes("pre")) return "Latest race results included";
