@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260911-madrid-fp1-fp2-label";
+const ASSET_VERSION = "20260911-historical-forecast-audit";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
@@ -233,6 +233,11 @@ const els = {
   forecastAuditGp: document.querySelector("#forecast-audit-gp"),
   forecastAuditStatus: document.querySelector("#forecast-audit-status"),
   forecastAssetAuditCopy: document.querySelector("#forecast-asset-audit-copy"),
+  forecastAccuracyNote: document.querySelector("#forecast-accuracy-note"),
+  forecastDriverMae: document.querySelector("#forecast-driver-mae"),
+  forecastDriverMaeDetail: document.querySelector("#forecast-driver-mae-detail"),
+  forecastConstructorMae: document.querySelector("#forecast-constructor-mae"),
+  forecastConstructorMaeDetail: document.querySelector("#forecast-constructor-mae-detail"),
   forecastDriverAuditRows: document.querySelector("#forecast-driver-audit-rows"),
   forecastConstructorAuditRows: document.querySelector("#forecast-constructor-audit-rows"),
 };
@@ -2076,12 +2081,18 @@ function isScoredForecastAudit(audit) {
   return String(audit.status || "").trim().toLowerCase() === "scored";
 }
 
+function auditSourceLabel(audit) {
+  return String(audit.forecast_source || "").trim().toLowerCase() === "replayed"
+    ? "Replayed forecast"
+    : "Archived forecast";
+}
+
 function populateForecastAuditSelect(audits, selectedAudit) {
   if (!els.forecastAuditGp) return;
   const selectedKey = forecastAuditKey(selectedAudit);
   els.forecastAuditGp.innerHTML = audits
     .map((audit) => {
-      const status = isScoredForecastAudit(audit) ? "Scored" : "Locked forecast";
+      const status = isScoredForecastAudit(audit) ? auditSourceLabel(audit) : "Locked forecast";
       return `<option value="${escapeHtml(forecastAuditKey(audit))}">${escapeHtml(audit.gp_display)} | ${escapeHtml(audit.mode)} | ${status}</option>`;
     })
     .join("");
@@ -2151,6 +2162,37 @@ function forecastRowsForAudit(audit) {
     }));
 }
 
+function renderForecastAccuracy(audit, auditRows) {
+  if (!els.forecastDriverMae || !els.forecastConstructorMae) return;
+
+  const nonDnfRows = (entityType) =>
+    auditRows.filter(
+      (row) =>
+        row.entity_type === entityType &&
+        !auditHasDnfImpact(row) &&
+        trackerNumber(row.estimated_points) !== null &&
+        trackerNumber(row.actual_points) !== null
+    );
+  const averageError = (rows) => {
+    if (!rows.length) return null;
+    return rows.reduce((sum, row) => sum + Math.abs(trackerNumber(row.estimated_points) - trackerNumber(row.actual_points)), 0) / rows.length;
+  };
+  const renderMetric = (valueEl, detailEl, rows) => {
+    const error = averageError(rows);
+    valueEl.textContent = error === null ? "--" : `${formatNumber(error, 1)} pts`;
+    if (detailEl) detailEl.textContent = rows.length ? `DNF-adjusted | ${rows.length} assets` : "No scored assets";
+  };
+
+  renderMetric(els.forecastDriverMae, els.forecastDriverMaeDetail, nonDnfRows("driver"));
+  renderMetric(els.forecastConstructorMae, els.forecastConstructorMaeDetail, nonDnfRows("constructor"));
+  if (els.forecastAccuracyNote) {
+    const replayed = String(audit.forecast_source || "").trim().toLowerCase() === "replayed";
+    els.forecastAccuracyNote.textContent = replayed
+      ? "Reconstructed from the locked model run; official Fantasy scores are final."
+      : "Forecast captured before the session; official Fantasy scores are final.";
+  }
+}
+
 function renderForecastAssetAudit(audit) {
   if (!els.forecastAssetAudit || !els.forecastDriverAuditRows || !els.forecastConstructorAuditRows) return;
 
@@ -2187,6 +2229,7 @@ function renderForecastAssetAudit(audit) {
     .map(forecastAuditRow)
     .join("");
   els.forecastAssetAudit.hidden = false;
+  renderForecastAccuracy(audit, auditRows);
 }
 
 function renderForecastTracker() {
@@ -2205,7 +2248,7 @@ function renderForecastTracker() {
   populateForecastAuditSelect(audits, audit);
   const scored = isScoredForecastAudit(audit);
   els.forecastTracker.dataset.status = scored ? "scored" : "pending";
-  if (els.forecastAuditStatus) els.forecastAuditStatus.textContent = scored ? "Official scoring complete" : "Official scoring pending";
+  if (els.forecastAuditStatus) els.forecastAuditStatus.textContent = scored ? `${auditSourceLabel(audit)} | Official scoring complete` : "Official scoring pending";
   if (els.forecastAssetAuditCopy) {
     els.forecastAssetAuditCopy.innerHTML = scored
       ? `Locked forecast compared with official F1 Fantasy scoring for the completed GP. <span class="forecast-tracker__dnf-key"><span aria-hidden="true">*</span> DNF affected the actual score.</span>`

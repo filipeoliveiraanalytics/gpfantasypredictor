@@ -526,6 +526,60 @@ button {
   padding-top: 16px;
 }
 
+.forecast-tracker__accuracy-summary {
+  align-items: end;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  padding: 0 0 18px;
+}
+
+.forecast-tracker__accuracy-summary .eyebrow {
+  margin: 0 0 5px;
+}
+
+.forecast-tracker__accuracy-note {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.forecast-tracker__accuracy-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.forecast-tracker__accuracy-metrics > div {
+  border-left: 1px solid var(--line);
+  min-width: 0;
+  padding: 2px 0 2px 16px;
+}
+
+.forecast-tracker__accuracy-metrics dt {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.forecast-tracker__accuracy-metrics dd {
+  color: var(--teal);
+  font-size: 1.22rem;
+  font-weight: 900;
+  margin: 5px 0 3px;
+  white-space: nowrap;
+}
+
+.forecast-tracker__accuracy-metrics small {
+  color: var(--muted);
+  display: block;
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
 .forecast-tracker__asset-details > summary {
   align-items: center;
   cursor: pointer;
@@ -2196,6 +2250,11 @@ tr.is-best td {
   }
 
   .forecast-tracker__asset-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .forecast-tracker__accuracy-summary {
+    align-items: start;
     grid-template-columns: 1fr;
   }
 
