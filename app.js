@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260911-forecast-audit-kpis";
+const ASSET_VERSION = "20260911-audit-all-modes";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
