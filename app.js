@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260912-fp3-calibrated";
+const ASSET_VERSION = "20260912-post-quali";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
@@ -637,7 +637,7 @@ function modeFreshnessLabel(mode, gpName = "") {
   if (normalized.includes("practice")) {
     return sprintOpportunity(gpName).currentSprint ? "FP1 + Sprint Qualifying + Sprint included" : "FP1 + FP2 + FP3 data included";
   }
-  if (normalized.includes("quali")) return "Qualifying data included";
+  if (normalized.includes("quali")) return "FP1 + FP2 + FP3 + qualifying data included";
   if (normalized.includes("pre")) return "Latest race results included";
   return "Latest model data included";
 }
