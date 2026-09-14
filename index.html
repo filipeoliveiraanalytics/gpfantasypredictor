@@ -32,7 +32,7 @@
   <meta name="twitter:description"
     content="A fan-made F1 Fantasy predictor powered by GP prediction modelling." />
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png" />
-    <link rel="stylesheet" href="style.css?v=20260905-italy-post-quali-final" />
+    <link rel="stylesheet" href="style.css?v=20260914-hindsight-review" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -162,6 +162,20 @@
           </div>
         </details>
       </div>
+    </section>
+
+    <section class="hindsight-teaser" id="hindsight-teaser" aria-label="Previous Grand Prix review" hidden>
+      <div class="hindsight-teaser__title">
+        <span class="eyebrow" id="hindsight-gp-label">Previous GP review</span>
+        <strong id="hindsight-title">Perfect hindsight</strong>
+      </div>
+      <div class="hindsight-teaser__score">
+        <span id="hindsight-saved-score">--</span>
+        <span aria-hidden="true">&rarr;</span>
+        <strong id="hindsight-best-score">--</strong>
+        <small id="hindsight-swing">--</small>
+      </div>
+      <button class="hindsight-teaser__button" id="open-hindsight-review" type="button">Review previous GP</button>
     </section>
 
     <section class="grid">
@@ -393,10 +407,60 @@
     </div>
   </div>
 
+  <div class="modal hindsight-modal" id="hindsight-modal" aria-hidden="true">
+    <div class="modal-card hindsight-modal__card" role="dialog" aria-modal="true" aria-labelledby="hindsight-modal-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow" id="hindsight-modal-gp">Previous Grand Prix</p>
+          <h2 id="hindsight-modal-title">Perfect hindsight</h2>
+        </div>
+        <button class="modal-close" id="close-hindsight-review" type="button">Close</button>
+      </div>
+
+      <div class="hindsight-summary">
+        <div>
+          <span>Saved lineup</span>
+          <strong id="hindsight-modal-saved-score">--</strong>
+        </div>
+        <div class="hindsight-summary__best">
+          <span>Best legal alternative</span>
+          <strong id="hindsight-modal-best-score">--</strong>
+          <small id="hindsight-modal-swing">--</small>
+        </div>
+      </div>
+
+      <dl class="hindsight-facts">
+        <div><dt>Transfers</dt><dd id="hindsight-transfers">--</dd></div>
+        <div><dt>Cost</dt><dd id="hindsight-cost">--</dd></div>
+        <div><dt>Chip</dt><dd>No chip</dd></div>
+        <div><dt>2x boost</dt><dd id="hindsight-boost">--</dd></div>
+      </dl>
+
+      <section class="hindsight-moves" id="hindsight-moves" hidden>
+        <div>
+          <span>Out</span>
+          <strong id="hindsight-out">--</strong>
+        </div>
+        <div>
+          <span>In</span>
+          <strong id="hindsight-in">--</strong>
+        </div>
+      </section>
+
+      <section class="hindsight-lineup" aria-labelledby="hindsight-lineup-title">
+        <div class="hindsight-lineup__heading">
+          <h3 id="hindsight-lineup-title">Best legal lineup</h3>
+          <span id="hindsight-raw-score">--</span>
+        </div>
+        <div class="hindsight-lineup__list" id="hindsight-lineup-list"></div>
+      </section>
+    </div>
+  </div>
+
   <script>
     window.GA_MEASUREMENT_ID = "G-0GCZQDW467";
   </script>
-  <script src="app.js?v=20260912-post-quali"></script>
+  <script src="app.js?v=20260914-hindsight-review"></script>
 </body>
 
 </html>

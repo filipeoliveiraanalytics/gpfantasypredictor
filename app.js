@@ -1,6 +1,7 @@
 const ASSET_VERSION = "20260914-madrid-scored-baku-pre";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
+const PRICE_HISTORY_PATH = `data/fantasy_price_history.csv?v=${ASSET_VERSION}`;
 const FORECAST_TRACKER_PATH = `data/fantasy_forecast_tracker.csv?v=${ASSET_VERSION}`;
 const FORECAST_ASSET_AUDIT_PATH = `data/fantasy_forecast_asset_audit.csv?v=${ASSET_VERSION}`;
 const KNOWN_AUDIT_DNFS = {
@@ -19,6 +20,7 @@ const KNOWN_AUDIT_DNFS = {
 const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 const AVAILABLE_CHIPS_KEY = "gp_fantasy_predictor_available_chips";
 const SAVED_TEAM_KEY = "gp_fantasy_predictor_saved_team";
+const HINDSIGHT_TEAM_KEY = "gp_fantasy_predictor_hindsight_team";
 const ROSTER_VERSION = "2026-08-lawson-red-bull";
 
 const CHIP_CONFIG = {
@@ -164,9 +166,11 @@ const state = {
   driverPhotos: new Set(),
   driverPhotoBasePath: "assets/drivers",
   priceMovements: new Map(),
+  priceHistory: [],
   forecastAudits: [],
   forecastAssetAudit: [],
   selectedForecastAuditKey: "",
+  hindsightReview: null,
   constructorLogos: new Set(),
   constructorLogoFiles: new Map(),
   constructorLogoBasePath: "assets/constructors",
@@ -240,6 +244,27 @@ const els = {
   forecastConstructorMaeDetail: document.querySelector("#forecast-constructor-mae-detail"),
   forecastDriverAuditRows: document.querySelector("#forecast-driver-audit-rows"),
   forecastConstructorAuditRows: document.querySelector("#forecast-constructor-audit-rows"),
+  hindsightTeaser: document.querySelector("#hindsight-teaser"),
+  hindsightGpLabel: document.querySelector("#hindsight-gp-label"),
+  hindsightTitle: document.querySelector("#hindsight-title"),
+  hindsightSavedScore: document.querySelector("#hindsight-saved-score"),
+  hindsightBestScore: document.querySelector("#hindsight-best-score"),
+  hindsightSwing: document.querySelector("#hindsight-swing"),
+  openHindsightReview: document.querySelector("#open-hindsight-review"),
+  hindsightModal: document.querySelector("#hindsight-modal"),
+  closeHindsightReview: document.querySelector("#close-hindsight-review"),
+  hindsightModalGp: document.querySelector("#hindsight-modal-gp"),
+  hindsightModalSavedScore: document.querySelector("#hindsight-modal-saved-score"),
+  hindsightModalBestScore: document.querySelector("#hindsight-modal-best-score"),
+  hindsightModalSwing: document.querySelector("#hindsight-modal-swing"),
+  hindsightTransfers: document.querySelector("#hindsight-transfers"),
+  hindsightCost: document.querySelector("#hindsight-cost"),
+  hindsightBoost: document.querySelector("#hindsight-boost"),
+  hindsightMoves: document.querySelector("#hindsight-moves"),
+  hindsightOut: document.querySelector("#hindsight-out"),
+  hindsightIn: document.querySelector("#hindsight-in"),
+  hindsightRawScore: document.querySelector("#hindsight-raw-score"),
+  hindsightLineupList: document.querySelector("#hindsight-lineup-list"),
 };
 
 function hasAnalyticsId() {
@@ -442,9 +467,11 @@ function syncChipAvailability() {
 
 function savedTeamSnapshot() {
   return {
-    version: 2,
+    version: 3,
     rosterVersion: ROSTER_VERSION,
     savedAt: new Date().toISOString(),
+    gpKey: state.projections[0]?.next_gp ?? "",
+    priceDate: state.projections[0]?.price_date ?? "",
     budget: els.budget.value.trim(),
     freeTransfers: els.freeTransfers.value.trim(),
     drivers: [...parseKeys(els.drivers.value)],
@@ -535,6 +562,7 @@ function persistSavedTeamIfEnabled() {
   }
 
   try {
+    archiveSavedTeamForHindsight(snapshot);
     localStorage.setItem(SAVED_TEAM_KEY, JSON.stringify(snapshot));
   } catch {
     return false;
@@ -543,6 +571,7 @@ function persistSavedTeamIfEnabled() {
   state.savedTeam = snapshot;
   state.savedTeamRestorePending = false;
   updateSavedTeamUi();
+  renderHindsightReview();
   return true;
 }
 
@@ -560,6 +589,7 @@ function saveTeamLocally() {
 function clearSavedTeam() {
   try {
     localStorage.removeItem(SAVED_TEAM_KEY);
+    localStorage.removeItem(HINDSIGHT_TEAM_KEY);
   } catch {
     updateSavedTeamUi();
     els.status.textContent = "This browser could not clear the saved team.";
@@ -570,7 +600,9 @@ function clearSavedTeam() {
   state.savedTeam = null;
   state.savedTeamRestorePending = false;
   state.savedTeamRestoreTracked = false;
+  state.hindsightReview = null;
   updateSavedTeamUi();
+  renderHindsightReview();
   els.status.textContent = "Saved team cleared from this device.";
   trackEvent("clear_team_local", saved ? savedTeamEventParams(saved) : {});
 }
@@ -2252,6 +2284,304 @@ function renderForecastTracker() {
   });
 }
 
+function latestScoredAudit() {
+  const scored = state.forecastAudits.filter(isScoredForecastAudit);
+  if (!scored.length) return null;
+
+  const latestDate = [...scored]
+    .map((audit) => String(audit.scored_at || ""))
+    .sort()
+    .at(-1);
+  const latest = scored.filter((audit) => String(audit.scored_at || "") === latestDate);
+  return latest.find((audit) => audit.mode === "Post-Quali") || latest[0];
+}
+
+function readStoredTeam(key) {
+  try {
+    const stored = JSON.parse(localStorage.getItem(key));
+    if (!stored || !Array.isArray(stored.drivers) || !Array.isArray(stored.constructors)) return null;
+    if (stored.drivers.length !== 5 || stored.constructors.length !== 2 || toNumber(stored.budget) <= 0) return null;
+    return stored;
+  } catch {
+    return null;
+  }
+}
+
+function archiveSavedTeamForHindsight(nextSnapshot) {
+  const previous = state.savedTeam;
+  if (!previous || previous.gpKey === nextSnapshot.gpKey) return;
+
+  const latestAudit = latestScoredAudit();
+  const gpKey = previous.gpKey || latestAudit?.gp_key;
+  if (!gpKey) return;
+
+  localStorage.setItem(
+    HINDSIGHT_TEAM_KEY,
+    JSON.stringify({ ...previous, gpKey, archivedAt: new Date().toISOString() })
+  );
+}
+
+function hindsightSnapshotForAudit(audit) {
+  const archived = readStoredTeam(HINDSIGHT_TEAM_KEY);
+  if (archived?.gpKey === audit.gp_key) return archived;
+  if (state.savedTeam?.gpKey === audit.gp_key) return state.savedTeam;
+
+  // Snapshots from before this feature did not record a target GP. Attribute a
+  // single legacy saved team to the latest completed round so existing users
+  // can receive their first retrospective.
+  if (!archived && state.savedTeam && !state.savedTeam.gpKey) return state.savedTeam;
+  return null;
+}
+
+function hindsightKey(key) {
+  return key === "LAW_RB" ? "LAW" : key;
+}
+
+function hindsightPriceDate(snapshot, audit) {
+  const rows = state.priceHistory;
+  const hasFullSnapshot = (date) => {
+    const prices = rows.filter((row) => row.price_date === date);
+    const available = new Set(prices.map((row) => `${row.entity_type}|${row.key}`));
+    return [...snapshot.drivers].every((key) => available.has(`driver|${hindsightKey(key)}`)) &&
+      [...snapshot.constructors].every((key) => available.has(`constructor|${hindsightKey(key)}`));
+  };
+
+  if (snapshot.priceDate && hasFullSnapshot(snapshot.priceDate)) return snapshot.priceDate;
+
+  const scoreDate = String(audit.scored_at || "");
+  const dates = [...new Set(rows.map((row) => row.price_date).filter((date) => date && date < scoreDate))].sort();
+  return dates.reverse().find(hasFullSnapshot) || "";
+}
+
+function hindsightAssets(audit, priceDate) {
+  const prices = new Map(
+    state.priceHistory
+      .filter((row) => row.price_date === priceDate)
+      .map((row) => [`${row.entity_type}|${row.key}`, row])
+  );
+
+  return state.forecastAssetAudit
+    .filter(
+      (row) =>
+        row.gp_key === audit.gp_key &&
+        row.mode === audit.mode &&
+        trackerNumber(row.actual_points) !== null &&
+        prices.has(`${row.entity_type}|${row.key}`)
+    )
+    .map((row) => {
+      const price = prices.get(`${row.entity_type}|${row.key}`);
+      return {
+        ...row,
+        price_m: price.price_m,
+        actualPoints: trackerNumber(row.actual_points),
+      };
+    });
+}
+
+function hindsightComboCandidates(currentRows, allRows, size, maxChanges, entityType) {
+  if (currentRows.length !== size) return [];
+  const currentKeys = new Set(currentRows.map((row) => row.key));
+  const alternatives = allRows.filter((row) => !currentKeys.has(row.key));
+  const candidates = [];
+
+  for (let changes = 0; changes <= Math.min(size, maxChanges); changes += 1) {
+    for (const kept of combinations(currentRows, size - changes)) {
+      for (const added of combinations(alternatives, changes)) {
+        const rows = [...kept, ...added];
+        const keys = new Set(rows.map((row) => row.key));
+        const inKeys = rows.filter((row) => !currentKeys.has(row.key)).map((row) => row.key);
+        const outKeys = currentRows.filter((row) => !keys.has(row.key)).map((row) => row.key);
+        const points = rows.reduce((sum, row) => sum + row.actualPoints, 0);
+        candidates.push({
+          entityType,
+          rows,
+          cost: rows.reduce((sum, row) => sum + toNumber(row.price_m), 0),
+          points,
+          bestBoost:
+            entityType === "driver"
+              ? [...rows].sort((left, right) => right.actualPoints - left.actualPoints)[0]
+              : null,
+          transferCount: inKeys.length,
+          inKeys,
+          outKeys,
+        });
+      }
+    }
+  }
+
+  return candidates;
+}
+
+function hindsightScore(driverCombo, constructorCombo) {
+  const rawPoints = driverCombo.points + constructorCombo.points;
+  const boostPoints = driverCombo.bestBoost?.actualPoints ?? 0;
+  return {
+    rawPoints,
+    boostPoints,
+    totalPoints: rawPoints + boostPoints,
+    bestBoost: driverCombo.bestBoost,
+  };
+}
+
+function buildHindsightReview() {
+  const audit = latestScoredAudit();
+  if (!audit) return null;
+
+  const snapshot = hindsightSnapshotForAudit(audit);
+  if (!snapshot) return null;
+
+  const priceDate = hindsightPriceDate(snapshot, audit);
+  if (!priceDate) return null;
+
+  const assets = hindsightAssets(audit, priceDate);
+  const drivers = assets.filter((row) => row.entity_type === "driver");
+  const constructors = assets.filter((row) => row.entity_type === "constructor");
+  if (drivers.length < 5 || constructors.length < 2) return null;
+
+  const driverByKey = new Map(drivers.map((row) => [row.key, row]));
+  const constructorByKey = new Map(constructors.map((row) => [row.key, row]));
+  const currentDrivers = snapshot.drivers.map(hindsightKey).map((key) => driverByKey.get(key)).filter(Boolean);
+  const currentConstructors = snapshot.constructors.map(hindsightKey).map((key) => constructorByKey.get(key)).filter(Boolean);
+  if (currentDrivers.length !== 5 || currentConstructors.length !== 2) return null;
+
+  const freeTransfers = Math.max(0, Math.floor(toNumber(snapshot.freeTransfers)));
+  const budget = toNumber(snapshot.budget);
+  const driverCandidates = hindsightComboCandidates(currentDrivers, drivers, 5, freeTransfers, "driver");
+  const constructorCandidates = hindsightComboCandidates(currentConstructors, constructors, 2, freeTransfers, "constructor");
+  let best = null;
+
+  driverCandidates.forEach((driverCombo) => {
+    constructorCandidates.forEach((constructorCombo) => {
+      const transferCount = driverCombo.transferCount + constructorCombo.transferCount;
+      const cost = driverCombo.cost + constructorCombo.cost;
+      if (transferCount > freeTransfers || cost > budget + 0.0001) return;
+
+      const score = hindsightScore(driverCombo, constructorCombo);
+      const candidate = {
+        ...score,
+        drivers: driverCombo.rows,
+        constructors: constructorCombo.rows,
+        cost,
+        budgetRemaining: budget - cost,
+        transferCount,
+        driversIn: driverCombo.inKeys,
+        driversOut: driverCombo.outKeys,
+        constructorsIn: constructorCombo.inKeys,
+        constructorsOut: constructorCombo.outKeys,
+      };
+      const isBetter =
+        !best ||
+        candidate.totalPoints > best.totalPoints ||
+        (candidate.totalPoints === best.totalPoints && candidate.transferCount < best.transferCount) ||
+        (candidate.totalPoints === best.totalPoints &&
+          candidate.transferCount === best.transferCount &&
+          candidate.budgetRemaining > best.budgetRemaining + 0.0001);
+      if (isBetter) best = candidate;
+    });
+  });
+
+  if (!best) return null;
+  const originalDrivers = hindsightComboCandidates(currentDrivers, drivers, 5, 0, "driver")[0];
+  const originalConstructors = hindsightComboCandidates(currentConstructors, constructors, 2, 0, "constructor")[0];
+  const original = hindsightScore(originalDrivers, originalConstructors);
+  const lookup = new Map(assets.map((row) => [`${row.entity_type}|${row.key}`, row]));
+
+  return {
+    audit,
+    snapshot,
+    priceDate,
+    budget,
+    original,
+    best,
+    pointSwing: best.totalPoints - original.totalPoints,
+    lookup,
+  };
+}
+
+function hindsightPointLabel(points) {
+  return `${formatNumber(points, 0)} pts`;
+}
+
+function hindsightAssetName(review, type, key) {
+  return review.lookup.get(`${type}|${key}`)?.name || displayAssetKey(key);
+}
+
+function hindsightLineupMarkup(review) {
+  const rows = [...review.best.drivers, ...review.best.constructors];
+  return rows
+    .map((row) => {
+      const boosted = row.entity_type === "driver" && row.key === review.best.bestBoost?.key;
+      const visual = row.entity_type === "driver" ? driverAvatar(row, "mini") : constructorMark(row, "mini");
+      return `
+        <article class="hindsight-lineup__asset" style="--team-color:${teamColor(row.team)}">
+          ${visual}
+          <span>
+            <strong>${escapeHtml(row.name)}</strong>
+            <small>${escapeHtml(row.team)}</small>
+          </span>
+          ${boosted ? '<b class="hindsight-boost-badge">2x</b>' : ""}
+          <em>${hindsightPointLabel(row.actualPoints)}</em>
+        </article>`;
+    })
+    .join("");
+}
+
+function renderHindsightReview() {
+  if (!els.hindsightTeaser) return;
+  const review = buildHindsightReview();
+  state.hindsightReview = review;
+  els.hindsightTeaser.hidden = !review;
+  if (!review) return;
+
+  const gpName = review.audit.gp_display || review.audit.gp_key;
+  const swing = `${review.pointSwing >= 0 ? "+" : ""}${hindsightPointLabel(review.pointSwing)}`;
+  els.hindsightGpLabel.textContent = `${review.audit.gp_key} Review`;
+  els.hindsightTitle.textContent = "Perfect hindsight";
+  els.hindsightSavedScore.textContent = hindsightPointLabel(review.original.totalPoints);
+  els.hindsightBestScore.textContent = hindsightPointLabel(review.best.totalPoints);
+  els.hindsightSwing.textContent = swing;
+  els.openHindsightReview.textContent = `Review ${review.audit.gp_key}`;
+  els.openHindsightReview.setAttribute("aria-label", `Review perfect hindsight for ${gpName}`);
+
+  els.hindsightModalGp.textContent = gpName;
+  els.hindsightModalSavedScore.textContent = hindsightPointLabel(review.original.totalPoints);
+  els.hindsightModalBestScore.textContent = hindsightPointLabel(review.best.totalPoints);
+  els.hindsightModalSwing.textContent = swing;
+  els.hindsightTransfers.textContent = `${review.best.transferCount} of ${Math.max(0, Math.floor(toNumber(review.snapshot.freeTransfers)))} free`;
+  els.hindsightCost.textContent = `${formatNumber(review.best.cost, 1)}M / ${formatNumber(review.budget, 1)}M`;
+  els.hindsightBoost.textContent = `${review.best.bestBoost.name} +${hindsightPointLabel(review.best.boostPoints)}`;
+  els.hindsightRawScore.textContent = `${hindsightPointLabel(review.best.rawPoints)} before 2x`;
+  els.hindsightLineupList.innerHTML = hindsightLineupMarkup(review);
+
+  const outgoing = [
+    ...review.best.driversOut.map((key) => hindsightAssetName(review, "driver", key)),
+    ...review.best.constructorsOut.map((key) => hindsightAssetName(review, "constructor", key)),
+  ];
+  const incoming = [
+    ...review.best.driversIn.map((key) => hindsightAssetName(review, "driver", key)),
+    ...review.best.constructorsIn.map((key) => hindsightAssetName(review, "constructor", key)),
+  ];
+  els.hindsightMoves.hidden = outgoing.length === 0;
+  els.hindsightOut.textContent = outgoing.join(", ") || "No moves";
+  els.hindsightIn.textContent = incoming.join(", ") || "No moves";
+}
+
+function openHindsightModal() {
+  if (!state.hindsightReview) return;
+  els.hindsightModal.classList.add("open");
+  els.hindsightModal.setAttribute("aria-hidden", "false");
+  trackEvent("open_hindsight_review", {
+    gp: state.hindsightReview.audit.gp_key,
+    point_swing: state.hindsightReview.pointSwing,
+    transfer_count: state.hindsightReview.best.transferCount,
+  });
+}
+
+function closeHindsightModal() {
+  els.hindsightModal.classList.remove("open");
+  els.hindsightModal.setAttribute("aria-hidden", "true");
+}
+
 function budgetLeftLabel(team) {
   if (team.activeChip === "limitless") return "Limitless";
   return `${formatNumber(team.budgetRemaining, 1)}M left`;
@@ -2949,6 +3279,16 @@ async function loadPriceMovements() {
   }
 }
 
+async function loadPriceHistory() {
+  try {
+    const response = await fetch(PRICE_HISTORY_PATH, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Could not load ${PRICE_HISTORY_PATH}`);
+    state.priceHistory = parseCsv(await response.text());
+  } catch {
+    state.priceHistory = [];
+  }
+}
+
 async function loadForecastTracker() {
   try {
     const response = await fetch(FORECAST_TRACKER_PATH, { cache: "no-store" });
@@ -2971,7 +3311,14 @@ async function loadForecastAssetAudit() {
 
 async function init() {
   updateStrategyNote();
-  await Promise.all([loadDriverPhotoManifest(), loadConstructorLogoManifest(), loadPriceMovements(), loadForecastTracker(), loadForecastAssetAudit()]);
+  await Promise.all([
+    loadDriverPhotoManifest(),
+    loadConstructorLogoManifest(),
+    loadPriceMovements(),
+    loadPriceHistory(),
+    loadForecastTracker(),
+    loadForecastAssetAudit(),
+  ]);
   const response = await fetch(DATA_PATH, { cache: "no-store" });
   if (!response.ok) throw new Error(`Could not load ${DATA_PATH}`);
   state.projections = parseCsv(await response.text());
@@ -2990,6 +3337,7 @@ async function init() {
   syncChipAvailability();
   updateBudgetValidation();
   updateSavedTeamUi();
+  renderHindsightReview();
 }
 
 els.form.addEventListener("submit", (event) => {
@@ -3042,8 +3390,13 @@ els.forecastAuditGp.addEventListener("change", () => {
     tracker_status: audit?.status || "",
   });
 });
+els.openHindsightReview.addEventListener("click", openHindsightModal);
+els.closeHindsightReview.addEventListener("click", closeHindsightModal);
 els.modal.addEventListener("click", (event) => {
   if (event.target === els.modal) closePicker();
+});
+els.hindsightModal.addEventListener("click", (event) => {
+  if (event.target === els.hindsightModal) closeHindsightModal();
 });
 els.pickerList.addEventListener("click", (event) => {
   const option = event.target.closest(".picker-option");
