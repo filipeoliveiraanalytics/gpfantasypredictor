@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260914-madrid-scored-baku-pre";
+const ASSET_VERSION = "20260914-madrid-all-forecast-modes";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const PRICE_HISTORY_PATH = `data/fantasy_price_history.csv?v=${ASSET_VERSION}`;
