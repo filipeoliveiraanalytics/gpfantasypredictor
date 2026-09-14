@@ -197,6 +197,72 @@ Italy,Italian Grand Prix,Post-Quali,archived,constructor,WIL,Williams,Williams,0
 Italy,Italian Grand Prix,Post-Quali,archived,constructor,CAD,Cadillac,Cadillac,-4.29,16,No
 Italy,Italian Grand Prix,Post-Quali,archived,constructor,AUD,Audi,Audi,11.13,41,No
 Italy,Italian Grand Prix,Post-Quali,archived,constructor,AMR,Aston Martin,Aston Martin,-4.34,-21,Yes
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,NOR,Lando Norris,McLaren,29.61,23,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,RUS,George Russell,Mercedes,29.59,27,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,ANT,Kimi Antonelli,Mercedes,26.54,35,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,PIA,Oscar Piastri,McLaren,19.5,9,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,HAM,Lewis Hamilton,Ferrari,17.8,-13,Yes
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,LEC,Charles Leclerc,Ferrari,14.48,19,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,VER,Max Verstappen,Red Bull Racing,9.72,38,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,TSU,Yuki Tsunoda,Racing Bulls,8.81,1,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,LIN,Arvid Lindblad,Racing Bulls,6.82,5,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,GAS,Pierre Gasly,Alpine,2.9,4,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,LAW,Liam Lawson,Red Bull Racing,4.1,16,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,BOR,Gabriel Bortoleto,Audi,0.73,0,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,HUL,Nico Hulkenberg,Audi,2.49,2,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,COL,Franco Colapinto,Alpine,3.28,13,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,SAI,Carlos Sainz,Williams,0.94,-18,Yes
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,OCO,Esteban Ocon,Haas F1 Team,0.98,5,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,BEA,Oliver Bearman,Haas F1 Team,1.13,3,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,ALB,Alexander Albon,Williams,1.61,4,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,ALO,Fernando Alonso,Aston Martin,1.17,4,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,PER,Sergio Perez,Cadillac,0.73,-18,Yes
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,BOT,Valtteri Bottas,Cadillac,0.32,1,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,driver,STR,Lance Stroll,Aston Martin,0.15,-22,Yes
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,constructor,MER,Mercedes,Mercedes,66.13,87,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,constructor,FER,Ferrari,Ferrari,42.28,18,Yes
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,constructor,MCL,McLaren,McLaren,59.11,44,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,constructor,RBR,Red Bull Racing,Red Bull Racing,18.82,59,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,constructor,HAA,Haas F1 Team,Haas F1 Team,1.11,11,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,constructor,ALP,Alpine,Alpine,11.18,24,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,constructor,RBL,Racing Bulls,Racing Bulls,25.63,13,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,constructor,WIL,Williams,Williams,3.55,-11,Yes
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,constructor,CAD,Cadillac,Cadillac,0.05,-16,Yes
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,constructor,AUD,Audi,Audi,6.22,10,No
+Madrid,Spanish Grand Prix,Pre-Weekend,replayed,constructor,AMR,Aston Martin,Aston Martin,0.32,-17,Yes
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,NOR,Lando Norris,McLaren,31.82,23,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,RUS,George Russell,Mercedes,28.11,27,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,ANT,Kimi Antonelli,Mercedes,24.6,35,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,PIA,Oscar Piastri,McLaren,20.86,9,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,HAM,Lewis Hamilton,Ferrari,17.76,-13,Yes
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,LEC,Charles Leclerc,Ferrari,14.98,19,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,VER,Max Verstappen,Red Bull Racing,10.78,38,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,TSU,Yuki Tsunoda,Racing Bulls,6.58,1,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,LIN,Arvid Lindblad,Racing Bulls,6.06,5,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,LAW,Liam Lawson,Red Bull Racing,5.03,16,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,GAS,Pierre Gasly,Alpine,2.46,4,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,BOR,Gabriel Bortoleto,Audi,1.3,0,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,HUL,Nico Hulkenberg,Audi,3.96,2,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,COL,Franco Colapinto,Alpine,2.62,13,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,OCO,Esteban Ocon,Haas F1 Team,1.17,5,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,BEA,Oliver Bearman,Haas F1 Team,1.05,3,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,SAI,Carlos Sainz,Williams,1.2,-18,Yes
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,ALO,Fernando Alonso,Aston Martin,1.2,4,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,ALB,Alexander Albon,Williams,1.26,4,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,PER,Sergio Perez,Cadillac,0.63,-18,Yes
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,BOT,Valtteri Bottas,Cadillac,0.31,1,No
+Madrid,Spanish Grand Prix,After Practice,replayed,driver,STR,Lance Stroll,Aston Martin,0.3,-22,Yes
+Madrid,Spanish Grand Prix,After Practice,replayed,constructor,MER,Mercedes,Mercedes,62.71,87,No
+Madrid,Spanish Grand Prix,After Practice,replayed,constructor,FER,Ferrari,Ferrari,42.74,18,Yes
+Madrid,Spanish Grand Prix,After Practice,replayed,constructor,MCL,McLaren,McLaren,62.68,44,No
+Madrid,Spanish Grand Prix,After Practice,replayed,constructor,RBR,Red Bull Racing,Red Bull Racing,20.81,59,No
+Madrid,Spanish Grand Prix,After Practice,replayed,constructor,HAA,Haas F1 Team,Haas F1 Team,3.22,11,No
+Madrid,Spanish Grand Prix,After Practice,replayed,constructor,ALP,Alpine,Alpine,10.08,24,No
+Madrid,Spanish Grand Prix,After Practice,replayed,constructor,RBL,Racing Bulls,Racing Bulls,22.64,13,No
+Madrid,Spanish Grand Prix,After Practice,replayed,constructor,WIL,Williams,Williams,1.46,-11,Yes
+Madrid,Spanish Grand Prix,After Practice,replayed,constructor,CAD,Cadillac,Cadillac,-0.06,-16,Yes
+Madrid,Spanish Grand Prix,After Practice,replayed,constructor,AUD,Audi,Audi,8.26,10,No
+Madrid,Spanish Grand Prix,After Practice,replayed,constructor,AMR,Aston Martin,Aston Martin,0.5,-17,Yes
 Madrid,Spanish Grand Prix,Post-Quali,archived,driver,ANT,Kimi Antonelli,Mercedes,24.38,35,No
 Madrid,Spanish Grand Prix,Post-Quali,archived,driver,HAM,Lewis Hamilton,Ferrari,17.88,-13,Yes
 Madrid,Spanish Grand Prix,Post-Quali,archived,driver,RUS,George Russell,Mercedes,23.94,27,No
