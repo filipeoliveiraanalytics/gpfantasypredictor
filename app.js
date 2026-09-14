@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260914-madrid-all-forecast-modes";
+const ASSET_VERSION = "20260914-dotd-pitstops-v2";
 const DATA_PATH = `data/fantasy_projections.csv?v=${ASSET_VERSION}`;
 const PRICE_MOVEMENTS_PATH = `data/fantasy_price_movements.csv?v=${ASSET_VERSION}`;
 const PRICE_HISTORY_PATH = `data/fantasy_price_history.csv?v=${ASSET_VERSION}`;
@@ -752,7 +752,7 @@ function updateModelCopy(sample) {
 
   if (els.modelNoteCopy) {
     els.modelNoteCopy.textContent =
-      `The optimizer combines the ${gpName} ${modeName} GP model, updated F1 Fantasy prices, rolling price-momentum estimates, transfer penalties and the mandatory 2x driver boost. It is built for lineup decisions before team lock, with deeper race context available in the full GP Predictor.`;
+      `The optimizer combines the ${gpName} ${modeName} GP model, updated F1 Fantasy prices, rolling price-momentum estimates, transfer penalties, expected Driver of the Day and constructor pit-stop scoring, and the mandatory 2x driver boost. It is built for lineup decisions before team lock, with deeper race context available in the full GP Predictor.`;
   }
 
   if (els.forecastTitle) {
