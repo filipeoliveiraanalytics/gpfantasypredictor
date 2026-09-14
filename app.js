@@ -2312,24 +2312,40 @@ function archiveSavedTeamForHindsight(nextSnapshot) {
   if (!previous || previous.gpKey === nextSnapshot.gpKey) return;
 
   const latestAudit = latestScoredAudit();
-  const gpKey = previous.gpKey || latestAudit?.gp_key;
+  const capturedGp = Boolean(previous.gpKey);
+  const gpKey = previous.gpKey || (isLegacySnapshotBeforeAudit(previous, latestAudit) ? latestAudit?.gp_key : "");
   if (!gpKey) return;
 
   localStorage.setItem(
     HINDSIGHT_TEAM_KEY,
-    JSON.stringify({ ...previous, gpKey, archivedAt: new Date().toISOString() })
+    JSON.stringify({
+      ...previous,
+      gpKey,
+      hindsightSource: capturedGp ? "captured_gp" : "legacy_before_audit",
+      archivedAt: new Date().toISOString(),
+    })
   );
+}
+
+function isLegacySnapshotBeforeAudit(snapshot, audit) {
+  if (snapshot?.gpKey || !snapshot?.savedAt || !audit?.scored_at) return false;
+  const savedAt = new Date(snapshot.savedAt);
+  const scoringDay = new Date(`${audit.scored_at}T00:00:00.000Z`);
+  return Number.isFinite(savedAt.getTime()) && Number.isFinite(scoringDay.getTime()) && savedAt < scoringDay;
 }
 
 function hindsightSnapshotForAudit(audit) {
   const archived = readStoredTeam(HINDSIGHT_TEAM_KEY);
-  if (archived?.gpKey === audit.gp_key) return archived;
+  const archivedMatchesAudit =
+    archived?.gpKey === audit.gp_key &&
+    (archived.hindsightSource === "captured_gp" || isLegacySnapshotBeforeAudit(archived, audit));
+  if (archivedMatchesAudit) return archived;
   if (state.savedTeam?.gpKey === audit.gp_key) return state.savedTeam;
 
-  // Snapshots from before this feature did not record a target GP. Attribute a
-  // single legacy saved team to the latest completed round so existing users
-  // can receive their first retrospective.
-  if (!archived && state.savedTeam && !state.savedTeam.gpKey) return state.savedTeam;
+  // Older snapshots did not record their target GP. Only use one when its
+  // timestamp clearly predates the completed round, avoiding a Baku team
+  // being mistaken for a Madrid team after the user returns to optimize.
+  if (!archived && state.savedTeam && isLegacySnapshotBeforeAudit(state.savedTeam, audit)) return state.savedTeam;
   return null;
 }
 
