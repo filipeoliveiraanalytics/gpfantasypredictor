@@ -274,6 +274,15 @@
           <span>Save my team</span>
         </label>
 
+        <aside class="snapshot-callout" id="snapshot-callout" aria-live="polite" hidden>
+          <div>
+            <span class="eyebrow" id="snapshot-callout-gp">GP snapshot</span>
+            <strong>Save your team for the post-race review.</strong>
+          </div>
+          <button class="snapshot-callout__save" id="save-snapshot-callout" type="button">Save team</button>
+          <button class="snapshot-callout__dismiss" id="dismiss-snapshot-callout" type="button" aria-label="Dismiss team snapshot reminder" title="Dismiss reminder">&times;</button>
+        </aside>
+
         <button id="optimize-button" type="submit">Optimize Team</button>
         <p class="disclaimer">Not affiliated with Formula 1. Projections are model estimates, not guarantees.</p>
       </form>
@@ -460,7 +469,7 @@
   <script>
     window.GA_MEASUREMENT_ID = "G-0GCZQDW467";
   </script>
-  <script src="app.js?v=20260914-hindsight-snapshot-fix"></script>
+  <script src="app.js?v=20260914-snapshot-callout"></script>
 </body>
 
 </html>

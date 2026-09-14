@@ -21,6 +21,7 @@ const CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 const AVAILABLE_CHIPS_KEY = "gp_fantasy_predictor_available_chips";
 const SAVED_TEAM_KEY = "gp_fantasy_predictor_saved_team";
 const HINDSIGHT_TEAM_KEY = "gp_fantasy_predictor_hindsight_team";
+const SNAPSHOT_CALLOUT_DISMISSED_KEY = "gp_fantasy_predictor_snapshot_callout_dismissed";
 const ROSTER_VERSION = "2026-08-lawson-red-bull";
 
 const CHIP_CONFIG = {
@@ -202,6 +203,10 @@ const els = {
   availableChipInputs: [...document.querySelectorAll("#available-chip-options input[type='checkbox']")],
   chipStatus: document.querySelector("#chip-status"),
   saveTeamToggle: document.querySelector("#save-team-toggle"),
+  snapshotCallout: document.querySelector("#snapshot-callout"),
+  snapshotCalloutGp: document.querySelector("#snapshot-callout-gp"),
+  saveSnapshotCallout: document.querySelector("#save-snapshot-callout"),
+  dismissSnapshotCallout: document.querySelector("#dismiss-snapshot-callout"),
   openDriverPicker: document.querySelector("#open-driver-picker"),
   openConstructorPicker: document.querySelector("#open-constructor-picker"),
   driverPickerSummary: document.querySelector("#driver-picker-summary"),
@@ -497,6 +502,35 @@ function savedTeamEventParams(snapshot) {
 
 function updateSavedTeamUi() {
   els.saveTeamToggle.checked = Boolean(state.savedTeam);
+  updateSnapshotCallout();
+}
+
+function hasCompleteTeamInputs() {
+  return (
+    toNumber(els.budget.value) > 0 &&
+    parseKeys(els.drivers.value).size === 5 &&
+    parseKeys(els.constructors.value).size === 2
+  );
+}
+
+function updateSnapshotCallout() {
+  if (!els.snapshotCallout) return;
+  const gpKey = state.projections[0]?.next_gp ?? "Next GP";
+  const dismissedForGp = localStorage.getItem(SNAPSHOT_CALLOUT_DISMISSED_KEY) === gpKey;
+  const show = !state.savedTeam && hasCompleteTeamInputs() && !dismissedForGp;
+  els.snapshotCallout.hidden = !show;
+  if (show) els.snapshotCalloutGp.textContent = `${gpKey} snapshot`;
+}
+
+function saveSnapshotFromCallout() {
+  els.saveTeamToggle.checked = true;
+  saveTeamLocally();
+}
+
+function dismissSnapshotCallout() {
+  const gpKey = state.projections[0]?.next_gp ?? "";
+  if (gpKey) localStorage.setItem(SNAPSHOT_CALLOUT_DISMISSED_KEY, gpKey);
+  updateSnapshotCallout();
 }
 
 function trackSavedTeamRestore() {
@@ -3173,6 +3207,7 @@ function updatePickerSummaries() {
   els.driverPickerSummary.textContent = driverKeys.map(displayAssetKey).join(", ") || "Choose drivers";
   els.constructorPickerSummary.textContent = [...parseKeys(els.constructors.value)].join(", ") || "Choose constructors";
   updateBudgetValidation();
+  updateSnapshotCallout();
 }
 
 function openPicker(type) {
@@ -3366,6 +3401,7 @@ els.openConstructorPicker.addEventListener("click", () => openPicker("constructo
 els.budget.addEventListener("input", () => {
   updateBudgetValidation();
   persistSavedTeamIfEnabled();
+  updateSnapshotCallout();
 });
 els.freeTransfers.addEventListener("input", persistSavedTeamIfEnabled);
 els.strategy.addEventListener("change", () => {
@@ -3380,6 +3416,8 @@ els.availableChipInputs.forEach((input) =>
   })
 );
 els.saveTeamToggle.addEventListener("change", handleSaveTeamToggle);
+els.saveSnapshotCallout.addEventListener("click", saveSnapshotFromCallout);
+els.dismissSnapshotCallout.addEventListener("click", dismissSnapshotCallout);
 els.closePicker.addEventListener("click", closePicker);
 els.applyPicker.addEventListener("click", applyPicker);
 els.acceptAnalytics.addEventListener("click", () => {
