@@ -1,5 +1,6 @@
 const DATA_ROOT = "data";
 const TEAM_STORAGE_KEY = "gp-fantasy-notebook-team-v1";
+const ANALYTICS_CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
 
 const teamColors = {
   Mercedes: "#20a69b", McLaren: "#ee781d", Ferrari: "#d52d36", "Red Bull Racing": "#20386f",
@@ -56,7 +57,31 @@ const els = {
   auditDriverRows: document.querySelector("#audit-driver-rows"),
   auditConstructorRows: document.querySelector("#audit-constructor-rows"),
   engine: document.querySelector("#optimizer-engine"),
+  cookieBanner: document.querySelector("#cookie-banner"),
+  acceptAnalytics: document.querySelector("#accept-analytics"),
+  declineAnalytics: document.querySelector("#decline-analytics"),
 };
+
+function loadAnalytics() {
+  if (!window.GA_MEASUREMENT_ID || window.gtag) return;
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function gtag() { window.dataLayer.push(arguments); };
+  window.gtag("js", new Date());
+  window.gtag("config", window.GA_MEASUREMENT_ID, { anonymize_ip: true });
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${window.GA_MEASUREMENT_ID}`;
+  document.head.appendChild(script);
+}
+
+function initialiseAnalyticsConsent() {
+  const consent = window.localStorage.getItem(ANALYTICS_CONSENT_KEY);
+  if (consent === "accepted") {
+    loadAnalytics();
+  } else if (consent !== "declined") {
+    els.cookieBanner.hidden = false;
+  }
+}
 
 function parseCsv(text) {
   const rows = [];
@@ -589,9 +614,19 @@ els.auditSelect.addEventListener("change", () => {
   if (els.auditDialog.open) renderAuditDialog();
 });
 els.openAudit.addEventListener("click", renderAuditDialog);
+els.acceptAnalytics.addEventListener("click", () => {
+  window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "accepted");
+  els.cookieBanner.hidden = true;
+  loadAnalytics();
+});
+els.declineAnalytics.addEventListener("click", () => {
+  window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "declined");
+  els.cookieBanner.hidden = true;
+});
 
 els.engine.addEventListener("load", warmOptimizerEngine);
 warmOptimizerEngine();
+initialiseAnalyticsConsent();
 
 initialise().catch((error) => {
   els.stageCopy.textContent = error.message;

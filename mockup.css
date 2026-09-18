@@ -81,6 +81,13 @@ nav a.active { color: var(--ink); border-color: var(--red); }
 .footer-disclaimer { margin: 8px 0 0; color: var(--muted); font-size: 10px; line-height: 1.45; }
 .site-footer a { color: var(--teal); font-family: Arial, Helvetica, sans-serif; font-size: 10px; font-weight: bold; text-decoration: none; }
 .site-footer a:hover, .site-footer a:focus-visible { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.cookie-banner { position: fixed; z-index: 10; right: 20px; bottom: 20px; width: min(540px, calc(100vw - 40px)); padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 18px; border: 1px solid var(--ink); background: var(--surface); box-shadow: 5px 5px 0 rgba(22, 21, 20, .14); }
+.cookie-banner p, .cookie-banner small { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+.cookie-banner small { display: block; margin-top: 4px; }
+.cookie-banner small a { color: var(--teal); font-weight: bold; }
+.cookie-actions { flex: 0 0 auto; display: flex; gap: 7px; }
+.cookie-actions button { min-width: 68px; min-height: 34px; padding: 0 11px; border: 1px solid var(--ink); background: transparent; color: var(--ink); font-size: 11px; font-weight: bold; }
+.cookie-actions .primary { width: auto; background: var(--ink); color: #fff; text-align: center; }
 
 .team-panel, .context-panel { padding-top: 12px; }
 .team-panel { border-right: 1px solid var(--rule); padding-right: 25px; }
@@ -482,4 +489,7 @@ td strong { font-size: 11px; }
   .stage-strip, .lineup { min-width: 0; }
   .asset-name strong { white-space: normal; }
   .picker-options, .audit-tables { grid-template-columns: 1fr; }
+  .cookie-banner { right: 14px; bottom: 14px; width: calc(100vw - 28px); display: block; }
+  .cookie-actions { margin-top: 12px; }
+  .cookie-actions button { flex: 1; }
 }
