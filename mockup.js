@@ -12,7 +12,7 @@ const teamColors = {
 };
 
 const state = {
-  projections: [], audits: [], auditRows: [],
+  projections: [], audits: [], auditRows: [], priceThresholds: [],
   dataReady: false,
   currentDrivers: [],
   currentConstructors: [],
@@ -269,24 +269,22 @@ function swatch(row) {
   return `<i style="background:${teamColors[row.team] || "#555"}"></i>`;
 }
 
-function priceGuidance(row) {
+function priceTrendGuidance(row, trendLabel) {
   const projected = number(row.expected_fantasy_points, Number.NaN);
-  const goodThreshold = number(row.price_points_needed_good, Number.NaN);
-  const greatThreshold = number(row.price_points_needed_great, Number.NaN);
-  const priceChange = number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m));
-  if (![projected, goodThreshold, greatThreshold].every(Number.isFinite)) {
-    return "Price guidance will be available with the next model update.";
+  const gpName = `${row.next_gp} Grand Prix`;
+  const threshold = state.priceThresholds.find((entry) => entry.source_gp === gpName && entry.entity_type === row.entity_type && entry.key === row.key);
+  if (!Number.isFinite(projected) || !threshold) {
+    return `Model trend: ${trendLabel}. Price thresholds are unavailable for this asset.`;
   }
 
-  if (projected < goodThreshold) {
-    return `Needs ${Math.ceil(goodThreshold - projected)} more projected pts to move out of a price-fall path.`;
-  }
-  if (projected < greatThreshold) {
-    const change = priceChange > 0 ? `+$${format(priceChange)}m` : "a positive";
-    return `On ${change} price path. Needs ${Math.ceil(greatThreshold - projected)} more projected pts for the top rise tier.`;
-  }
-  const change = priceChange > 0 ? `+$${format(priceChange)}m` : "positive";
-  return `On a ${change} price path with a ${Math.floor(projected - greatThreshold)}-pt cushion above the top rise tier.`;
+  const premiumAsset = number(row.price_m) >= 18.5;
+  const tiers = premiumAsset ? { good: 0.1, great: 0.3, poor: 0.1 } : { good: 0.2, great: 0.6, poor: 0.2 };
+  const pointsTo = (value) => Math.max(0, Math.ceil(number(value) - projected));
+  const pointsLowerTo = (value) => Math.max(0, Math.ceil(projected - number(value)));
+  const good = pointsTo(threshold.good_min);
+  const great = pointsTo(threshold.great_min);
+  const poor = pointsLowerTo(threshold.poor_max);
+  return `Model trend: ${trendLabel}. +$${format(tiers.good)}m: ${good ? `${good} pts more` : "in range"}. +$${format(tiers.great)}m: ${great ? `${great} pts more` : "in range"}. -$${format(tiers.poor)}m: ${poor ? `${poor} pts lower` : "in range"}.`;
 }
 
 function renderCurrentTeam() {
@@ -297,10 +295,7 @@ function renderCurrentTeam() {
       return `<li class="team-empty">Choose ${count}</li>`;
     }
     return rows
-      .map((row) => {
-        const guidance = priceGuidance(row);
-        return `<li class="has-price-guidance" role="button" tabindex="0" aria-expanded="false" data-price-guidance="${escapeHtml(guidance)}" aria-label="${escapeHtml(`${row.name}. ${guidance}`)}">${swatch(row)}<span>${escapeHtml(row.name)}${type === "driver" ? `<small>${escapeHtml(row.team)}</small>` : ""}</span><b>$${format(row.price_m)}m</b></li>`;
-      })
+      .map((row) => `<li>${swatch(row)}<span>${escapeHtml(row.name)}${type === "driver" ? `<small>${escapeHtml(row.team)}</small>` : ""}</span><b>$${format(row.price_m)}m</b></li>`)
       .join("");
   };
   els.drivers.innerHTML = renderList("driver");
@@ -488,11 +483,12 @@ function renderLineupTable() {
     const hasMaterialPriceMove = Math.abs(delta) >= 0.05;
     const trendClass = hasMaterialPriceMove ? (delta > 0 ? "up" : "down") : "neutral";
     const trendLabel = hasMaterialPriceMove ? `${delta > 0 ? "+" : ""}${format(delta)}m` : "--";
+    const trendGuidance = priceTrendGuidance(row, trendLabel);
     const position = rows.slice(0, index).filter((candidate) => candidate.entity_type === row.entity_type).length + 1;
     const isFirstConstructor = row.entity_type === "constructor" && !rows.slice(0, index).some((candidate) => candidate.entity_type === "constructor");
     const rowClass = [row.entity_type === "constructor" ? "constructor" : "", isFirstConstructor ? "first-constructor" : ""].filter(Boolean).join(" ");
     const teamLabel = row.entity_type === "driver" ? `<small>${escapeHtml(row.team)}</small>` : "";
-    return `<tr class="${rowClass}"><td class="position">${position}</td><td class="asset-name"><i style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong>${teamLabel}</span></td><td class="points">${format(row.expected_fantasy_points)}</td><td>$${format(row.price_m)}m</td><td title="Projected points per $1M">${format(row.value_per_million, 2)}</td><td class="${trendClass}">${trendLabel}</td></tr>`;
+    return `<tr class="${rowClass}"><td class="position">${position}</td><td class="asset-name"><i style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong>${teamLabel}</span></td><td class="points">${format(row.expected_fantasy_points)}</td><td>$${format(row.price_m)}m</td><td title="Projected points per $1M">${format(row.value_per_million, 2)}</td><td class="${trendClass} trend-cell" role="button" tabindex="0" aria-expanded="false" data-trend-guidance="${escapeHtml(trendGuidance)}" aria-label="${escapeHtml(`${row.name}. ${trendGuidance}`)}">${trendLabel}</td></tr>`;
   }).join("");
 }
 
@@ -757,15 +753,17 @@ function renderAuditDialog() {
 }
 
 async function initialise() {
-  const [projectionResponse, auditResponse, auditRowsResponse] = await Promise.all([
+  const [projectionResponse, auditResponse, auditRowsResponse, priceThresholdResponse] = await Promise.all([
     fetch(`${DATA_ROOT}/fantasy_projections.csv`, { cache: "no-store" }),
     fetch(`${DATA_ROOT}/fantasy_forecast_tracker.csv`, { cache: "no-store" }),
     fetch(`${DATA_ROOT}/fantasy_forecast_asset_audit.csv`, { cache: "no-store" }),
+    fetch(`${DATA_ROOT}/fantasy_price_thresholds.csv`, { cache: "no-store" }),
   ]);
-  if (!projectionResponse.ok || !auditResponse.ok || !auditRowsResponse.ok) throw new Error("Could not load the Fantasy data files.");
+  if (!projectionResponse.ok || !auditResponse.ok || !auditRowsResponse.ok || !priceThresholdResponse.ok) throw new Error("Could not load the Fantasy data files.");
   state.projections = parseCsv(await projectionResponse.text());
   state.audits = parseCsv(await auditResponse.text());
   state.auditRows = parseCsv(await auditRowsResponse.text());
+  state.priceThresholds = parseCsv(await priceThresholdResponse.text());
   const restoredTeam = restoreSavedTeam();
   renderChipCount();
   renderCurrentTeam();
@@ -844,9 +842,9 @@ els.confirmAnalytics.addEventListener("click", confirmAnalyticsConsent);
 els.closeRatingPrompt.addEventListener("click", dismissRatingPrompt);
 els.ratingButtons.forEach((button) => button.addEventListener("click", () => selectSiteRating(Number(button.dataset.siteRating))));
 els.submitSiteRating.addEventListener("click", submitSiteRating);
-[els.drivers, els.constructors].forEach((list) => {
+[els.rows].forEach((list) => {
   const toggleGuidance = (event) => {
-    const row = event.target.closest(".has-price-guidance");
+    const row = event.target.closest(".trend-cell");
     if (!row) return;
     const shown = row.classList.toggle("show-price-guidance");
     row.setAttribute("aria-expanded", String(shown));
