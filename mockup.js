@@ -615,7 +615,8 @@ function renderAuditDialog() {
   const tableRows = (type) => rows.filter((row) => row.entity_type === type).sort((left, right) => Math.abs(auditDelta(left)) - Math.abs(auditDelta(right)) || left.name.localeCompare(right.name))
     .map((row) => {
       const delta = auditDelta(row);
-      return `<tr><td><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.team || "")}</small></td><td>${format(row.estimated_points)}</td><td>${format(row.actual_points)}</td><td class="${delta >= 0 ? "up" : "down"}">${delta >= 0 ? "+" : ""}${format(delta)}</td></tr>`;
+      const teamDetail = type === "driver" && row.team ? `<small>${escapeHtml(row.team)}</small>` : "";
+      return `<tr><td><strong>${escapeHtml(row.name)}</strong>${teamDetail}</td><td>${format(row.estimated_points)}</td><td>${format(row.actual_points)}</td><td class="${delta >= 0 ? "up" : "down"}">${delta >= 0 ? "+" : ""}${format(delta)}</td></tr>`;
     }).join("");
   els.auditDriverRows.innerHTML = tableRows("driver");
   els.auditConstructorRows.innerHTML = tableRows("constructor");

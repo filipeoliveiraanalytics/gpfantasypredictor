@@ -338,13 +338,12 @@ td strong { font-size: 11px; }
 .audit-tables h3 { margin: 4px 0 10px; font-size: 17px; }
 .audit-tables table { table-layout: fixed; font-size: 10px; }
 .audit-tables th { padding: 0 4px 6px; text-align: right; }
-.audit-tables th:first-child { text-align: left; }
 .audit-tables td { padding: 7px 4px; text-align: right; }
-.audit-tables td:first-child { width: 44%; text-align: left; }
-.audit-tables td:nth-child(2) { width: 14%; text-align: right; }
-.audit-tables td:nth-child(3), .audit-tables td:nth-child(4) { width: 21%; text-align: right; }
+.audit-tables th:first-child, .audit-tables td:first-child { width: 50%; text-align: left; }
+.audit-tables th:nth-child(2), .audit-tables td:nth-child(2) { width: 14%; text-align: right; }
+.audit-tables th:nth-child(3), .audit-tables td:nth-child(3), .audit-tables th:nth-child(4), .audit-tables td:nth-child(4) { width: 18%; text-align: right; }
 .audit-tables td:nth-child(3) { font-family: Georgia, 'Times New Roman', serif; font-weight: bold; }
-.audit-tables td:first-child strong { font-size: 10px; }
+.audit-tables td:first-child strong { display: block; font-size: 10px; white-space: nowrap; }
 .audit-tables td:first-child small { margin-top: 1px; font-size: 9px; }
 /* Use the available width on large desktop displays for a more readable workspace. */
 @media (min-width: 1500px) {
