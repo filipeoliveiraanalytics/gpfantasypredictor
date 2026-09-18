@@ -18,7 +18,7 @@ const state = {
   currentConstructors: [],
   pickerType: "driver", pickerSelection: new Set(),
   recommendedRows: [], recommendation: null, lineupView: "recommended",
-  ratingEligible: false, ratingTimer: null,
+  ratingEligible: false, ratingTimer: null, selectedSiteRating: null,
 };
 
 const els = {
@@ -68,6 +68,8 @@ const els = {
   ratingPrompt: document.querySelector("#rating-prompt"),
   closeRatingPrompt: document.querySelector("#close-rating-prompt"),
   ratingButtons: [...document.querySelectorAll("[data-site-rating]")],
+  ratingFeedback: document.querySelector("#site-rating-feedback"),
+  submitSiteRating: document.querySelector("#submit-site-rating"),
 };
 
 function loadAnalytics() {
@@ -148,13 +150,31 @@ function dismissRatingPrompt() {
   trackEvent("site_rating_dismissed");
 }
 
-function submitSiteRating(rating) {
+function selectSiteRating(rating) {
+  state.selectedSiteRating = rating;
+  els.ratingButtons.forEach((button) => {
+    const selected = Number(button.dataset.siteRating) === rating;
+    button.setAttribute("aria-pressed", String(selected));
+  });
+  els.submitSiteRating.disabled = false;
+}
+
+function submitSiteRating() {
+  const rating = state.selectedSiteRating;
+  if (!rating) return;
   if (state.ratingTimer) window.clearTimeout(state.ratingTimer);
   state.ratingTimer = null;
   state.ratingEligible = false;
   els.ratingPrompt.hidden = true;
   window.localStorage.setItem(SITE_RATING_KEY, String(rating));
   trackEvent("site_rating_submitted", { rating });
+  const feedback = els.ratingFeedback.value.trim();
+  if (feedback) {
+    trackEvent("site_feedback_email_opened", { rating });
+    const subject = "GP Fantasy Predictor feedback";
+    const body = `Rating: ${rating}/5\n\nFeedback:\n${feedback}`;
+    window.location.href = `mailto:filipe@filipeoliveiraanalytics.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
 }
 
 function parseCsv(text) {
@@ -799,7 +819,8 @@ els.openAudit.addEventListener("click", () => {
 });
 els.confirmAnalytics.addEventListener("click", confirmAnalyticsConsent);
 els.closeRatingPrompt.addEventListener("click", dismissRatingPrompt);
-els.ratingButtons.forEach((button) => button.addEventListener("click", () => submitSiteRating(Number(button.dataset.siteRating))));
+els.ratingButtons.forEach((button) => button.addEventListener("click", () => selectSiteRating(Number(button.dataset.siteRating))));
+els.submitSiteRating.addEventListener("click", submitSiteRating);
 document.querySelectorAll("[data-analytics-link]").forEach((link) => link.addEventListener("click", () => {
   trackEvent("outbound_link_clicked", { destination: link.dataset.analyticsLink });
 }));

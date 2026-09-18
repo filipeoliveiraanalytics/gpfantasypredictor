@@ -108,7 +108,14 @@ nav a.active { color: var(--ink); border-color: var(--red); }
 .rating-prompt .icon-button { flex: 0 0 auto; }
 .rating-scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .rating-scale button { min-height: 37px; padding: 0; border: 1px solid var(--ink); background: var(--surface); color: var(--ink); font-size: 13px; font-weight: bold; }
-.rating-scale button:hover, .rating-scale button:focus-visible { border-color: var(--teal); background: var(--teal); color: #fff; outline: none; }
+.rating-scale button:hover, .rating-scale button:focus-visible, .rating-scale button[aria-pressed="true"] { border-color: var(--teal); background: var(--teal); color: #fff; outline: none; }
+.rating-feedback { display: grid; gap: 6px; margin-top: 14px; color: var(--ink); font-size: 11px; font-weight: bold; }
+.rating-feedback small { color: var(--muted); font-size: 10px; font-weight: normal; }
+.rating-feedback textarea { width: 100%; min-height: 66px; padding: 9px; resize: vertical; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); font: inherit; font-size: 11px; line-height: 1.4; }
+.rating-feedback textarea:focus { border-color: var(--teal); outline: 2px solid rgba(5, 123, 115, .15); outline-offset: 1px; }
+.rating-submit { width: 100%; min-height: 38px; margin-top: 14px; padding: 0 13px; border: 1px solid var(--ink); background: var(--ink); color: #fff; font-size: 11px; font-weight: bold; }
+.rating-submit span { margin-left: 7px; color: var(--yellow); }
+.rating-submit:disabled { cursor: not-allowed; opacity: .42; }
 
 .team-panel, .context-panel { padding-top: 12px; }
 .team-panel { border-right: 1px solid var(--rule); padding-right: 25px; }
