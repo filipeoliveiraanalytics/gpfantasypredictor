@@ -1,7 +1,6 @@
 const DATA_ROOT = "data";
 const TEAM_STORAGE_KEY = "gp-fantasy-notebook-team-v1";
 const ANALYTICS_CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
-const OPTIMIZER_MESSAGE_SOURCE = "gp-fantasy-optimizer";
 
 const teamColors = {
   Mercedes: "#20a69b", McLaren: "#ee781d", Ferrari: "#d52d36", "Red Bull Racing": "#20386f",
@@ -13,7 +12,7 @@ const state = {
   projections: [], audits: [], auditRows: [],
   currentDrivers: ["RUS", "LIN", "HUL", "ALB", "PER"],
   currentConstructors: ["MER", "MCL"],
-  pickerType: "driver", pickerSelection: new Set(), engineReady: false, engineReadyTimer: null, optimizationRequest: null,
+  pickerType: "driver", pickerSelection: new Set(),
   recommendedRows: [], recommendation: null, lineupView: "recommended",
 };
 
@@ -57,7 +56,6 @@ const els = {
   auditNote: document.querySelector("#audit-note"),
   auditDriverRows: document.querySelector("#audit-driver-rows"),
   auditConstructorRows: document.querySelector("#audit-constructor-rows"),
-  engine: document.querySelector("#optimizer-engine"),
   cookieBanner: document.querySelector("#cookie-banner"),
   acceptAnalytics: document.querySelector("#accept-analytics"),
   declineAnalytics: document.querySelector("#decline-analytics"),
@@ -450,83 +448,108 @@ function renderRecommendation(rows, result) {
   renderRaceContext();
 }
 
-function waitFor(condition, timeout = 12000) {
-  const started = Date.now();
-  return new Promise((resolve, reject) => {
-    const check = () => {
-      if (condition()) return resolve();
-      if (Date.now() - started > timeout) return reject(new Error("The optimizer engine did not finish loading."));
-      window.setTimeout(check, 100);
-    };
-    check();
-  });
-}
-
-function prepareOptimizerEngine() {
-  state.engineReady = false;
-  window.clearTimeout(state.engineReadyTimer);
-  els.optimize.disabled = true;
-  els.optimize.innerHTML = "Preparing optimizer <span>...</span>";
-  const engineUrl = new URL("optimizer-engine.html", window.location.href);
-  engineUrl.searchParams.set("bridge", Date.now().toString());
-  els.engine.src = engineUrl.toString();
-  state.engineReadyTimer = window.setTimeout(() => {
-    if (state.engineReady) return;
-    els.optimize.disabled = false;
-    els.optimize.innerHTML = "Retry optimizer <span>→</span>";
-    els.stageCopy.textContent = "The optimizer did not finish starting. Retry to continue.";
-  }, 15000);
-}
-
-function requestOptimization() {
-  const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  const input = {
-    budget: els.budget.value,
-    transfers: els.transfers.value,
-    drivers: state.currentDrivers,
-    constructors: state.currentConstructors,
-    strategy: els.strategy.value,
-    chips: els.chips.filter((chip) => chip.checked).map((chip) => chip.value),
+function combinations(items, size) {
+  const result = [];
+  const selected = [];
+  const visit = (start) => {
+    if (selected.length === size) {
+      result.push([...selected]);
+      return;
+    }
+    for (let index = start; index <= items.length - (size - selected.length); index += 1) {
+      selected.push(items[index]);
+      visit(index + 1);
+      selected.pop();
+    }
   };
-  return new Promise((resolve, reject) => {
-    const timeout = window.setTimeout(() => {
-      if (state.optimizationRequest?.requestId !== requestId) return;
-      state.optimizationRequest = null;
-      reject(new Error("The optimizer did not return a result. Please retry."));
-    }, 30000);
-    state.optimizationRequest = { requestId, resolve, reject, timeout };
-    els.engine.contentWindow.postMessage({ source: OPTIMIZER_MESSAGE_SOURCE, type: "optimise", requestId, input }, window.location.origin);
-  });
+  visit(0);
+  return result;
 }
 
-async function runOptimizer() {
-  if (!state.engineReady) {
-    els.stageCopy.textContent = "Preparing the optimizer. It will be ready shortly.";
-    prepareOptimizerEngine();
-    return;
-  }
+function optimizerAssetScore(row) {
+  const points = number(row.expected_fantasy_points);
+  const value = number(row.value_per_million);
+  const pricePath = number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m));
+  return points + value * 3 + pricePath * 4;
+}
+
+function optimizerDriverPool() {
+  const drivers = rowsFor("driver");
+  const current = selectedRows("driver");
+  const cheapest = [...drivers].sort((left, right) => number(left.price_m) - number(right.price_m)).slice(0, 5);
+  const strongest = [...drivers].sort((left, right) => optimizerAssetScore(right) - optimizerAssetScore(left)).slice(0, 9);
+  return [...new Map([...current, ...cheapest, ...strongest].map((row) => [row.key, row])).values()];
+}
+
+function scoreLineup(drivers, constructors, { ignoreBudget = false, unlimitedTransfers = false } = {}) {
+  const rows = [...drivers, ...constructors];
+  const cost = rows.reduce((total, row) => total + number(row.price_m), 0);
+  const budget = number(els.budget.value);
+  if (!ignoreBudget && cost > budget + 0.001) return null;
+
+  const current = new Set([...state.currentDrivers, ...state.currentConstructors]);
+  const incoming = rows.filter((row) => !current.has(row.key));
+  const transferCount = incoming.length;
+  const freeTransfers = Math.max(0, Math.floor(number(els.transfers.value)));
+  const paidTransfers = unlimitedTransfers ? 0 : Math.max(0, transferCount - freeTransfers);
+  const expected = rows.reduce((total, row) => total + number(row.expected_fantasy_points), 0);
+  const boost = [...drivers].sort((left, right) => number(right.expected_fantasy_points) - number(left.expected_fantasy_points))[0];
+  const netPoints = expected + number(boost?.expected_fantasy_points) - paidTransfers * 10;
+  const pricePath = rows.reduce((total, row) => total + number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m)), 0);
+  const strategy = els.strategy.value;
+  const strategyScore = strategy === "budget_growth"
+    ? netPoints + pricePath * 14
+    : strategy === "current_friendly"
+      ? netPoints - transferCount * 1.5
+      : netPoints;
+  return { rows, cost, incoming, transferCount, paidTransfers, boost, netPoints, strategyScore };
+}
+
+function findBestLineup(options = {}) {
+  const currentFriendly = els.strategy.value === "current_friendly" && !options.unlimitedTransfers;
+  const freeTransfers = Math.max(0, Math.floor(number(els.transfers.value)));
+  let best = null;
+  const driverCombos = combinations(optimizerDriverPool(), 5);
+  const constructorCombos = combinations(rowsFor("constructor"), 2);
+
+  driverCombos.forEach((drivers) => {
+    constructorCombos.forEach((constructors) => {
+      const lineup = scoreLineup(drivers, constructors, options);
+      if (!lineup || (currentFriendly && lineup.transferCount > freeTransfers)) return;
+      if (!best || lineup.strategyScore > best.strategyScore) best = lineup;
+    });
+  });
+  return best;
+}
+
+function directRecommendation() {
+  const base = findBestLineup();
+  if (!base) throw new Error("No valid lineup fits the current budget. Edit your team or budget and try again.");
+  return { ...base, chip: "" };
+}
+
+function runOptimizer() {
   els.optimize.disabled = true;
   els.optimize.innerHTML = "Optimizing <span>...</span>";
   els.stageCopy.textContent = "Calculating with the live Pre-Weekend model.";
-  try {
-    const result = await requestOptimization();
-    const recommended = result.names.map((name) => state.projections.find((row) => row.name === name)).filter(Boolean);
-    if (recommended.length !== 7) throw new Error("Could not read the full recommendation from the optimizer.");
-    const boost = recommended.find((row) => row.name === result.boostName);
-    renderRecommendation(recommended, {
-      points: `${result.points} pts`,
-      cost: result.cost,
-      paidTransfers: Math.max(0, Math.round(Math.abs(number(result.transferText)) / 10)),
-      boost,
-      chip: result.chip,
-    });
-    els.stageCopy.textContent = "Pre-weekend recommendation updated from the live optimizer.";
-  } catch (error) {
-    els.stageCopy.textContent = error.message;
-  } finally {
-    els.optimize.disabled = false;
-    els.optimize.innerHTML = "Optimize Team <span>→</span>";
-  }
+
+  window.setTimeout(() => {
+    try {
+      const result = directRecommendation();
+      renderRecommendation(result.rows, {
+        points: `${format(result.netPoints)} pts`,
+        paidTransfers: result.paidTransfers,
+        boost: result.boost,
+        chip: result.chip,
+      });
+      els.stageCopy.textContent = "Pre-weekend recommendation updated from the live optimizer.";
+    } catch (error) {
+      els.stageCopy.textContent = error.message;
+    } finally {
+      els.optimize.disabled = false;
+      els.optimize.innerHTML = "Optimize Team <span>→</span>";
+    }
+  }, 0);
 }
 
 function renderAuditDialog() {
@@ -620,37 +643,6 @@ els.declineAnalytics.addEventListener("click", () => {
   els.cookieBanner.hidden = true;
 });
 
-window.addEventListener("message", (event) => {
-  if (event.origin !== window.location.origin || event.data?.source !== OPTIMIZER_MESSAGE_SOURCE) return;
-  if (event.data.type === "ready") {
-    state.engineReady = true;
-    window.clearTimeout(state.engineReadyTimer);
-    els.optimize.disabled = false;
-    els.optimize.innerHTML = "Optimize Team <span>→</span>";
-    return;
-  }
-  if (event.data.type === "result" && state.optimizationRequest?.requestId === event.data.requestId) {
-    const request = state.optimizationRequest;
-    state.optimizationRequest = null;
-    window.clearTimeout(request.timeout);
-    request.resolve(event.data);
-    return;
-  }
-  if (event.data.type === "error") {
-    if (state.optimizationRequest?.requestId === event.data.requestId) {
-      const request = state.optimizationRequest;
-      state.optimizationRequest = null;
-      window.clearTimeout(request.timeout);
-      request.reject(new Error(event.data.message));
-      return;
-    }
-    state.engineReady = false;
-    els.optimize.disabled = false;
-    els.optimize.innerHTML = "Retry optimizer <span>→</span>";
-    els.stageCopy.textContent = "The optimizer could not start. Retry to continue.";
-  }
-});
-prepareOptimizerEngine();
 initialiseAnalyticsConsent();
 
 initialise().catch((error) => {

@@ -344,8 +344,6 @@ td strong { font-size: 11px; }
 .audit-tables td:nth-child(3) { font-family: Georgia, 'Times New Roman', serif; font-weight: bold; }
 .audit-tables td:first-child strong { font-size: 10px; }
 .audit-tables td:first-child small { margin-top: 1px; font-size: 9px; }
-#optimizer-engine { position: fixed; width: 1px; height: 1px; overflow: hidden; border: 0; opacity: 0; pointer-events: none; left: -10px; top: -10px; }
-
 /* Use the available width on large desktop displays for a more readable workspace. */
 @media (min-width: 1500px) {
   body { font-size: 15px; }
