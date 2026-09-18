@@ -31,6 +31,11 @@ const els = {
   drivers: document.querySelector("#current-drivers"),
   constructors: document.querySelector("#current-constructors"),
   optimize: document.querySelector("#optimize-button"),
+  teamPanel: document.querySelector("#team-panel"),
+  mobileTeamCta: document.querySelector("#mobile-team-cta"),
+  mobileOptimize: document.querySelector("#mobile-optimize"),
+  mobileTeamCopy: document.querySelector("#mobile-team-copy"),
+  mobileTeamCollapse: document.querySelector("#mobile-team-collapse"),
   saveTeam: document.querySelector("#save-team"),
   rows: document.querySelector("#recommended-rows"),
   summary: document.querySelector("#recommendation-summary"),
@@ -333,6 +338,33 @@ function renderCurrentTeam() {
   els.drivers.innerHTML = renderList("driver");
   els.constructors.innerHTML = renderList("constructor");
   updateBudgetWarning();
+  renderMobileTeamState();
+}
+
+function renderMobileTeamState() {
+  if (!els.mobileTeamCopy) return;
+  const drivers = state.currentDrivers.length;
+  const constructors = state.currentConstructors.length;
+  const teamReady = hasCompleteTeam();
+  const cost = [...selectedRows("driver"), ...selectedRows("constructor")]
+    .reduce((total, row) => total + number(row.price_m), 0);
+  els.mobileTeamCopy.textContent = teamReady
+    ? `$${format(cost)}m current squad · ${Math.max(0, Math.floor(number(els.transfers.value)))} free transfers`
+    : `${drivers}/5 drivers · ${constructors}/2 constructors selected`;
+  els.mobileTeamCta.textContent = "Team";
+  els.mobileOptimize.disabled = !teamReady || number(els.budget.value) <= 0 || els.transfers.value === "" || !state.dataReady;
+}
+
+function openMobileTeam() {
+  els.teamPanel.classList.add("mobile-team-expanded");
+  els.mobileTeamCta.setAttribute("aria-expanded", "true");
+  els.teamPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  trackEvent("mobile_team_opened");
+}
+
+function closeMobileTeam() {
+  els.teamPanel.classList.remove("mobile-team-expanded");
+  els.mobileTeamCta.setAttribute("aria-expanded", "false");
 }
 
 function renderChipCount() {
@@ -728,6 +760,7 @@ function runOptimizer() {
     return;
   }
   els.optimize.disabled = true;
+  els.mobileOptimize.disabled = true;
   els.optimize.innerHTML = "Optimizing <span>...</span>";
   els.stageCopy.textContent = "Calculating with the live Pre-Weekend model.";
   trackEvent("optimizer_run", {
@@ -759,6 +792,7 @@ function runOptimizer() {
     } finally {
       els.optimize.disabled = false;
       els.optimize.innerHTML = "Optimize Team <span>→</span>";
+      renderMobileTeamState();
     }
   }, 0);
 }
@@ -811,6 +845,7 @@ async function initialise() {
   initialiseRatingPrompt();
   els.optimize.disabled = false;
   els.optimize.innerHTML = "Optimize Team <span>→</span>";
+  renderMobileTeamState();
   els.lineupHeading.textContent = "Recommended Lineup";
   els.stageCopy.textContent = restoredTeam
     ? "Saved team restored. Run the optimizer to refresh the recommendation."
@@ -829,6 +864,9 @@ els.pickerOptions.addEventListener("click", (event) => {
 });
 els.applyPicker.addEventListener("click", applyPicker);
 els.optimize.addEventListener("click", runOptimizer);
+els.mobileTeamCta.addEventListener("click", openMobileTeam);
+els.mobileTeamCollapse.addEventListener("click", closeMobileTeam);
+els.mobileOptimize.addEventListener("click", () => els.optimize.click());
 els.viewControls.forEach((button) => button.addEventListener("click", () => {
   state.lineupView = button.dataset.lineupView;
   renderLineupTable();
@@ -859,6 +897,7 @@ els.saveTeam.addEventListener("change", () => {
   if (input === els.budget) trackEvent("budget_changed", { budget_range: budgetRange(els.budget.value) });
   if (input === els.transfers) trackEvent("transfers_changed", { free_transfers: Math.max(0, Math.floor(number(els.transfers.value))) });
   updateBudgetWarning();
+  renderMobileTeamState();
   persistTeamIfEnabled();
   renderRaceContext();
 }));
