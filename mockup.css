@@ -310,14 +310,16 @@ td strong { font-size: 11px; }
 .points { color: var(--teal); }
 .up { color: var(--teal) !important; }
 .down { color: var(--red) !important; }
-.trend-cell { position: relative; cursor: help; }
+.trend-cell, .points-cell { position: relative; cursor: help; }
 .trend-tooltip { width: 248px; padding: 10px; position: absolute; z-index: 12; top: calc(100% + 5px); right: 0; display: grid; gap: 5px; border: 1px solid #36332f; background: var(--ink); color: #fff; font-size: 10px; font-weight: normal; line-height: 1.25; text-align: left; opacity: 0; pointer-events: none; transform: translateY(-3px); transition: opacity .14s ease, transform .14s ease; visibility: hidden; }
-.trend-tooltip > b { margin-bottom: 2px; color: var(--yellow); font-size: 9px; letter-spacing: .45px; text-transform: uppercase; }
-.trend-tooltip > span { display: grid; grid-template-columns: 58px 1fr; gap: 8px; }
-.trend-tooltip em { color: #fff; font-style: normal; font-weight: bold; }
-.trend-tooltip i { color: #e3e0d9; font-style: normal; }
-.trend-cell:hover .trend-tooltip, .trend-cell:focus-visible .trend-tooltip, .trend-cell.show-price-guidance .trend-tooltip { opacity: 1; transform: translateY(0); visibility: visible; }
-.trend-cell:focus-visible { outline: 2px solid var(--yellow); outline-offset: -2px; }
+.points-tooltip { width: 226px; padding: 10px; position: absolute; z-index: 12; top: calc(100% + 5px); left: 50%; display: grid; gap: 5px; border: 1px solid #36332f; background: var(--ink); color: #fff; font-size: 10px; font-weight: normal; line-height: 1.25; text-align: left; opacity: 0; pointer-events: none; transform: translate(-50%, -3px); transition: opacity .14s ease, transform .14s ease; visibility: hidden; }
+.trend-tooltip > b, .points-tooltip > b { margin-bottom: 2px; color: var(--yellow); font-size: 9px; letter-spacing: .45px; text-transform: uppercase; }
+.trend-tooltip > span, .points-tooltip > span { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.trend-tooltip em, .points-tooltip em { color: #fff; font-style: normal; font-weight: bold; }
+.trend-tooltip i, .points-tooltip i { color: #e3e0d9; font-style: normal; }
+.trend-cell:hover .trend-tooltip, .trend-cell:focus-visible .trend-tooltip, .trend-cell.show-table-tooltip .trend-tooltip { opacity: 1; transform: translateY(0); visibility: visible; }
+.points-cell:hover .points-tooltip, .points-cell:focus-visible .points-tooltip, .points-cell.show-table-tooltip .points-tooltip { opacity: 1; transform: translate(-50%, 0); visibility: visible; }
+.trend-cell:focus-visible, .points-cell:focus-visible { outline: 2px solid var(--yellow); outline-offset: -2px; }
 
 .context-intro { margin: 0 0 19px; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .context-list { margin: 0; border-top: 1px solid var(--rule); }

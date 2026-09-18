@@ -289,6 +289,34 @@ function priceTrendTiers(row) {
   };
 }
 
+function projectedPointsBreakdown(row) {
+  const components = [
+    ["Qualifying", row.qualifying_points_est],
+    ["Race finish", row.race_finish_points_est],
+    ["Position change", row.position_change_points_est],
+    ["Overtakes", row.overtake_points_est],
+    ["Fastest lap", row.fastest_lap_points_est],
+    ["Driver of the Day", row.dotd_points_est],
+    ["DNF risk", row.dnf_penalty_points_est],
+  ];
+  if (row.entity_type === "constructor") {
+    components.push(["Constructor bonus", row.constructor_bonus_points_est], ["Pit stops", row.pit_stop_points_est]);
+  }
+  components.push(
+    ["Sprint finish", row.sprint_finish_points_est],
+    ["Sprint position change", row.sprint_position_change_points_est],
+    ["Sprint overtakes", row.sprint_overtake_points_est],
+    ["Sprint fastest lap", row.sprint_fastest_lap_points_est],
+    ["Sprint DNF risk", row.sprint_dnf_penalty_points_est],
+  );
+  const entries = components.filter(([, value]) => Math.abs(number(value)) >= 0.05);
+  const signed = (value) => `${number(value) > 0 ? "+" : ""}${format(value)} pts`;
+  return {
+    aria: `Projected points breakdown. ${entries.map(([label, value]) => `${label}: ${signed(value)}`).join(". ")}.`,
+    markup: `<span class="points-tooltip" role="tooltip"><b>Projected points</b>${entries.map(([label, value]) => `<span><em>${escapeHtml(label)}</em><i>${signed(value)}</i></span>`).join("")}</span>`,
+  };
+}
+
 function renderCurrentTeam() {
   const renderList = (type) => {
     const rows = selectedRows(type);
@@ -486,13 +514,14 @@ function renderLineupTable() {
     const trendClass = hasMaterialPriceMove ? (delta > 0 ? "up" : "down") : "neutral";
     const trendLabel = hasMaterialPriceMove ? `${delta > 0 ? "+" : ""}${format(delta)}m` : "--";
     const trendTiers = priceTrendTiers(row);
+    const pointsBreakdown = projectedPointsBreakdown(row);
     const position = rows.slice(0, index).filter((candidate) => candidate.entity_type === row.entity_type).length + 1;
     const isFirstConstructor = row.entity_type === "constructor" && !rows.slice(0, index).some((candidate) => candidate.entity_type === "constructor");
     const rowClass = [row.entity_type === "constructor" ? "constructor" : "", isFirstConstructor ? "first-constructor" : ""].filter(Boolean).join(" ");
     const teamLabel = row.entity_type === "driver" ? `<small>${escapeHtml(row.team)}</small>` : "";
     const trendTooltip = trendTiers?.markup || "";
     const trendAria = trendTiers?.aria || "Price thresholds are unavailable for this asset.";
-    return `<tr class="${rowClass}"><td class="position">${position}</td><td class="asset-name"><i style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong>${teamLabel}</span></td><td class="points">${format(row.expected_fantasy_points)}</td><td>$${format(row.price_m)}m</td><td title="Projected points per $1M">${format(row.value_per_million, 2)}</td><td class="${trendClass} trend-cell" role="button" tabindex="0" aria-expanded="false" aria-label="${escapeHtml(`${row.name}. ${trendAria}`)}">${trendLabel}${trendTooltip}</td></tr>`;
+    return `<tr class="${rowClass}"><td class="position">${position}</td><td class="asset-name"><i style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong>${teamLabel}</span></td><td class="points points-cell" role="button" tabindex="0" aria-expanded="false" aria-label="${escapeHtml(`${row.name}. ${pointsBreakdown.aria}`)}">${format(row.expected_fantasy_points)}${pointsBreakdown.markup}</td><td>$${format(row.price_m)}m</td><td title="Projected points per $1M">${format(row.value_per_million, 2)}</td><td class="${trendClass} trend-cell" role="button" tabindex="0" aria-expanded="false" aria-label="${escapeHtml(`${row.name}. ${trendAria}`)}">${trendLabel}${trendTooltip}</td></tr>`;
   }).join("");
 }
 
@@ -848,10 +877,10 @@ els.ratingButtons.forEach((button) => button.addEventListener("click", () => sel
 els.submitSiteRating.addEventListener("click", submitSiteRating);
 [els.rows].forEach((list) => {
   const toggleGuidance = (event) => {
-    const row = event.target.closest(".trend-cell");
-    if (!row) return;
-    const shown = row.classList.toggle("show-price-guidance");
-    row.setAttribute("aria-expanded", String(shown));
+    const cell = event.target.closest(".trend-cell, .points-cell");
+    if (!cell) return;
+    const shown = cell.classList.toggle("show-table-tooltip");
+    cell.setAttribute("aria-expanded", String(shown));
   };
   list.addEventListener("click", toggleGuidance);
   list.addEventListener("keydown", (event) => {
