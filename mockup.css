@@ -99,6 +99,16 @@ nav a.active { color: var(--ink); border-color: var(--red); }
 .cookie-toggle input:focus-visible + span { outline: 2px solid var(--yellow); outline-offset: 2px; }
 .cookie-actions button { width: 100%; min-height: 39px; padding: 0 13px; border: 1px solid var(--ink); background: var(--ink); color: #fff; font-size: 11px; font-weight: bold; text-align: center; }
 .cookie-actions button span { margin-left: 7px; color: var(--yellow); }
+.rating-prompt { position: fixed; z-index: 900; right: 24px; bottom: 24px; width: min(352px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--ink); background: #fffdf9; box-shadow: 0 14px 34px rgba(22, 21, 20, .16), 3px 3px 0 rgba(22, 21, 20, .1); }
+.rating-prompt[hidden] { display: none; }
+.rating-prompt header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.rating-prompt .kicker { margin-bottom: 5px; }
+.rating-prompt h2 { margin: 0; font-size: 20px; line-height: 1.05; }
+.rating-prompt > p { margin: 11px 0 14px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+.rating-prompt .icon-button { flex: 0 0 auto; }
+.rating-scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.rating-scale button { min-height: 37px; padding: 0; border: 1px solid var(--ink); background: var(--surface); color: var(--ink); font-size: 13px; font-weight: bold; }
+.rating-scale button:hover, .rating-scale button:focus-visible { border-color: var(--teal); background: var(--teal); color: #fff; outline: none; }
 
 .team-panel, .context-panel { padding-top: 12px; }
 .team-panel { border-right: 1px solid var(--rule); padding-right: 25px; }
@@ -500,4 +510,5 @@ td strong { font-size: 11px; }
   .asset-name strong { white-space: normal; }
   .picker-options, .audit-tables { grid-template-columns: 1fr; }
   .cookie-banner { width: calc(100vw - 28px); padding: 18px; display: grid; gap: 14px; }
+  .rating-prompt { right: 14px; bottom: 14px; width: calc(100vw - 28px); }
 }

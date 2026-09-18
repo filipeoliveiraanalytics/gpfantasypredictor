@@ -1,6 +1,9 @@
 const DATA_ROOT = "data";
 const TEAM_STORAGE_KEY = "gp-fantasy-notebook-team-v1";
 const ANALYTICS_CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
+const SITE_VISIT_KEY = "gp_fantasy_predictor_visited_v1";
+const SITE_RATING_KEY = "gp_fantasy_predictor_site_rating_v1";
+const SITE_RATING_DISMISSED_KEY = "gp_fantasy_predictor_site_rating_dismissed_v1";
 
 const teamColors = {
   Mercedes: "#20a69b", McLaren: "#ee781d", Ferrari: "#d52d36", "Red Bull Racing": "#20386f",
@@ -15,6 +18,7 @@ const state = {
   currentConstructors: [],
   pickerType: "driver", pickerSelection: new Set(),
   recommendedRows: [], recommendation: null, lineupView: "recommended",
+  ratingEligible: false, ratingTimer: null,
 };
 
 const els = {
@@ -61,6 +65,9 @@ const els = {
   cookieBanner: document.querySelector("#cookie-banner"),
   analyticsPreference: document.querySelector("#analytics-preference"),
   confirmAnalytics: document.querySelector("#confirm-analytics"),
+  ratingPrompt: document.querySelector("#rating-prompt"),
+  closeRatingPrompt: document.querySelector("#close-rating-prompt"),
+  ratingButtons: [...document.querySelectorAll("[data-site-rating]")],
 };
 
 function loadAnalytics() {
@@ -106,7 +113,48 @@ function confirmAnalyticsConsent() {
   if (accepted) {
     loadAnalytics();
     trackEvent("analytics_consent", { choice: "accepted" });
+    scheduleRatingPrompt();
   }
+}
+
+function initialiseRatingPrompt() {
+  const returningVisitor = window.localStorage.getItem(SITE_VISIT_KEY) === "true"
+    || window.localStorage.getItem(ANALYTICS_CONSENT_KEY) === "accepted";
+  const alreadyResponded = window.localStorage.getItem(SITE_RATING_KEY)
+    || window.localStorage.getItem(SITE_RATING_DISMISSED_KEY);
+  window.localStorage.setItem(SITE_VISIT_KEY, "true");
+  state.ratingEligible = returningVisitor && !alreadyResponded;
+  scheduleRatingPrompt();
+}
+
+function scheduleRatingPrompt() {
+  if (!state.dataReady || !state.ratingEligible || window.localStorage.getItem(ANALYTICS_CONSENT_KEY) !== "accepted") return;
+  if (state.ratingTimer || !els.ratingPrompt.hidden) return;
+  state.ratingTimer = window.setTimeout(() => {
+    state.ratingTimer = null;
+    if (!els.pickerDialog.open && !els.auditDialog.open && els.cookieBanner.hidden) {
+      els.ratingPrompt.hidden = false;
+      trackEvent("site_rating_prompted");
+    }
+  }, 4500);
+}
+
+function dismissRatingPrompt() {
+  if (state.ratingTimer) window.clearTimeout(state.ratingTimer);
+  state.ratingTimer = null;
+  state.ratingEligible = false;
+  els.ratingPrompt.hidden = true;
+  window.localStorage.setItem(SITE_RATING_DISMISSED_KEY, "true");
+  trackEvent("site_rating_dismissed");
+}
+
+function submitSiteRating(rating) {
+  if (state.ratingTimer) window.clearTimeout(state.ratingTimer);
+  state.ratingTimer = null;
+  state.ratingEligible = false;
+  els.ratingPrompt.hidden = true;
+  window.localStorage.setItem(SITE_RATING_KEY, String(rating));
+  trackEvent("site_rating_submitted", { rating });
 }
 
 function parseCsv(text) {
@@ -684,6 +732,7 @@ async function initialise() {
   populateAuditSelect();
   const sample = state.projections[0];
   state.dataReady = true;
+  initialiseRatingPrompt();
   els.optimize.disabled = false;
   els.optimize.innerHTML = "Optimize Team <span>→</span>";
   els.lineupHeading.textContent = "Recommended Lineup";
@@ -749,6 +798,8 @@ els.openAudit.addEventListener("click", () => {
   trackEvent("audit_opened", { grand_prix: audit?.gp_key || "", stage: audit?.mode || "" });
 });
 els.confirmAnalytics.addEventListener("click", confirmAnalyticsConsent);
+els.closeRatingPrompt.addEventListener("click", dismissRatingPrompt);
+els.ratingButtons.forEach((button) => button.addEventListener("click", () => submitSiteRating(Number(button.dataset.siteRating))));
 document.querySelectorAll("[data-analytics-link]").forEach((link) => link.addEventListener("click", () => {
   trackEvent("outbound_link_clicked", { destination: link.dataset.analyticsLink });
 }));
