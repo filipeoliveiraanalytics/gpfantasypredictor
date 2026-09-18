@@ -597,10 +597,12 @@ function directRecommendation() {
 function runOptimizer() {
   if (!hasCompleteTeam()) {
     els.stageCopy.textContent = "Choose 5 drivers and 2 constructors before optimizing.";
+    trackEvent("optimizer_validation_failed", { reason: "incomplete_team" });
     return;
   }
   if (number(els.budget.value) <= 0 || els.transfers.value === "") {
     els.stageCopy.textContent = "Enter your budget and free transfers before optimizing.";
+    trackEvent("optimizer_validation_failed", { reason: "missing_team_settings" });
     return;
   }
   els.optimize.disabled = true;
@@ -705,22 +707,32 @@ els.optimize.addEventListener("click", runOptimizer);
 els.viewControls.forEach((button) => button.addEventListener("click", () => {
   state.lineupView = button.dataset.lineupView;
   renderLineupTable();
+  trackEvent("lineup_view_changed", { view: state.lineupView });
 }));
 els.saveTeam.addEventListener("change", () => {
   if (els.saveTeam.checked) {
     if (!hasCompleteTeam() || number(els.budget.value) <= 0 || els.transfers.value === "") {
       els.saveTeam.checked = false;
       els.stageCopy.textContent = "Enter your budget, transfers, and full team before saving.";
+      trackEvent("team_save_blocked", { reason: "incomplete_setup" });
       return;
     }
     saveTeam();
+    trackEvent("team_save_changed", { enabled: true });
     return;
   }
   window.localStorage.removeItem(TEAM_STORAGE_KEY);
   els.stageCopy.textContent = "Team saving is off for this browser.";
+  trackEvent("team_save_changed", { enabled: false });
 });
 [els.budget, els.transfers, els.strategy, ...els.chips].forEach((input) => input.addEventListener("change", () => {
-  if (input.matches(".chip-settings input")) renderChipCount();
+  if (input.matches(".chip-settings input")) {
+    renderChipCount();
+    trackEvent("chip_availability_changed", { chip: input.value, enabled: input.checked });
+  }
+  if (input === els.strategy) trackEvent("strategy_changed", { strategy: els.strategy.value });
+  if (input === els.budget) trackEvent("budget_changed", { budget_range: budgetRange(els.budget.value) });
+  if (input === els.transfers) trackEvent("transfers_changed", { free_transfers: Math.max(0, Math.floor(number(els.transfers.value))) });
   updateBudgetWarning();
   persistTeamIfEnabled();
   renderRaceContext();
@@ -728,9 +740,18 @@ els.saveTeam.addEventListener("change", () => {
 els.auditSelect.addEventListener("change", () => {
   renderAudit();
   if (els.auditDialog.open) renderAuditDialog();
+  const audit = activeAudit();
+  trackEvent("audit_selection_changed", { grand_prix: audit?.gp_key || "", stage: audit?.mode || "" });
 });
-els.openAudit.addEventListener("click", renderAuditDialog);
+els.openAudit.addEventListener("click", () => {
+  renderAuditDialog();
+  const audit = activeAudit();
+  trackEvent("audit_opened", { grand_prix: audit?.gp_key || "", stage: audit?.mode || "" });
+});
 els.confirmAnalytics.addEventListener("click", confirmAnalyticsConsent);
+document.querySelectorAll("[data-analytics-link]").forEach((link) => link.addEventListener("click", () => {
+  trackEvent("outbound_link_clicked", { destination: link.dataset.analyticsLink });
+}));
 
 initialiseAnalyticsConsent();
 
