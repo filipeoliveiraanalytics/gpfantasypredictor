@@ -11,7 +11,7 @@ const state = {
   projections: [], audits: [], auditRows: [],
   currentDrivers: ["RUS", "LIN", "HUL", "ALB", "PER"],
   currentConstructors: ["MER", "MCL"],
-  pickerType: "driver", pickerSelection: new Set(), engineReady: false,
+  pickerType: "driver", pickerSelection: new Set(), engineReady: false, engineWarmup: null,
   recommendedRows: [], recommendation: null, lineupView: "recommended",
 };
 
@@ -434,6 +434,28 @@ function waitFor(condition, timeout = 12000) {
   });
 }
 
+function warmOptimizerEngine() {
+  if (state.engineReady) return Promise.resolve();
+  if (state.engineWarmup) return state.engineWarmup;
+
+  state.engineWarmup = waitFor(
+    () => els.engine.contentDocument?.querySelector("#data-status")?.textContent.includes("model ready"),
+    20000,
+  ).then(() => {
+    state.engineReady = true;
+    els.optimize.disabled = false;
+    els.optimize.innerHTML = "Optimize Team <span>→</span>";
+  }).catch(() => {
+    els.optimize.disabled = false;
+    els.optimize.innerHTML = "Retry optimizer <span>→</span>";
+    els.stageCopy.textContent = "The optimizer is taking longer than usual. Retry to continue.";
+  }).finally(() => {
+    state.engineWarmup = null;
+  });
+
+  return state.engineWarmup;
+}
+
 function setEngineValue(document, selector, value) {
   const input = document.querySelector(selector);
   if (!input) throw new Error(`Missing optimizer field: ${selector}`);
@@ -444,7 +466,8 @@ function setEngineValue(document, selector, value) {
 
 async function runOptimizer() {
   if (!state.engineReady) {
-    els.stageCopy.textContent = "The optimizer engine is still loading. Try again in a moment.";
+    els.stageCopy.textContent = "Preparing the optimizer. It will be ready shortly.";
+    warmOptimizerEngine();
     return;
   }
   els.optimize.disabled = true;
@@ -567,14 +590,8 @@ els.auditSelect.addEventListener("change", () => {
 });
 els.openAudit.addEventListener("click", renderAuditDialog);
 
-els.engine.addEventListener("load", async () => {
-  try {
-    await waitFor(() => els.engine.contentDocument?.querySelector("#data-status")?.textContent.includes("model ready"), 20000);
-    state.engineReady = true;
-  } catch {
-    els.stageCopy.textContent = "The notebook loaded, but the optimizer engine is still warming up.";
-  }
-});
+els.engine.addEventListener("load", warmOptimizerEngine);
+warmOptimizerEngine();
 
 initialise().catch((error) => {
   els.stageCopy.textContent = error.message;
