@@ -59,8 +59,8 @@ const els = {
   auditDriverRows: document.querySelector("#audit-driver-rows"),
   auditConstructorRows: document.querySelector("#audit-constructor-rows"),
   cookieBanner: document.querySelector("#cookie-banner"),
-  acceptAnalytics: document.querySelector("#accept-analytics"),
-  declineAnalytics: document.querySelector("#decline-analytics"),
+  analyticsPreference: document.querySelector("#analytics-preference"),
+  confirmAnalytics: document.querySelector("#confirm-analytics"),
 };
 
 function loadAnalytics() {
@@ -75,12 +75,37 @@ function loadAnalytics() {
   document.head.appendChild(script);
 }
 
+function trackEvent(name, parameters = {}) {
+  if (!window.gtag) return;
+  window.gtag("event", name, parameters);
+}
+
+function budgetRange(value) {
+  const budget = number(value);
+  if (budget < 75) return "under_75m";
+  if (budget < 100) return "75_to_99m";
+  if (budget < 115) return "100_to_114m";
+  return "115m_plus";
+}
+
 function initialiseAnalyticsConsent() {
   const consent = window.localStorage.getItem(ANALYTICS_CONSENT_KEY);
   if (consent === "accepted") {
     loadAnalytics();
   } else if (consent !== "declined") {
     els.cookieBanner.hidden = false;
+    document.body.classList.add("has-cookie-dialog");
+  }
+}
+
+function confirmAnalyticsConsent() {
+  const accepted = els.analyticsPreference.checked;
+  window.localStorage.setItem(ANALYTICS_CONSENT_KEY, accepted ? "accepted" : "declined");
+  els.cookieBanner.hidden = true;
+  document.body.classList.remove("has-cookie-dialog");
+  if (accepted) {
+    loadAnalytics();
+    trackEvent("analytics_consent", { choice: "accepted" });
   }
 }
 
@@ -317,6 +342,7 @@ function openPicker(type) {
   els.pickerHelp.textContent = `Select exactly ${maximum} assets. These are your existing Fantasy picks, not the recommendation.`;
   renderPickerOptions();
   els.pickerDialog.showModal();
+  trackEvent("team_picker_opened", { asset_type: type });
 }
 
 function renderPickerOptions() {
@@ -341,6 +367,7 @@ function applyPicker() {
   persistTeamIfEnabled();
   els.pickerDialog.close();
   els.stageCopy.textContent = "Current team updated. Run the optimizer to refresh the recommendation.";
+  trackEvent("team_selection_applied", { asset_type: state.pickerType, selection_size: maximum });
 }
 
 function sortedAssets(compare) {
@@ -579,6 +606,12 @@ function runOptimizer() {
   els.optimize.disabled = true;
   els.optimize.innerHTML = "Optimizing <span>...</span>";
   els.stageCopy.textContent = "Calculating with the live Pre-Weekend model.";
+  trackEvent("optimizer_run", {
+    strategy: els.strategy.value,
+    budget_range: budgetRange(els.budget.value),
+    free_transfers: Math.max(0, Math.floor(number(els.transfers.value))),
+    available_chip_count: els.chips.filter((chip) => chip.checked).length,
+  });
 
   window.setTimeout(() => {
     try {
@@ -590,8 +623,15 @@ function runOptimizer() {
         chip: result.chip,
       });
       els.stageCopy.textContent = "Pre-weekend recommendation updated from the live optimizer.";
+      trackEvent("optimizer_result", {
+        strategy: els.strategy.value,
+        transfer_count: result.transferCount,
+        paid_transfers: result.paidTransfers,
+        recommended_chip: result.chip || "hold",
+      });
     } catch (error) {
       els.stageCopy.textContent = error.message;
+      trackEvent("optimizer_error", { reason: "no_valid_lineup" });
     } finally {
       els.optimize.disabled = false;
       els.optimize.innerHTML = "Optimize Team <span>→</span>";
@@ -690,15 +730,7 @@ els.auditSelect.addEventListener("change", () => {
   if (els.auditDialog.open) renderAuditDialog();
 });
 els.openAudit.addEventListener("click", renderAuditDialog);
-els.acceptAnalytics.addEventListener("click", () => {
-  window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "accepted");
-  els.cookieBanner.hidden = true;
-  loadAnalytics();
-});
-els.declineAnalytics.addEventListener("click", () => {
-  window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "declined");
-  els.cookieBanner.hidden = true;
-});
+els.confirmAnalytics.addEventListener("click", confirmAnalyticsConsent);
 
 initialiseAnalyticsConsent();
 
