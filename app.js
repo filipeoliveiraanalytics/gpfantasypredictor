@@ -3362,7 +3362,8 @@ async function loadForecastAssetAudit() {
 
 async function init() {
   updateStrategyNote();
-  await Promise.all([
+  // The optimizer only needs the forecast CSV. Let supporting visual and audit data finish in the background.
+  const supportingData = Promise.all([
     loadDriverPhotoManifest(),
     loadConstructorLogoManifest(),
     loadPriceMovements(),
@@ -3380,7 +3381,6 @@ async function init() {
   buildComboCaches();
   const sample = state.projections[0];
   updateModelCopy(sample);
-  renderForecastTracker();
   els.status.textContent = `${sample?.next_gp ?? "Next GP"} ${sample?.mode ? `| ${sample.mode}` : ""} model ready. Click Optimize Team to run it.`;
   loadAvailableChips();
   restoreSavedTeam();
@@ -3388,7 +3388,12 @@ async function init() {
   syncChipAvailability();
   updateBudgetValidation();
   updateSavedTeamUi();
-  renderHindsightReview();
+
+  supportingData.then(() => {
+    renderForecastTracker();
+    renderHindsightReview();
+    updateSnapshotCallout();
+  });
 }
 
 els.form.addEventListener("submit", (event) => {
