@@ -10,8 +10,9 @@ const teamColors = {
 
 const state = {
   projections: [], audits: [], auditRows: [],
-  currentDrivers: ["RUS", "LIN", "HUL", "ALB", "PER"],
-  currentConstructors: ["MER", "MCL"],
+  dataReady: false,
+  currentDrivers: [],
+  currentConstructors: [],
   pickerType: "driver", pickerSelection: new Set(),
   recommendedRows: [], recommendation: null, lineupView: "recommended",
 };
@@ -19,6 +20,7 @@ const state = {
 const els = {
   budget: document.querySelector("#budget-input"),
   transfers: document.querySelector("#transfers-input"),
+  budgetWarning: document.querySelector("#budget-warning"),
   strategy: document.querySelector("#strategy-input"),
   chips: [...document.querySelectorAll(".chip-settings input")],
   chipCount: document.querySelector("#chip-count"),
@@ -144,16 +146,50 @@ function selectedRows(type) {
   return keys.map(rowForKey).filter(Boolean);
 }
 
+function hasCompleteTeam() {
+  return state.currentDrivers.length === 5 && state.currentConstructors.length === 2;
+}
+
+function updateBudgetWarning() {
+  if (!els.budgetWarning) return;
+  const budget = number(els.budget.value);
+  const rows = [...selectedRows("driver"), ...selectedRows("constructor")];
+  if (!hasCompleteTeam() || rows.length !== 7 || budget <= 0) {
+    els.budgetWarning.hidden = true;
+    els.budgetWarning.textContent = "";
+    return;
+  }
+
+  const cost = rows.reduce((total, row) => total + number(row.price_m), 0);
+  const overBudget = cost - budget;
+  if (overBudget <= 0.01) {
+    els.budgetWarning.hidden = true;
+    els.budgetWarning.textContent = "";
+    return;
+  }
+
+  els.budgetWarning.hidden = false;
+  els.budgetWarning.textContent = `Current team costs $${format(cost)}m, $${format(overBudget)}m over budget.`;
+}
+
 function swatch(row) {
   return `<i style="background:${teamColors[row.team] || "#555"}"></i>`;
 }
 
 function renderCurrentTeam() {
-  const renderList = (type) => selectedRows(type)
-    .map((row) => `<li>${swatch(row)}<span>${escapeHtml(row.name)}${type === "driver" ? `<small>${escapeHtml(row.team)}</small>` : ""}</span><b>$${format(row.price_m)}m</b></li>`)
-    .join("");
+  const renderList = (type) => {
+    const rows = selectedRows(type);
+    if (!rows.length) {
+      const count = type === "driver" ? "5 drivers" : "2 constructors";
+      return `<li class="team-empty">Choose ${count}</li>`;
+    }
+    return rows
+      .map((row) => `<li>${swatch(row)}<span>${escapeHtml(row.name)}${type === "driver" ? `<small>${escapeHtml(row.team)}</small>` : ""}</span><b>$${format(row.price_m)}m</b></li>`)
+      .join("");
+  };
   els.drivers.innerHTML = renderList("driver");
   els.constructors.innerHTML = renderList("constructor");
+  updateBudgetWarning();
 }
 
 function renderChipCount() {
@@ -506,7 +542,7 @@ function scoreLineup(drivers, constructors, { ignoreBudget = false, unlimitedTra
 }
 
 function findBestLineup(options = {}) {
-  const currentFriendly = els.strategy.value === "current_friendly" && !options.unlimitedTransfers;
+  const currentFriendly = els.strategy.value === "current_friendly" && !options.unlimitedTransfers && !options.allowPaidTransfers;
   const freeTransfers = Math.max(0, Math.floor(number(els.transfers.value)));
   let best = null;
   const driverCombos = combinations(optimizerDriverPool(), 5);
@@ -523,12 +559,23 @@ function findBestLineup(options = {}) {
 }
 
 function directRecommendation() {
-  const base = findBestLineup();
+  let base = findBestLineup();
+  if (!base && els.strategy.value === "current_friendly") {
+    base = findBestLineup({ allowPaidTransfers: true });
+  }
   if (!base) throw new Error("No valid lineup fits the current budget. Edit your team or budget and try again.");
   return { ...base, chip: "" };
 }
 
 function runOptimizer() {
+  if (!hasCompleteTeam()) {
+    els.stageCopy.textContent = "Choose 5 drivers and 2 constructors before optimizing.";
+    return;
+  }
+  if (number(els.budget.value) <= 0 || els.transfers.value === "") {
+    els.stageCopy.textContent = "Enter your budget and free transfers before optimizing.";
+    return;
+  }
   els.optimize.disabled = true;
   els.optimize.innerHTML = "Optimizing <span>...</span>";
   els.stageCopy.textContent = "Calculating with the live Pre-Weekend model.";
@@ -593,10 +640,13 @@ async function initialise() {
   renderSchedule();
   populateAuditSelect();
   const sample = state.projections[0];
+  state.dataReady = true;
+  els.optimize.disabled = false;
+  els.optimize.innerHTML = "Optimize Team <span>→</span>";
   els.lineupHeading.textContent = "Recommended Lineup";
   els.stageCopy.textContent = restoredTeam
     ? "Saved team restored. Run the optimizer to refresh the recommendation."
-    : `Live ${sample.mode} model loaded. Choose your team and run the optimizer.`;
+    : `Live ${sample.mode} model loaded. Enter your team details to build a recommendation.`;
 }
 
 document.querySelectorAll("[data-picker]").forEach((button) => button.addEventListener("click", () => openPicker(button.dataset.picker)));
@@ -617,6 +667,11 @@ els.viewControls.forEach((button) => button.addEventListener("click", () => {
 }));
 els.saveTeam.addEventListener("change", () => {
   if (els.saveTeam.checked) {
+    if (!hasCompleteTeam() || number(els.budget.value) <= 0 || els.transfers.value === "") {
+      els.saveTeam.checked = false;
+      els.stageCopy.textContent = "Enter your budget, transfers, and full team before saving.";
+      return;
+    }
     saveTeam();
     return;
   }
@@ -625,6 +680,7 @@ els.saveTeam.addEventListener("change", () => {
 });
 [els.budget, els.transfers, els.strategy, ...els.chips].forEach((input) => input.addEventListener("change", () => {
   if (input.matches(".chip-settings input")) renderChipCount();
+  updateBudgetWarning();
   persistTeamIfEnabled();
   renderRaceContext();
 }));

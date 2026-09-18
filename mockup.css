@@ -122,6 +122,7 @@ dd { margin: 4px 0 0; font-size: 18px; font-family: Georgia, 'Times New Roman', 
 .team-settings { margin: 0 0 14px; padding: 13px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
 .team-settings label, .strategy-field, .audit-select-label { display: grid; gap: 5px; color: var(--muted); font-size: 10px; font-weight: bold; letter-spacing: .5px; text-transform: uppercase; }
 .team-settings input, .strategy-field select, .audit-select-label select { width: 100%; height: 35px; padding: 0 8px; border: 1px solid var(--rule); border-radius: 0; background: var(--surface); color: var(--ink); font-size: 13px; font-weight: bold; }
+.budget-warning { margin: -5px 0 14px; padding: 8px 9px; border-left: 2px solid var(--red); background: #fbf0ed; color: #a72b24; font-size: 10px; font-weight: bold; line-height: 1.35; }
 .strategy-field { margin-bottom: 24px; }
 .strategy-field select { text-transform: none; letter-spacing: 0; }
 .chip-settings { margin: -10px 0 24px; padding: 12px 0 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 13px; border: 0; border-top: 1px solid var(--soft-rule); }
@@ -152,6 +153,7 @@ dd { margin: 4px 0 0; font-size: 18px; font-family: Georgia, 'Times New Roman', 
 .team-list span, .shifts span { font-size: 12px; font-weight: bold; }
 .team-list small, .shifts small, td small { display: block; margin-top: 1px; color: var(--muted); font-size: 10px; font-weight: normal; }
 .team-list b { font-family: Georgia, 'Times New Roman', serif; font-size: 12px; }
+.team-list .team-empty { min-height: 39px; display: flex; align-items: center; border-bottom: 1px solid var(--soft-rule); color: var(--muted); font-size: 11px; font-style: italic; }
 .mercedes { background: #20a69b !important; }
 .racing-bulls { background: #224caa !important; }
 .audi { background: #d52d36 !important; }
