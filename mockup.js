@@ -1,6 +1,7 @@
 const DATA_ROOT = "data";
 const TEAM_STORAGE_KEY = "gp-fantasy-notebook-team-v1";
 const ANALYTICS_CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
+const OPTIMIZER_MESSAGE_SOURCE = "gp-fantasy-optimizer";
 
 const teamColors = {
   Mercedes: "#20a69b", McLaren: "#ee781d", Ferrari: "#d52d36", "Red Bull Racing": "#20386f",
@@ -12,7 +13,7 @@ const state = {
   projections: [], audits: [], auditRows: [],
   currentDrivers: ["RUS", "LIN", "HUL", "ALB", "PER"],
   currentConstructors: ["MER", "MCL"],
-  pickerType: "driver", pickerSelection: new Set(), engineReady: false, engineWarmup: null,
+  pickerType: "driver", pickerSelection: new Set(), engineReady: false, optimizationRequest: null,
   recommendedRows: [], recommendation: null, lineupView: "recommended",
 };
 
@@ -459,70 +460,56 @@ function waitFor(condition, timeout = 12000) {
   });
 }
 
-function warmOptimizerEngine() {
-  if (state.engineReady) return Promise.resolve();
-  if (state.engineWarmup) return state.engineWarmup;
-
-  state.engineWarmup = waitFor(
-    () => els.engine.contentDocument?.querySelector("#data-status")?.textContent.includes("model ready"),
-    20000,
-  ).then(() => {
-    state.engineReady = true;
-    els.optimize.disabled = false;
-    els.optimize.innerHTML = "Optimize Team <span>→</span>";
-  }).catch(() => {
-    els.optimize.disabled = false;
-    els.optimize.innerHTML = "Retry optimizer <span>→</span>";
-    els.stageCopy.textContent = "The optimizer is taking longer than usual. Retry to continue.";
-  }).finally(() => {
-    state.engineWarmup = null;
-  });
-
-  return state.engineWarmup;
+function prepareOptimizerEngine() {
+  state.engineReady = false;
+  els.optimize.disabled = true;
+  els.optimize.innerHTML = "Preparing optimizer <span>...</span>";
+  const engineUrl = new URL("optimizer-engine.html", window.location.href);
+  engineUrl.searchParams.set("bridge", Date.now().toString());
+  els.engine.src = engineUrl.toString();
 }
 
-function setEngineValue(document, selector, value) {
-  const input = document.querySelector(selector);
-  if (!input) throw new Error(`Missing optimizer field: ${selector}`);
-  input.value = value;
-  input.dispatchEvent(new Event("input", { bubbles: true }));
-  input.dispatchEvent(new Event("change", { bubbles: true }));
+function requestOptimization() {
+  const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const input = {
+    budget: els.budget.value,
+    transfers: els.transfers.value,
+    drivers: state.currentDrivers,
+    constructors: state.currentConstructors,
+    strategy: els.strategy.value,
+    chips: els.chips.filter((chip) => chip.checked).map((chip) => chip.value),
+  };
+  return new Promise((resolve, reject) => {
+    const timeout = window.setTimeout(() => {
+      if (state.optimizationRequest?.requestId !== requestId) return;
+      state.optimizationRequest = null;
+      reject(new Error("The optimizer did not return a result. Please retry."));
+    }, 30000);
+    state.optimizationRequest = { requestId, resolve, reject, timeout };
+    els.engine.contentWindow.postMessage({ source: OPTIMIZER_MESSAGE_SOURCE, type: "optimise", requestId, input }, window.location.origin);
+  });
 }
 
 async function runOptimizer() {
   if (!state.engineReady) {
     els.stageCopy.textContent = "Preparing the optimizer. It will be ready shortly.";
-    warmOptimizerEngine();
+    prepareOptimizerEngine();
     return;
   }
   els.optimize.disabled = true;
   els.optimize.innerHTML = "Optimizing <span>...</span>";
   els.stageCopy.textContent = "Calculating with the live Pre-Weekend model.";
   try {
-    const engineDocument = els.engine.contentDocument;
-    setEngineValue(engineDocument, "#budget", els.budget.value);
-    setEngineValue(engineDocument, "#free-transfers", els.transfers.value);
-    setEngineValue(engineDocument, "#drivers", state.currentDrivers.join(", "));
-    setEngineValue(engineDocument, "#constructors", state.currentConstructors.join(", "));
-    setEngineValue(engineDocument, "#strategy", els.strategy.value);
-    els.chips.forEach((chip) => {
-      const engineChip = engineDocument.querySelector(`#available-chip-options input[value="${chip.value}"]`);
-      if (engineChip) engineChip.checked = chip.checked;
-    });
-    engineDocument.querySelector("#optimize-button").click();
-    await waitFor(() => engineDocument.querySelectorAll("#driver-list .chip").length === 5 && engineDocument.querySelectorAll("#constructor-list .chip").length === 2);
-    const names = [...engineDocument.querySelectorAll("#driver-list .chip strong, #constructor-list .chip strong")].map((element) => element.textContent.trim());
-    const recommended = names.map((name) => state.projections.find((row) => row.name === name)).filter(Boolean);
+    const result = await requestOptimization();
+    const recommended = result.names.map((name) => state.projections.find((row) => row.name === name)).filter(Boolean);
     if (recommended.length !== 7) throw new Error("Could not read the full recommendation from the optimizer.");
-    const boostName = engineDocument.querySelector("#boost-driver small")?.textContent.trim();
-    const boost = recommended.find((row) => row.name === boostName);
-    const transferText = engineDocument.querySelector("#transfer-penalty")?.textContent || "0";
+    const boost = recommended.find((row) => row.name === result.boostName);
     renderRecommendation(recommended, {
-      points: `${engineDocument.querySelector("#net-points")?.textContent.trim() || "--"} pts`,
-      cost: engineDocument.querySelector("#team-cost")?.textContent.trim() || "--",
-      paidTransfers: Math.max(0, Math.round(Math.abs(number(transferText)) / 10)),
+      points: `${result.points} pts`,
+      cost: result.cost,
+      paidTransfers: Math.max(0, Math.round(Math.abs(number(result.transferText)) / 10)),
       boost,
-      chip: engineDocument.querySelector("#why-lineup .chip-recommendation-badge")?.textContent.trim(),
+      chip: result.chip,
     });
     els.stageCopy.textContent = "Pre-weekend recommendation updated from the live optimizer.";
   } catch (error) {
@@ -624,8 +611,36 @@ els.declineAnalytics.addEventListener("click", () => {
   els.cookieBanner.hidden = true;
 });
 
-els.engine.addEventListener("load", warmOptimizerEngine);
-warmOptimizerEngine();
+window.addEventListener("message", (event) => {
+  if (event.origin !== window.location.origin || event.data?.source !== OPTIMIZER_MESSAGE_SOURCE) return;
+  if (event.data.type === "ready") {
+    state.engineReady = true;
+    els.optimize.disabled = false;
+    els.optimize.innerHTML = "Optimize Team <span>→</span>";
+    return;
+  }
+  if (event.data.type === "result" && state.optimizationRequest?.requestId === event.data.requestId) {
+    const request = state.optimizationRequest;
+    state.optimizationRequest = null;
+    window.clearTimeout(request.timeout);
+    request.resolve(event.data);
+    return;
+  }
+  if (event.data.type === "error") {
+    if (state.optimizationRequest?.requestId === event.data.requestId) {
+      const request = state.optimizationRequest;
+      state.optimizationRequest = null;
+      window.clearTimeout(request.timeout);
+      request.reject(new Error(event.data.message));
+      return;
+    }
+    state.engineReady = false;
+    els.optimize.disabled = false;
+    els.optimize.innerHTML = "Retry optimizer <span>→</span>";
+    els.stageCopy.textContent = "The optimizer could not start. Retry to continue.";
+  }
+});
+prepareOptimizerEngine();
 initialiseAnalyticsConsent();
 
 initialise().catch((error) => {
