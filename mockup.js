@@ -481,7 +481,7 @@ function renderLineupTable() {
     return;
   }
   els.rows.innerHTML = rows.map((row, index) => {
-    const delta = number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m));
+    const delta = number(row.projected_price_delta_m);
     const hasMaterialPriceMove = Math.abs(delta) >= 0.05;
     const trendClass = hasMaterialPriceMove ? (delta > 0 ? "up" : "down") : "neutral";
     const trendLabel = hasMaterialPriceMove ? `${delta > 0 ? "+" : ""}${format(delta)}m` : "--";
