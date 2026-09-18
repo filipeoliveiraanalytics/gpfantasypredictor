@@ -311,8 +311,12 @@ td strong { font-size: 11px; }
 .up { color: var(--teal) !important; }
 .down { color: var(--red) !important; }
 .trend-cell { position: relative; cursor: help; }
-.trend-cell::after { width: 260px; padding: 8px 9px; position: absolute; z-index: 12; top: calc(100% + 5px); right: 0; border: 1px solid #36332f; background: var(--ink); color: #fff; content: attr(data-trend-guidance); font-size: 10px; font-weight: normal; line-height: 1.35; text-align: left; opacity: 0; pointer-events: none; transform: translateY(-3px); transition: opacity .14s ease, transform .14s ease; visibility: hidden; }
-.trend-cell:hover::after, .trend-cell:focus-visible::after, .trend-cell.show-price-guidance::after { opacity: 1; transform: translateY(0); visibility: visible; }
+.trend-tooltip { width: 248px; padding: 10px; position: absolute; z-index: 12; top: calc(100% + 5px); right: 0; display: grid; gap: 5px; border: 1px solid #36332f; background: var(--ink); color: #fff; font-size: 10px; font-weight: normal; line-height: 1.25; text-align: left; opacity: 0; pointer-events: none; transform: translateY(-3px); transition: opacity .14s ease, transform .14s ease; visibility: hidden; }
+.trend-tooltip > b { margin-bottom: 2px; color: var(--yellow); font-size: 9px; letter-spacing: .45px; text-transform: uppercase; }
+.trend-tooltip > span { display: grid; grid-template-columns: 58px 1fr; gap: 8px; }
+.trend-tooltip em { color: #fff; font-style: normal; font-weight: bold; }
+.trend-tooltip i { color: #e3e0d9; font-style: normal; }
+.trend-cell:hover .trend-tooltip, .trend-cell:focus-visible .trend-tooltip, .trend-cell.show-price-guidance .trend-tooltip { opacity: 1; transform: translateY(0); visibility: visible; }
 .trend-cell:focus-visible { outline: 2px solid var(--yellow); outline-offset: -2px; }
 
 .context-intro { margin: 0 0 19px; color: var(--muted); font-size: 12px; line-height: 1.5; }

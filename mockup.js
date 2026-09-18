@@ -269,22 +269,24 @@ function swatch(row) {
   return `<i style="background:${teamColors[row.team] || "#555"}"></i>`;
 }
 
-function priceTrendGuidance(row, trendLabel) {
-  const projected = number(row.expected_fantasy_points, Number.NaN);
+function priceTrendTiers(row) {
   const gpName = `${row.next_gp} Grand Prix`;
   const threshold = state.priceThresholds.find((entry) => entry.source_gp === gpName && entry.entity_type === row.entity_type && entry.key === row.key);
-  if (!Number.isFinite(projected) || !threshold) {
-    return `Model trend: ${trendLabel}. Price thresholds are unavailable for this asset.`;
-  }
+  if (!threshold) return null;
 
   const premiumAsset = number(row.price_m) >= 18.5;
   const tiers = premiumAsset ? { good: 0.1, great: 0.3, poor: 0.1 } : { good: 0.2, great: 0.6, poor: 0.2 };
-  const pointsTo = (value) => Math.max(0, Math.ceil(number(value) - projected));
-  const pointsLowerTo = (value) => Math.max(0, Math.ceil(projected - number(value)));
-  const good = pointsTo(threshold.good_min);
-  const great = pointsTo(threshold.great_min);
-  const poor = pointsLowerTo(threshold.poor_max);
-  return `Model trend: ${trendLabel}. +$${format(tiers.good)}m: ${good ? `${good} pts more` : "in range"}. +$${format(tiers.great)}m: ${great ? `${great} pts more` : "in range"}. -$${format(tiers.poor)}m: ${poor ? `${poor} pts lower` : "in range"}.`;
+  const whole = (value) => format(value, 0);
+  const labels = [
+    [`+$${format(tiers.great)}M`, `>= ${whole(threshold.great_min)} pts`],
+    [`+$${format(tiers.good)}M`, `${whole(threshold.good_min)} to ${whole(threshold.good_max)} pts`],
+    [`-$${format(tiers.poor)}M`, `${whole(threshold.poor_min)} to ${whole(threshold.poor_max)} pts`],
+    [`-$${format(tiers.great)}M`, `<= ${whole(threshold.terrible_max)} pts`],
+  ];
+  return {
+    aria: `Price change after this GP. ${labels.map(([change, range]) => `${change}: ${range}`).join(". ")}.`,
+    markup: `<span class="trend-tooltip" role="tooltip"><b>Price change after this GP</b>${labels.map(([change, range]) => `<span><em>${change}</em><i>${range}</i></span>`).join("")}</span>`,
+  };
 }
 
 function renderCurrentTeam() {
@@ -483,12 +485,14 @@ function renderLineupTable() {
     const hasMaterialPriceMove = Math.abs(delta) >= 0.05;
     const trendClass = hasMaterialPriceMove ? (delta > 0 ? "up" : "down") : "neutral";
     const trendLabel = hasMaterialPriceMove ? `${delta > 0 ? "+" : ""}${format(delta)}m` : "--";
-    const trendGuidance = priceTrendGuidance(row, trendLabel);
+    const trendTiers = priceTrendTiers(row);
     const position = rows.slice(0, index).filter((candidate) => candidate.entity_type === row.entity_type).length + 1;
     const isFirstConstructor = row.entity_type === "constructor" && !rows.slice(0, index).some((candidate) => candidate.entity_type === "constructor");
     const rowClass = [row.entity_type === "constructor" ? "constructor" : "", isFirstConstructor ? "first-constructor" : ""].filter(Boolean).join(" ");
     const teamLabel = row.entity_type === "driver" ? `<small>${escapeHtml(row.team)}</small>` : "";
-    return `<tr class="${rowClass}"><td class="position">${position}</td><td class="asset-name"><i style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong>${teamLabel}</span></td><td class="points">${format(row.expected_fantasy_points)}</td><td>$${format(row.price_m)}m</td><td title="Projected points per $1M">${format(row.value_per_million, 2)}</td><td class="${trendClass} trend-cell" role="button" tabindex="0" aria-expanded="false" data-trend-guidance="${escapeHtml(trendGuidance)}" aria-label="${escapeHtml(`${row.name}. ${trendGuidance}`)}">${trendLabel}</td></tr>`;
+    const trendTooltip = trendTiers?.markup || "";
+    const trendAria = trendTiers?.aria || "Price thresholds are unavailable for this asset.";
+    return `<tr class="${rowClass}"><td class="position">${position}</td><td class="asset-name"><i style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong>${teamLabel}</span></td><td class="points">${format(row.expected_fantasy_points)}</td><td>$${format(row.price_m)}m</td><td title="Projected points per $1M">${format(row.value_per_million, 2)}</td><td class="${trendClass} trend-cell" role="button" tabindex="0" aria-expanded="false" aria-label="${escapeHtml(`${row.name}. ${trendAria}`)}">${trendLabel}${trendTooltip}</td></tr>`;
   }).join("");
 }
 
