@@ -269,6 +269,26 @@ function swatch(row) {
   return `<i style="background:${teamColors[row.team] || "#555"}"></i>`;
 }
 
+function priceGuidance(row) {
+  const projected = number(row.expected_fantasy_points, Number.NaN);
+  const goodThreshold = number(row.price_points_needed_good, Number.NaN);
+  const greatThreshold = number(row.price_points_needed_great, Number.NaN);
+  const priceChange = number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m));
+  if (![projected, goodThreshold, greatThreshold].every(Number.isFinite)) {
+    return "Price guidance will be available with the next model update.";
+  }
+
+  if (projected < goodThreshold) {
+    return `Needs ${Math.ceil(goodThreshold - projected)} more projected pts to move out of a price-fall path.`;
+  }
+  if (projected < greatThreshold) {
+    const change = priceChange > 0 ? `+$${format(priceChange)}m` : "a positive";
+    return `On ${change} price path. Needs ${Math.ceil(greatThreshold - projected)} more projected pts for the top rise tier.`;
+  }
+  const change = priceChange > 0 ? `+$${format(priceChange)}m` : "positive";
+  return `On a ${change} price path with a ${Math.floor(projected - greatThreshold)}-pt cushion above the top rise tier.`;
+}
+
 function renderCurrentTeam() {
   const renderList = (type) => {
     const rows = selectedRows(type);
@@ -277,7 +297,10 @@ function renderCurrentTeam() {
       return `<li class="team-empty">Choose ${count}</li>`;
     }
     return rows
-      .map((row) => `<li>${swatch(row)}<span>${escapeHtml(row.name)}${type === "driver" ? `<small>${escapeHtml(row.team)}</small>` : ""}</span><b>$${format(row.price_m)}m</b></li>`)
+      .map((row) => {
+        const guidance = priceGuidance(row);
+        return `<li class="has-price-guidance" role="button" tabindex="0" aria-expanded="false" data-price-guidance="${escapeHtml(guidance)}" aria-label="${escapeHtml(`${row.name}. ${guidance}`)}">${swatch(row)}<span>${escapeHtml(row.name)}${type === "driver" ? `<small>${escapeHtml(row.team)}</small>` : ""}</span><b>$${format(row.price_m)}m</b></li>`;
+      })
       .join("");
   };
   els.drivers.innerHTML = renderList("driver");
@@ -821,6 +844,20 @@ els.confirmAnalytics.addEventListener("click", confirmAnalyticsConsent);
 els.closeRatingPrompt.addEventListener("click", dismissRatingPrompt);
 els.ratingButtons.forEach((button) => button.addEventListener("click", () => selectSiteRating(Number(button.dataset.siteRating))));
 els.submitSiteRating.addEventListener("click", submitSiteRating);
+[els.drivers, els.constructors].forEach((list) => {
+  const toggleGuidance = (event) => {
+    const row = event.target.closest(".has-price-guidance");
+    if (!row) return;
+    const shown = row.classList.toggle("show-price-guidance");
+    row.setAttribute("aria-expanded", String(shown));
+  };
+  list.addEventListener("click", toggleGuidance);
+  list.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    toggleGuidance(event);
+  });
+});
 document.querySelectorAll("[data-analytics-link]").forEach((link) => link.addEventListener("click", () => {
   trackEvent("outbound_link_clicked", { destination: link.dataset.analyticsLink });
 }));

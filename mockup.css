@@ -176,6 +176,10 @@ dd { margin: 4px 0 0; font-size: 18px; font-family: Georgia, 'Times New Roman', 
   border-top: 1px solid var(--soft-rule);
 }
 .team-list li:last-child { border-bottom: 1px solid var(--soft-rule); }
+.team-list .has-price-guidance { position: relative; cursor: help; }
+.team-list .has-price-guidance::after { width: 238px; padding: 8px 9px; position: absolute; z-index: 10; top: calc(100% + 5px); left: 0; border: 1px solid #36332f; background: var(--ink); color: #fff; content: attr(data-price-guidance); font-size: 10px; font-weight: normal; line-height: 1.35; opacity: 0; pointer-events: none; transform: translateY(-3px); transition: opacity .14s ease, transform .14s ease; visibility: hidden; }
+.team-list .has-price-guidance:hover::after, .team-list .has-price-guidance:focus-visible::after, .team-list .has-price-guidance.show-price-guidance::after { opacity: 1; transform: translateY(0); visibility: visible; }
+.team-list .has-price-guidance:focus-visible { outline: 2px solid var(--yellow); outline-offset: -2px; }
 .team-list i { width: 8px; height: 29px; display: block; background: var(--ink); }
 .team-list span, .shifts span { font-size: 12px; font-weight: bold; }
 .team-list small, .shifts small, td small { display: block; margin-top: 1px; color: var(--muted); font-size: 10px; font-weight: normal; }
