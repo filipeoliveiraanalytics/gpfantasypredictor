@@ -105,6 +105,7 @@ nav a.active { color: var(--ink); border-color: var(--red); }
 .rating-prompt .kicker { margin-bottom: 5px; }
 .rating-prompt h2 { margin: 0; font-size: 20px; line-height: 1.05; }
 .rating-prompt > p { margin: 11px 0 14px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+.rating-prompt .rating-status { margin: 11px 0 -2px; color: var(--teal); font-weight: bold; }
 .rating-prompt .icon-button { flex: 0 0 auto; }
 .rating-scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .rating-scale button { min-height: 37px; padding: 0; border: 1px solid var(--ink); background: var(--surface); color: var(--ink); font-size: 13px; font-weight: bold; }

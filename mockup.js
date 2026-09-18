@@ -70,6 +70,7 @@ const els = {
   ratingButtons: [...document.querySelectorAll("[data-site-rating]")],
   ratingFeedback: document.querySelector("#site-rating-feedback"),
   submitSiteRating: document.querySelector("#submit-site-rating"),
+  ratingStatus: document.querySelector("#rating-status"),
 };
 
 function loadAnalytics() {
@@ -146,35 +147,36 @@ function dismissRatingPrompt() {
   state.ratingTimer = null;
   state.ratingEligible = false;
   els.ratingPrompt.hidden = true;
-  window.localStorage.setItem(SITE_RATING_DISMISSED_KEY, "true");
-  trackEvent("site_rating_dismissed");
+  if (!window.localStorage.getItem(SITE_RATING_KEY)) {
+    window.localStorage.setItem(SITE_RATING_DISMISSED_KEY, "true");
+    trackEvent("site_rating_dismissed");
+  }
 }
 
 function selectSiteRating(rating) {
+  if (window.localStorage.getItem(SITE_RATING_KEY)) return;
   state.selectedSiteRating = rating;
   els.ratingButtons.forEach((button) => {
     const selected = Number(button.dataset.siteRating) === rating;
     button.setAttribute("aria-pressed", String(selected));
+    button.disabled = true;
   });
-  els.submitSiteRating.disabled = false;
+  state.ratingEligible = false;
+  window.localStorage.setItem(SITE_RATING_KEY, String(rating));
+  trackEvent("site_rating_submitted", { rating });
+  els.ratingStatus.hidden = false;
+  els.submitSiteRating.disabled = !els.ratingFeedback.value.trim();
 }
 
 function submitSiteRating() {
   const rating = state.selectedSiteRating;
-  if (!rating) return;
-  if (state.ratingTimer) window.clearTimeout(state.ratingTimer);
-  state.ratingTimer = null;
-  state.ratingEligible = false;
-  els.ratingPrompt.hidden = true;
-  window.localStorage.setItem(SITE_RATING_KEY, String(rating));
-  trackEvent("site_rating_submitted", { rating });
   const feedback = els.ratingFeedback.value.trim();
-  if (feedback) {
-    trackEvent("site_feedback_email_opened", { rating });
-    const subject = "GP Fantasy Predictor feedback";
-    const body = `Rating: ${rating}/5\n\nFeedback:\n${feedback}`;
-    window.location.href = `mailto:filipe@filipeoliveiraanalytics.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }
+  if (!rating || !feedback) return;
+  els.ratingPrompt.hidden = true;
+  trackEvent("site_feedback_email_opened", { rating });
+  const subject = "GP Fantasy Predictor feedback";
+  const body = `Rating: ${rating}/5\n\nFeedback:\n${feedback}`;
+  window.location.href = `mailto:filipe@filipeoliveiraanalytics.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 function parseCsv(text) {
@@ -875,6 +877,9 @@ els.confirmAnalytics.addEventListener("click", confirmAnalyticsConsent);
 els.closeRatingPrompt.addEventListener("click", dismissRatingPrompt);
 els.ratingButtons.forEach((button) => button.addEventListener("click", () => selectSiteRating(Number(button.dataset.siteRating))));
 els.submitSiteRating.addEventListener("click", submitSiteRating);
+els.ratingFeedback.addEventListener("input", () => {
+  els.submitSiteRating.disabled = !state.selectedSiteRating || !els.ratingFeedback.value.trim();
+});
 [els.rows].forEach((list) => {
   const toggleGuidance = (event) => {
     const cell = event.target.closest(".trend-cell, .points-cell");

@@ -23,7 +23,7 @@
   <meta name="twitter:title" content="F1 Fantasy Predictor & Team Optimizer">
   <meta name="twitter:description" content="A fan-made F1 Fantasy predictor powered by GP prediction modelling.">
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png">
-  <link rel="stylesheet" href="mockup.css?v=points-breakdown-v63-20260918">
+  <link rel="stylesheet" href="mockup.css?v=one-click-rating-v64-20260918">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -131,12 +131,13 @@
     <header><div><p class="kicker">New experience</p><h2 id="rating-title">How is the new predictor?</h2></div><button id="close-rating-prompt" class="icon-button" type="button" aria-label="Close rating prompt">×</button></header>
     <p>Your quick score helps shape the next update.</p>
     <div class="rating-scale" role="group" aria-label="Rate the new predictor from 1 to 5"><button type="button" data-site-rating="1" aria-label="1 out of 5">1</button><button type="button" data-site-rating="2" aria-label="2 out of 5">2</button><button type="button" data-site-rating="3" aria-label="3 out of 5">3</button><button type="button" data-site-rating="4" aria-label="4 out of 5">4</button><button type="button" data-site-rating="5" aria-label="5 out of 5">5</button></div>
+    <p id="rating-status" class="rating-status" hidden>Thanks - your rating was saved.</p>
     <label class="rating-feedback"><span>What should we improve? <small>Optional - opens your email to send it.</small></span><textarea id="site-rating-feedback" rows="3" maxlength="500" placeholder="Share a thought"></textarea></label>
-    <button id="submit-site-rating" class="rating-submit" type="button" disabled>Submit rating <span aria-hidden="true">→</span></button>
+    <button id="submit-site-rating" class="rating-submit" type="button" disabled>Send feedback <span aria-hidden="true">→</span></button>
   </aside>
   <dialog id="picker-dialog" class="dialog"><form method="dialog"><header><div><p class="kicker">Current Team</p><h2 id="picker-title">Choose drivers</h2></div><button class="icon-button" value="cancel" aria-label="Close picker">×</button></header><p id="picker-help" class="muted"></p><div id="picker-options" class="picker-options"></div><footer><button id="apply-picker" class="primary" type="button">Apply selection <span>→</span></button></footer></form></dialog>
   <dialog id="audit-dialog" class="dialog audit-dialog"><form method="dialog"><header><div><p class="kicker">Forecast vs Real Points</p><h2 class="audit-title"><span id="audit-flag" class="audit-flag flag-spain" aria-label="Spain flag"></span><span id="audit-title">Selected audit</span></h2></div><button class="icon-button" value="cancel" aria-label="Close audit">×</button></header><p id="audit-note" class="muted"></p><label class="audit-select-label">Grand Prix and forecast stage<select id="audit-select" aria-label="Select forecast audit"></select></label><div class="audit-tables"><section><h3>Drivers</h3><table><thead><tr><th>Asset</th><th>Est.</th><th>Actual</th><th>Delta</th></tr></thead><tbody id="audit-driver-rows"></tbody></table></section><section><h3>Constructors</h3><table><thead><tr><th>Asset</th><th>Est.</th><th>Actual</th><th>Delta</th></tr></thead><tbody id="audit-constructor-rows"></tbody></table></section></div></form></dialog>
   <script>window.GA_MEASUREMENT_ID = "G-0GCZQDW467";</script>
-  <script src="mockup.js?v=points-breakdown-v63-20260918"></script>
+  <script src="mockup.js?v=one-click-rating-v64-20260918"></script>
 </body>
 </html>
