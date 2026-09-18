@@ -13,7 +13,7 @@ const state = {
   projections: [], audits: [], auditRows: [],
   currentDrivers: ["RUS", "LIN", "HUL", "ALB", "PER"],
   currentConstructors: ["MER", "MCL"],
-  pickerType: "driver", pickerSelection: new Set(), engineReady: false, optimizationRequest: null,
+  pickerType: "driver", pickerSelection: new Set(), engineReady: false, engineReadyTimer: null, optimizationRequest: null,
   recommendedRows: [], recommendation: null, lineupView: "recommended",
 };
 
@@ -423,7 +423,9 @@ function renderRecommendationSummary(rows, result, incoming, boost) {
   const budgetLeft = number(els.budget.value) - totalCost;
   const limitless = result.chip?.includes("Limitless");
   const transferLabel = `${incoming.length} move${incoming.length === 1 ? "" : "s"}`;
-  const transferDetail = result.paidTransfers ? `${result.paidTransfers} paid` : "Free moves cover it";
+  const transferDetail = limitless
+    ? "Limitless removes transfer penalties"
+    : result.paidTransfers ? `${result.paidTransfers} paid` : "Free moves cover it";
   const valueDirection = projectedValue >= 0 ? "up" : "down";
   const valueArrow = projectedValue >= 0 ? "&uarr;" : "&darr;";
   els.summary.hidden = false;
@@ -462,11 +464,18 @@ function waitFor(condition, timeout = 12000) {
 
 function prepareOptimizerEngine() {
   state.engineReady = false;
+  window.clearTimeout(state.engineReadyTimer);
   els.optimize.disabled = true;
   els.optimize.innerHTML = "Preparing optimizer <span>...</span>";
   const engineUrl = new URL("optimizer-engine.html", window.location.href);
   engineUrl.searchParams.set("bridge", Date.now().toString());
   els.engine.src = engineUrl.toString();
+  state.engineReadyTimer = window.setTimeout(() => {
+    if (state.engineReady) return;
+    els.optimize.disabled = false;
+    els.optimize.innerHTML = "Retry optimizer <span>→</span>";
+    els.stageCopy.textContent = "The optimizer did not finish starting. Retry to continue.";
+  }, 15000);
 }
 
 function requestOptimization() {
@@ -615,6 +624,7 @@ window.addEventListener("message", (event) => {
   if (event.origin !== window.location.origin || event.data?.source !== OPTIMIZER_MESSAGE_SOURCE) return;
   if (event.data.type === "ready") {
     state.engineReady = true;
+    window.clearTimeout(state.engineReadyTimer);
     els.optimize.disabled = false;
     els.optimize.innerHTML = "Optimize Team <span>→</span>";
     return;
