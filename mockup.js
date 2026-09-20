@@ -39,6 +39,7 @@ const els = {
   saveTeam: document.querySelector("#save-team"),
   rows: document.querySelector("#recommended-rows"),
   summary: document.querySelector("#recommendation-summary"),
+  rationale: document.querySelector("#recommendation-rationale"),
   viewControls: [...document.querySelectorAll("[data-lineup-view]")],
   contextTitle: document.querySelector("#context-title"),
   contextIntro: document.querySelector("#context-intro"),
@@ -653,6 +654,45 @@ function renderRecommendationSummary(rows, result, incoming, boost) {
     <div class="projected-value ${valueDirection}"><span>Projected value</span><strong><i aria-hidden="true">${valueArrow}</i> ${format(Math.abs(projectedValue))}m</strong><small>Expected price path</small></div>`;
 }
 
+function compactNameList(rows, limit = 2) {
+  if (rows.length <= limit) return nameList(rows);
+  return `${nameList(rows.slice(0, limit))} +${rows.length - limit} more`;
+}
+
+function renderRecommendationRationale(rows, result, incoming, boost) {
+  const current = new Set([...state.currentDrivers, ...state.currentConstructors]);
+  const recommended = new Set(rows.map((row) => row.key));
+  const outgoing = state.projections.filter((row) => current.has(row.key) && !recommended.has(row.key));
+  const drivers = rows.filter((row) => row.entity_type === "driver").sort((left, right) => number(right.expected_fantasy_points) - number(left.expected_fantasy_points));
+  const constructors = rows.filter((row) => row.entity_type === "constructor").sort((left, right) => number(right.expected_fantasy_points) - number(left.expected_fantasy_points));
+  const topDriver = drivers[0];
+  const topConstructor = constructors[0];
+  const projectedValue = rows.reduce((sum, row) => sum + number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m)), 0);
+  const freeTransfers = Math.max(0, Math.floor(number(els.transfers.value)));
+  const stageName = document.querySelector(".stage.selected b")?.textContent?.trim() || "Pre-weekend";
+  const transferDetail = !incoming.length
+    ? "The current team already clears the model's value and points threshold."
+    : result.paidTransfers
+      ? `${compactNameList(incoming)} replace ${compactNameList(outgoing)}. ${result.paidTransfers} paid move${result.paidTransfers === 1 ? "" : "s"} still clears the projected upside.`
+      : `${compactNameList(incoming)} replace ${compactNameList(outgoing)} within your ${freeTransfers} free move${freeTransfers === 1 ? "" : "s"}.`;
+  const priceDetail = Math.abs(projectedValue) < 0.05
+    ? "Price movement is close to flat, so projected scoring is driving the choice."
+    : `${projectedValue > 0 ? "+" : ""}${format(projectedValue)}m expected across the lineup, alongside the points case.`;
+  const modelDetail = stageName === "Pre-weekend"
+    ? "Built before practice data. Qualifying pace and reliability signals will refresh the recommendation after FP."
+    : `Built from the latest ${stageName.toLowerCase()} inputs and will refresh again when new track data arrives.`;
+
+  els.rationale.hidden = false;
+  els.rationale.innerHTML = `
+    <header><div><p class="kicker">Decision notes</p><h3 id="recommendation-rationale-title">Why this lineup?</h3></div><p>What is moving the recommendation beyond the headline score.</p></header>
+    <div class="rationale-grid">
+      <article><span>Point ceiling</span><strong>${escapeHtml(topDriver?.name || "Top driver")} <em>${format(topDriver?.expected_fantasy_points)} pts</em></strong><p>${escapeHtml(`${topConstructor?.name || "Constructor"} adds ${format(topConstructor?.expected_fantasy_points)} projected constructor points, while ${boost?.name || topDriver?.name || "the top driver"} carries the 2x boost.`)}</p></article>
+      <article><span>Transfer fit</span><strong>${incoming.length ? `${incoming.length} move${incoming.length === 1 ? "" : "s"}` : "Hold squad"}</strong><p>${escapeHtml(transferDetail)}</p></article>
+      <article class="${projectedValue >= 0 ? "positive" : "negative"}"><span>Price path</span><strong>${projectedValue >= 0 ? "+" : ""}${format(projectedValue)}m</strong><p>${escapeHtml(priceDetail)}</p></article>
+      <article><span>Model status</span><strong>${escapeHtml(stageName)}</strong><p>${escapeHtml(modelDetail)}</p></article>
+    </div>`;
+}
+
 function renderRecommendation(rows, result) {
   const current = new Set([...state.currentDrivers, ...state.currentConstructors]);
   const incoming = rows.filter((row) => !current.has(row.key));
@@ -661,6 +701,7 @@ function renderRecommendation(rows, result) {
   state.recommendation = result;
   state.lineupView = "recommended";
   renderRecommendationSummary(rows, result, incoming, boost);
+  renderRecommendationRationale(rows, result, incoming, boost);
   renderLineupTable();
   renderRaceContext();
 }
