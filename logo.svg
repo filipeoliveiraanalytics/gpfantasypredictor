@@ -1,6 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#f7f5f0"/>
-  <path d="M14 18h19v8H22v12h11v8H14z" fill="#181614"/>
-  <path d="M39 18h10c7 0 11 5 11 11s-4 11-11 11h-2v10h-8zm8 8v6h2c2 0 4-1 4-3s-2-3-4-3z" fill="#d52d36"/>
-  <path d="M14 51h36" stroke="#00877d" stroke-width="4" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="GP Fantasy Predictor">
+  <rect width="64" height="64" rx="12" fill="#fffefa"/>
+  <path d="M51 17C43 11 31 10 21 16C9 23 9 40 17 49C26 59 42 57 50 47" fill="none" stroke="#161514" stroke-linecap="butt" stroke-linejoin="round" stroke-width="10"/>
+  <path d="M33 33H55V43H49" fill="none" stroke="#161514" stroke-linecap="butt" stroke-linejoin="round" stroke-width="10"/>
+  <path d="M31 14C28 14 25 15 22 17M15 28C14 32 14 36 16 40M22 49C25 52 29 53 33 53M40 52C44 50 47 48 49 45" fill="none" stroke="#fffefa" stroke-linecap="round" stroke-width="1.6"/>
+  <path d="M24 17L28 15" fill="none" stroke="#13a8ab" stroke-linecap="round" stroke-width="2.2"/>
 </svg>
