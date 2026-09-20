@@ -287,20 +287,6 @@ dd { margin: 4px 0 0; font-size: 18px; font-family: Georgia, 'Times New Roman', 
 .projected-value strong i { font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-style: normal; }
 .projected-value.up strong, .projected-value.up strong i { color: var(--teal); }
 .projected-value.down strong, .projected-value.down strong i { color: var(--red); }
-.recommendation-rationale { margin: 0 0 18px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--rule); }
-.recommendation-rationale[hidden] { display: none; }
-.recommendation-rationale header { padding: 13px 0 11px; display: flex; align-items: end; justify-content: space-between; gap: 20px; }
-.recommendation-rationale h3 { margin: 3px 0 0; font-family: Georgia, 'Times New Roman', serif; font-size: 20px; line-height: 1; }
-.recommendation-rationale header > p { max-width: 260px; margin: 0; color: var(--muted); font-size: 10px; line-height: 1.35; text-align: right; }
-.rationale-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--rule); }
-.rationale-grid article { min-height: 112px; padding: 12px 11px 13px 0; display: grid; align-content: start; gap: 5px; }
-.rationale-grid article + article { padding-left: 11px; border-left: 1px solid var(--rule); }
-.rationale-grid span { color: var(--teal); font-size: 9px; font-weight: bold; letter-spacing: .85px; text-transform: uppercase; }
-.rationale-grid strong { color: var(--ink); font-family: Georgia, 'Times New Roman', serif; font-size: 15px; line-height: 1.1; }
-.rationale-grid strong em { color: var(--teal); font-family: Arial, Helvetica, sans-serif; font-size: 10px; font-style: normal; font-weight: bold; white-space: nowrap; }
-.rationale-grid p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.4; }
-.rationale-grid .positive strong { color: var(--teal); }
-.rationale-grid .negative strong { color: var(--red); }
 .lineup-views { width: min(250px, 100%); margin: 0 0 11px auto; display: grid; grid-template-columns: repeat(2, 1fr); border: 1px solid var(--rule); }
 .lineup-views button { min-height: 29px; padding: 0 7px; border: 0; border-right: 1px solid var(--rule); background: transparent; color: var(--muted); font-size: 9px; font-weight: bold; }
 .lineup-views button:last-child { border-right: 0; }
@@ -518,9 +504,6 @@ td strong { font-size: 11px; }
   .recommendation-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .recommendation-summary > div:nth-child(n + 4) { border-top: 1px solid var(--rule); }
   .recommendation-summary > div:nth-child(4) { border-left: 0; }
-  .rationale-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .rationale-grid article:nth-child(n + 3) { border-top: 1px solid var(--rule); }
-  .rationale-grid article:nth-child(3) { border-left: 0; }
 }
 
 @media (max-width: 980px) {
@@ -578,13 +561,6 @@ td strong { font-size: 11px; }
   .recommendation-summary > div:nth-child(odd) { border-left: 0; }
   .recommendation-summary > div:nth-child(n + 3) { border-top: 1px solid var(--rule); }
   .recommendation-summary strong { font-size: 16px; }
-  .recommendation-rationale { margin-bottom: 15px; }
-  .recommendation-rationale header { padding: 12px 0 10px; display: block; }
-  .recommendation-rationale h3 { font-size: 19px; }
-  .recommendation-rationale header > p { max-width: none; margin-top: 7px; font-size: 10px; text-align: left; }
-  .rationale-grid { grid-template-columns: 1fr; }
-  .rationale-grid article { min-height: 0; padding: 11px 0 12px; }
-  .rationale-grid article + article, .rationale-grid article:nth-child(3) { border-left: 0; border-top: 1px solid var(--rule); }
   .lineup-views { width: 100%; margin-bottom: 12px; }
   .lineup-views:has(button:disabled) { display: none; }
   .lineup table thead { display: none; }
