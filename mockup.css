@@ -228,6 +228,11 @@ dd { margin: 4px 0 0; font-size: 18px; font-family: Georgia, 'Times New Roman', 
 .race-header h2 { margin: 9px 0 7px; font-size: 40px; line-height: .95; }
 .race-header p:not(.kicker) { margin: 0; color: var(--muted); font-size: 12px; }
 .divider { margin: 0 5px; color: var(--rule); }
+.race-header .forecast-freshness { margin-top: 11px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; color: var(--muted); font-size: 10px; line-height: 1.2; }
+.forecast-freshness span { color: var(--teal); font-size: 9px; font-weight: bold; letter-spacing: .8px; text-transform: uppercase; }
+.forecast-freshness strong { color: var(--ink); font-size: 10px; }
+.forecast-freshness i { color: var(--teal); font-size: 12px; font-style: normal; }
+.forecast-freshness em { font-style: normal; }
 .track-map { width: 100%; max-width: 142px; margin: 0; position: relative; justify-self: center; }
 .track-map::after { content: ""; position: absolute; inset: 0; background: url("azerbaijan-circuit.png?v=20260918") center / 100% 100% no-repeat; filter: invert(1) grayscale(1) contrast(2.2) brightness(.72); mix-blend-mode: multiply; opacity: .65; pointer-events: none; transform: translate(.55px, .4px); }
 .track-map img { width: 100%; display: block; filter: invert(1) grayscale(1) contrast(2.2) brightness(.72); mix-blend-mode: multiply; }
@@ -545,6 +550,9 @@ td strong { font-size: 11px; }
   .analysis-panel .race-header { min-height: 0; padding: 20px; }
   .race-header h2 { margin-top: 8px; font-size: 34px; }
   .race-header p:not(.kicker) { font-size: 11px; }
+  .race-header .forecast-freshness { margin-top: 9px; font-size: 9px; }
+  .forecast-freshness span { font-size: 8px; }
+  .forecast-freshness strong { font-size: 9px; }
   .stage-strip { padding: 14px 12px 12px; }
   .stage-strip .stage { min-height: 53px; grid-template-rows: 25px auto; gap: 5px; }
   .stage-strip .stage:not(:last-child)::after { top: 12px; left: calc(50% + 14px); width: calc(100% - 28px); }
