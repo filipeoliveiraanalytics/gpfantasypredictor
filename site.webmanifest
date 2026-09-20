@@ -9,9 +9,9 @@
   "theme_color": "#070A13",
   "icons": [
     {
-      "src": "/logo.svg?v=track-g-v1",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/favicon-g-track.png?v=track-g-v1",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any"
     },
     {
