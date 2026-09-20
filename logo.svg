@@ -1,6 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#f7f5f0"/>
-  <path d="M14 18h19v8H22v12h11v8H14z" fill="#181614"/>
-  <path d="M39 18h10c7 0 11 5 11 11s-4 11-11 11h-2v10h-8zm8 8v6h2c2 0 4-1 4-3s-2-3-4-3z" fill="#d52d36"/>
-  <path d="M14 51h36" stroke="#00877d" stroke-width="4" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="GP Fantasy Predictor G track logo">
+  <image href="favicon-g-track.png" width="512" height="512" preserveAspectRatio="xMidYMid meet"/>
 </svg>
