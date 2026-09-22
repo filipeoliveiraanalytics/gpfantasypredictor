@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 190" role="img" aria-labelledby="title desc">
+  <title id="title">Baku City Circuit layout</title>
+  <desc id="desc">A simplified outline of the Azerbaijan Grand Prix street circuit.</desc>
+  <path d="M292 148L257 145L213 116L185 94L174 113L151 105L131 95L112 84L106 70L121 49L116 35L132 19L111 10L80 25L52 49L57 98L82 112L114 106L145 118L181 138L244 169C267 180 294 168 292 148Z" fill="none" stroke="#201f1d" stroke-linecap="round" stroke-linejoin="round" stroke-width="5.5"/>
+  <path d="M244 169L181 138L145 118" fill="none" stroke="#008c82" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+  <path d="M289 143L295 153" fill="none" stroke="#201f1d" stroke-width="1.5"/>
+</svg>

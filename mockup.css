@@ -228,9 +228,8 @@ dd { margin: 4px 0 0; font-size: 18px; font-family: Georgia, 'Times New Roman', 
 .race-header h2 { margin: 9px 0 7px; font-size: 40px; line-height: .95; }
 .race-header p:not(.kicker) { margin: 0; color: var(--muted); font-size: 12px; }
 .divider { margin: 0 5px; color: var(--rule); }
-.track-map { width: 100%; max-width: 142px; margin: 0; position: relative; justify-self: center; }
-.track-map::after { content: ""; position: absolute; inset: 0; background: url("azerbaijan-circuit.png?v=20260918") center / 100% 100% no-repeat; filter: invert(1) grayscale(1) contrast(2.2) brightness(.72); mix-blend-mode: multiply; opacity: .65; pointer-events: none; transform: translate(.55px, .4px); }
-.track-map img { width: 100%; display: block; filter: invert(1) grayscale(1) contrast(2.2) brightness(.72); mix-blend-mode: multiply; }
+.track-map { width: 100%; max-width: 142px; margin: 0; justify-self: center; }
+.track-map img { width: 100%; display: block; opacity: .86; }
 .track-facts { margin: 0; padding-left: 23px; display: grid; gap: 8px; border-left: 1px solid var(--rule); }
 .track-facts div { display: grid; grid-template-columns: 86px auto; align-items: baseline; gap: 10px; }
 .track-facts dd { margin: 0; font-size: 12px; white-space: nowrap; }
