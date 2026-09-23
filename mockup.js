@@ -277,6 +277,13 @@ function swatch(row) {
 }
 
 function priceTrendTiers(row) {
+  if (row.price_model_type === "returning_asset_active_history") {
+    const recentPoints = format(number(row.price_last_two_points), 0);
+    return {
+      aria: `Returning asset price outlook. It uses ${recentPoints} points from the two most recent active rounds and excludes inactive rounds. Low confidence until F1 Fantasy confirms the calculation.`,
+      markup: `<span class="trend-tooltip" role="tooltip"><b>Returning asset price outlook</b><span><em>History</em><i>${recentPoints} pts from two active rounds</i></span><span><em>Method</em><i>Inactive rounds excluded</i></span><span><em>Confidence</em><i>Low until official confirmation</i></span></span>`,
+    };
+  }
   const gpName = `${row.next_gp} Grand Prix`;
   const threshold = state.priceThresholds.find((entry) => entry.source_gp === gpName && entry.entity_type === row.entity_type && entry.key === row.key);
   if (!threshold) return null;
@@ -583,6 +590,7 @@ function renderContextRows(rows) {
 function renderRaceContext() {
   if (!els.contextList) return;
   const trackLogic = "Long flat-out runs reward top speed; heavy braking zones and the Castle sector raise the cost of small mistakes.";
+  const priceWatch = "Hadjar and Lawson's Baku price outlook uses their two most recent active Fantasy rounds (HAD: 38 + 15; LAW: 3 + 13). Inactive rounds are excluded while F1 Fantasy's treatment is unconfirmed.";
   if (!state.recommendation) {
     els.contextTitle.textContent = "Azerbaijan context.";
     els.contextIntro.textContent = "The Baku baseline is ready. Save a team and run the model to tailor this plan to your transfers, budget, and chips.";
@@ -590,6 +598,7 @@ function renderRaceContext() {
       ["Track logic", trackLogic],
       ["Constructor logic", "Prioritize efficient cars that can convert qualifying pace into track position and defend on the main straight."],
       ["Chip plan", "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
+      ["Price watch", priceWatch],
     ]);
     return;
   }
@@ -627,6 +636,7 @@ function renderRaceContext() {
     ["Track logic", trackLogic],
     ["Constructor logic", constructorDetail],
     ["Chip plan", chipDetail],
+    ["Price watch", priceWatch],
     ["Transfer plan", transferDetail],
     ["Budget outlook", budgetDetail],
   ]);

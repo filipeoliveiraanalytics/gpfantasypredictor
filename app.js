@@ -22,7 +22,7 @@ const AVAILABLE_CHIPS_KEY = "gp_fantasy_predictor_available_chips";
 const SAVED_TEAM_KEY = "gp_fantasy_predictor_saved_team";
 const HINDSIGHT_TEAM_KEY = "gp_fantasy_predictor_hindsight_team";
 const SNAPSHOT_CALLOUT_DISMISSED_KEY = "gp_fantasy_predictor_snapshot_callout_dismissed";
-const ROSTER_VERSION = "2026-08-lawson-red-bull";
+const ROSTER_VERSION = "2026-09-hadjar-red-bull";
 
 const CHIP_CONFIG = {
   none: { label: "No chip" },
@@ -552,7 +552,7 @@ function restoreSavedTeam() {
 
   const hasLegacyLawsonAsset = state.drivers.some((row) => row.key === "LAW_RB");
   const needsLawsonMigration =
-    hasLegacyLawsonAsset && saved.rosterVersion !== ROSTER_VERSION && saved.drivers.includes("LAW");
+    hasLegacyLawsonAsset && saved.rosterVersion === "2026-08-lawson-red-bull" && saved.drivers.includes("LAW");
   if (needsLawsonMigration) {
     saved.drivers = saved.drivers.map((key) => (key === "LAW" ? "LAW_RB" : key));
   }
@@ -740,7 +740,7 @@ function updateModelCopy(sample) {
   if (els.modelAdjustment) {
     const hasSpaPenalties = gpName.toLowerCase().includes("belgium");
     const hasItalyWeekendAdjustments = /italy|italian|monza/.test(gpName.toLowerCase());
-    const rosterNote = "Lawson continues to replace Hadjar at Red Bull Racing, while Tsunoda replaces Lawson at Racing Bulls.";
+    const rosterNote = "Hadjar is back at Red Bull Racing and Lawson returns to Racing Bulls; Tsunoda is inactive.";
     const weekendNote = hasSpaPenalties
       ? "Grid penalties for Norris, Hadjar, Stroll and Alonso are included in this model."
       : hasItalyWeekendAdjustments
