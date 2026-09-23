@@ -217,6 +217,7 @@ driver,HAD,Isack Hadjar,Red Bull Racing,13.3,85,2026-07-06,TRUE
 driver,HAD,Isack Hadjar,Red Bull Racing,13.9,123,2026-07-20,TRUE
 driver,HAD,Isack Hadjar,Red Bull Racing,14.5,138,2026-07-27,TRUE
 driver,HAD,Isack Hadjar,Red Bull Racing,14.5,138,2026-08-20,FALSE
+driver,HAD,Isack Hadjar,Red Bull Racing,14.5,138,2026-09-22,FALSE
 driver,HAM,Lewis Hamilton,Ferrari,23.5,112,2026-05-16,TRUE
 driver,HAM,Lewis Hamilton,Ferrari,23.6,154,2026-05-26,TRUE
 driver,HAM,Lewis Hamilton,Ferrari,23.9,181,2026-06-08,TRUE
@@ -252,6 +253,7 @@ driver,LAW,Liam Lawson,Red Bull Racing,14.5,128,2026-08-20,TRUE
 driver,LAW,Liam Lawson,Red Bull Racing,14.3,12,2026-08-25,TRUE
 driver,LAW,Liam Lawson,Red Bull Racing,14.9,37,2026-09-07,TRUE
 driver,LAW,Liam Lawson,Red Bull Racing,15.1,53,2026-09-14,TRUE
+driver,LAW,Liam Lawson,Racing Bulls,15.1,53,2026-09-22,TRUE
 driver,LEC,Charles Leclerc,Ferrari,24.0,138,2026-05-16,TRUE
 driver,LEC,Charles Leclerc,Ferrari,24.1,165,2026-05-26,TRUE
 driver,LEC,Charles Leclerc,Ferrari,23.8,152,2026-06-08,TRUE
@@ -355,6 +357,9 @@ driver,TSU,Yuki Tsunoda,Racing Bulls,10.3,0,2026-08-20,TRUE
 driver,TSU,Yuki Tsunoda,Racing Bulls,9.7,5,2026-08-25,TRUE
 driver,TSU,Yuki Tsunoda,Racing Bulls,9.9,22,2026-09-07,TRUE
 driver,TSU,Yuki Tsunoda,Racing Bulls,9.7,23,2026-09-14,TRUE
+driver,TSU,Yuki Tsunoda,Racing Bulls,9.7,23,2026-09-22,FALSE
+driver,HAD,Isack Hadjar,Red Bull Racing,14.5,142,2026-09-23,TRUE
+driver,LAW,Liam Lawson,Racing Bulls,9.7,131,2026-09-23,TRUE
 driver,VER,Max Verstappen,Red Bull Racing,28.3,129,2026-05-16,TRUE
 driver,VER,Max Verstappen,Red Bull Racing,28.4,155,2026-05-26,TRUE
 driver,VER,Max Verstappen,Red Bull Racing,28.3,144,2026-06-08,TRUE
