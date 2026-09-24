@@ -13,7 +13,7 @@ const teamColors = {
 
 const state = {
   projections: [], audits: [], auditRows: [], priceThresholds: [],
-  dataReady: false,
+  dataReady: false, modelMode: "Pre-Weekend",
   currentDrivers: [],
   currentConstructors: [],
   pickerType: "driver", pickerSelection: new Set(),
@@ -46,6 +46,8 @@ const els = {
   scheduleHeading: document.querySelector("#schedule-heading"),
   scheduleTimes: [...document.querySelectorAll("[data-session-start]")],
   stageCopy: document.querySelector("#stage-copy"),
+  topbarStage: document.querySelector("#topbar-stage"),
+  stages: [...document.querySelectorAll(".stage[data-stage]")],
   lineupHeading: document.querySelector("#lineup-heading"),
   auditSelect: document.querySelector("#audit-select"),
   driverMae: document.querySelector("#driver-mae"),
@@ -462,6 +464,18 @@ function metric(value, element, detail) {
   detail.textContent = "DNF-adjusted scoring";
 }
 
+function renderPredictionStage(mode) {
+  const selectedStage = els.stages.find((stage) => stage.dataset.stage === mode) || els.stages[0];
+  els.topbarStage.textContent = selectedStage.dataset.stage;
+  els.stages.forEach((stage, index) => {
+    const selected = stage === selectedStage;
+    stage.classList.toggle("selected", selected);
+    if (selected) stage.setAttribute("aria-current", "step");
+    else stage.removeAttribute("aria-current");
+    stage.querySelector(".stage-mark").textContent = selected ? "✓" : String(index + 1);
+  });
+}
+
 function renderAudit() {
   const audit = activeAudit();
   if (!audit) return;
@@ -772,7 +786,7 @@ function runOptimizer() {
   els.optimize.disabled = true;
   els.mobileOptimize.disabled = true;
   els.optimize.innerHTML = "Optimizing <span>...</span>";
-  els.stageCopy.textContent = "Calculating with the live Pre-Weekend model.";
+  els.stageCopy.textContent = `Calculating with the live ${state.modelMode} model.`;
   trackEvent("optimizer_run", {
     strategy: els.strategy.value,
     budget_range: budgetRange(els.budget.value),
@@ -789,7 +803,7 @@ function runOptimizer() {
         boost: result.boost,
         chip: result.chip,
       });
-      els.stageCopy.textContent = "Pre-weekend recommendation updated from the live optimizer.";
+      els.stageCopy.textContent = `${state.modelMode} recommendation updated from the live optimizer.`;
       trackEvent("optimizer_result", {
         strategy: els.strategy.value,
         transfer_count: result.transferCount,
@@ -851,6 +865,8 @@ async function initialise() {
   renderSchedule();
   populateAuditSelect();
   const sample = state.projections[0];
+  state.modelMode = sample.mode;
+  renderPredictionStage(sample.mode);
   state.dataReady = true;
   initialiseRatingPrompt();
   els.optimize.disabled = false;

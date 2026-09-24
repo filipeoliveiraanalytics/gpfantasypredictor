@@ -66,7 +66,7 @@ nav a.active { color: var(--ink); border-color: var(--red); }
   font-weight: bold;
   white-space: nowrap;
 }
-.topbar-meta span { display: inline-block; width: 5px; height: 5px; margin: 0 8px 2px; border-radius: 50%; background: var(--teal); }
+.topbar-meta .topbar-separator { display: inline-block; width: 5px; height: 5px; margin: 0 8px 2px; border-radius: 50%; background: var(--teal); }
 .mobile-actions, .mobile-team-summary { display: none; }
 
 .workspace {
