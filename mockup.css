@@ -226,6 +226,7 @@ dd { margin: 4px 0 0; font-size: 18px; font-family: Georgia, 'Times New Roman', 
 .audit-flag { width: 27px; height: 18px; display: inline-block; flex: 0 0 auto; background: linear-gradient(to bottom, #bd1e2d 0 25%, #f1c94b 25% 75%, #bd1e2d 75%); }
 .audit-flag.flag-netherlands { background: linear-gradient(to bottom, #ae1c28 0 33.333%, #fff 33.333% 66.666%, #21468b 66.666%); }
 .audit-flag.flag-italy { background: linear-gradient(to right, #009246 0 33.333%, #fff 33.333% 66.666%, #ce2b37 66.666%); }
+.audit-flag.flag-azerbaijan { background: url("azerbaijan-flag.svg") center / contain no-repeat; }
 .race-header h2 { margin: 9px 0 7px; font-size: 40px; line-height: .95; }
 .race-header p:not(.kicker) { margin: 0; color: var(--muted); font-size: 12px; }
 .divider { margin: 0 5px; color: var(--rule); }

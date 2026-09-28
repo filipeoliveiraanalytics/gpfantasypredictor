@@ -611,7 +611,7 @@ function renderContextRows(rows) {
 function renderRaceContext() {
   if (!els.contextList) return;
   const trackLogic = "Sepang combines fast corners and long straights. Tyre management, high-speed balance and traction all matter.";
-  const priceWatch = "Baku prices are updated. Hadjar rose $0.6m and Lawson fell $0.6m: both match a new-asset reset under our estimated bands. We provisionally use Baku plus this forecast; the official method remains unconfirmed. Other price forecasts await the current GP threshold table.";
+  const priceWatch = "Price trends use provisional F1 Focal tables for Bahrain in Malaysia. Final scoring may change these bands. Hadjar's maximum-rise threshold is corrected to 11 points per the author's follow-up; his lower bands remain unverified. These are community estimates, not official guarantees.";
   if (!state.recommendation) {
     els.contextTitle.textContent = "Sepang context.";
     els.contextIntro.textContent = "The pre-weekend Sepang forecast is ready with updated post-Baku prices.";
@@ -841,7 +841,9 @@ function renderAuditDialog() {
   els.auditFlag.className = `audit-flag flag-${flagClass}`;
   els.auditFlag.setAttribute("aria-label", `${flagLabel} flag`);
   els.auditTitle.textContent = `${audit.gp_display} | ${audit.mode}`;
-  els.auditNote.textContent = "Locked forecast compared with official F1 Fantasy scoring. DNF-affected assets remain marked in the source audit.";
+  els.auditNote.textContent = audit.forecast_source === "replayed"
+    ? "Reconstructed from the archived stage model using the current Fantasy scoring code, not an original saved Fantasy forecast. Compared with official Fantasy scores."
+    : "Locked forecast compared with official F1 Fantasy scoring. DNF-affected assets remain marked in the source audit.";
   const tableRows = (type) => rows.filter((row) => row.entity_type === type).sort((left, right) => Math.abs(auditDelta(left)) - Math.abs(auditDelta(right)) || left.name.localeCompare(right.name))
     .map((row) => {
       const delta = auditDelta(row);
