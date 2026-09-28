@@ -221,6 +221,7 @@ dd { margin: 4px 0 0; font-size: 18px; font-family: Georgia, 'Times New Roman', 
 .race-meta .kicker { margin: 0; }
 .flag { width: 38px; height: 26px; flex: 0 0 auto; background: linear-gradient(to bottom, #bd1e2d 0 25%, #f1c94b 25% 75%, #bd1e2d 75%); }
 .flag-azerbaijan { background: linear-gradient(to bottom, #00b5e2 0 33.333%, #ed2939 33.333% 66.666%, #009b48 66.666%); }
+.race-meta img.flag { width: 42px; height: 21px; aspect-ratio: 2 / 1; object-fit: contain; background: none; display: block; }
 .audit-title { display: flex; align-items: center; gap: 10px; }
 .audit-flag { width: 27px; height: 18px; display: inline-block; flex: 0 0 auto; background: linear-gradient(to bottom, #bd1e2d 0 25%, #f1c94b 25% 75%, #bd1e2d 75%); }
 .audit-flag.flag-netherlands { background: linear-gradient(to bottom, #ae1c28 0 33.333%, #fff 33.333% 66.666%, #21468b 66.666%); }
