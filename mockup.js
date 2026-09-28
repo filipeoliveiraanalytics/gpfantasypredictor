@@ -279,6 +279,13 @@ function swatch(row) {
 }
 
 function priceTrendTiers(row) {
+  if (row.price_model_type === "returning_asset_reset_history") {
+    return {
+      aria: row.price_model_notes,
+      markup: `<span class="trend-tooltip" role="tooltip"><b>Returning driver: provisional</b><span><em>History</em><i>Baku actual + current forecast</i></span><span><em>Method</em><i>Assumed reset at Baku</i></span><span><em>Confidence</em><i>Low; not officially confirmed</i></span></span>`,
+    };
+  }
+
   if (row.price_model_type === "returning_asset_active_history") {
     const recentPoints = format(number(row.price_last_two_points), 0);
     return {
@@ -414,7 +421,7 @@ function saveTeam({ announce = true } = {}) {
   };
   try {
     window.localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(saved));
-    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the Azerbaijan GP.";
+    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the Bahrain GP in Malaysia.";
   } catch {
     if (announce) els.stageCopy.textContent = "This browser could not save the team.";
   }
@@ -498,9 +505,9 @@ function populateAuditSelect() {
   els.auditSelect.innerHTML = audits.map((audit) =>
     `<option value="${escapeHtml(auditKey(audit))}">${escapeHtml(audit.gp_display)} | ${escapeHtml(audit.mode)}</option>`
   ).join("");
-  const preferred = audits.find((audit) => audit.gp_key === "Madrid" && audit.mode === "Post-Quali") || audits[0];
+  const preferred = audits.find((audit) => audit.gp_key === "Azerbaijan" && audit.mode === "Post-Quali") || audits[0];
   els.auditSelect.value = auditKey(preferred);
-  els.auditTeaserCopy.textContent = "Compare Dutch, Italian, and Spanish GP forecasts at every published stage.";
+  els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Azerbaijan.";
   els.auditButtonLabel.textContent = "Browse forecast reviews";
   renderAudit();
 }
@@ -603,11 +610,11 @@ function renderContextRows(rows) {
 
 function renderRaceContext() {
   if (!els.contextList) return;
-  const trackLogic = "Long flat-out runs reward top speed; heavy braking zones and the Castle sector raise the cost of small mistakes.";
-  const priceWatch = "Hadjar and Lawson's Baku price outlook uses their two most recent active Fantasy rounds (HAD: 38 + 15; LAW: 3 + 13). Inactive rounds are excluded while F1 Fantasy's treatment is unconfirmed.";
+  const trackLogic = "Sepang combines fast corners and long straights. Tyre management, high-speed balance and traction all matter.";
+  const priceWatch = "Baku prices are updated. Hadjar rose $0.6m and Lawson fell $0.6m: both match a new-asset reset under our estimated bands. We provisionally use Baku plus this forecast; the official method remains unconfirmed. Other price forecasts await the current GP threshold table.";
   if (!state.recommendation) {
-    els.contextTitle.textContent = "Azerbaijan context.";
-    els.contextIntro.textContent = "The Baku baseline is ready. Save a team and run the model to tailor this plan to your transfers, budget, and chips.";
+    els.contextTitle.textContent = "Sepang context.";
+    els.contextIntro.textContent = "The pre-weekend Sepang forecast is ready with updated post-Baku prices.";
     renderContextRows([
       ["Track logic", trackLogic],
       ["Constructor logic", "Prioritize efficient cars that can convert qualifying pace into track position and defend on the main straight."],
@@ -633,8 +640,8 @@ function renderRaceContext() {
     ? { out: nameList(outgoing), in: nameList(incoming) }
     : "The model retains your current squad, so no transfer is needed.";
   const constructorDetail = retainedConstructors.length === constructors.length
-    ? `${nameList(constructors)} keep your existing constructor exposure, which the model rates strongly for Baku.`
-    : `${nameList(constructors)} are the model's best constructor fit for Baku's straight-line and qualifying demands.`;
+    ? `${nameList(constructors)} keep your existing constructor exposure, which the model rates strongly for Sepang.`
+    : `${nameList(constructors)} are the model's best constructor fit for Sepang's high-speed and tyre-management demands.`;
   const chipDetail = chip === "No chip"
     ? "Hold your chips. No available option creates enough projected upside over the standard transfer route."
     : limitless
@@ -644,7 +651,7 @@ function renderRaceContext() {
     ? `The standard-price equivalent is $${format(totalCost)}m, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`
     : `$${format(Math.max(0, budgetLeft))}m remains after changes, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`;
 
-  els.contextTitle.textContent = "Your Azerbaijan plan.";
+  els.contextTitle.textContent = "Your Sepang plan.";
   els.contextIntro.textContent = `${state.recommendation.points} projected from a lineup tailored to your saved team, budget, and transfer plan.`;
   renderContextRows([
     ["Track logic", trackLogic],
@@ -828,6 +835,7 @@ function renderAuditDialog() {
     Netherlands: ["netherlands", "Netherlands"],
     Italy: ["italy", "Italy"],
     Madrid: ["spain", "Spain"],
+    Azerbaijan: ["azerbaijan", "Azerbaijan"],
   };
   const [flagClass, flagLabel] = auditFlags[audit.gp_key] || ["spain", "Spain"];
   els.auditFlag.className = `audit-flag flag-${flagClass}`;
