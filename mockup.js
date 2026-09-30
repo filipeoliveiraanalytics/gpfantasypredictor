@@ -293,8 +293,9 @@ function priceTrendTiers(row) {
       markup: `<span class="trend-tooltip" role="tooltip"><b>Returning asset price outlook</b><span><em>History</em><i>${recentPoints} pts from two active rounds</i></span><span><em>Method</em><i>Inactive rounds excluded</i></span><span><em>Confidence</em><i>Low until official confirmation</i></span></span>`,
     };
   }
-  const gpName = `${row.next_gp} Grand Prix`;
-  const threshold = state.priceThresholds.find((entry) => entry.source_gp === gpName && entry.entity_type === row.entity_type && entry.key === row.key);
+  const normalizeGp = (value) => String(value || "").replace(/\s+Grand Prix\s*$/i, "").trim().toLowerCase();
+  const gpName = normalizeGp(row.next_gp);
+  const threshold = state.priceThresholds.find((entry) => normalizeGp(entry.source_gp) === gpName && entry.entity_type === row.entity_type && entry.key === row.key);
   if (!threshold) return null;
 
   const premiumAsset = number(row.price_m) >= 18.5;
