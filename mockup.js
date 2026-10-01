@@ -856,6 +856,26 @@ function renderAuditDialog() {
   if (!els.auditDialog.open) els.auditDialog.showModal();
 }
 
+function renderLastUpdated(rows) {
+  const dates = rows.map((row) => {
+    const match = /^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/.exec(row.run_timestamp || "");
+    if (!match) return null;
+    const iso = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}.000Z`;
+    const date = new Date(iso);
+    return Number.isFinite(date.getTime()) && date.toISOString() === iso ? date : null;
+  }).filter(Boolean);
+  const container = document.getElementById("last-updated");
+  container.hidden = !dates.length;
+  if (!dates.length) return;
+  const latest = new Date(Math.max(...dates.map((date) => date.getTime())));
+  const time = document.getElementById("last-updated-time");
+  time.dateTime = latest.toISOString();
+  time.textContent = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+    timeZone: "UTC", timeZoneName: "short", hourCycle: "h23",
+  }).format(latest);
+}
+
 async function initialise() {
   const [projectionResponse, auditResponse, auditRowsResponse, priceThresholdResponse] = await Promise.all([
     fetch(`${DATA_ROOT}/fantasy_projections.csv`, { cache: "no-store" }),
@@ -865,6 +885,7 @@ async function initialise() {
   ]);
   if (!projectionResponse.ok || !auditResponse.ok || !auditRowsResponse.ok || !priceThresholdResponse.ok) throw new Error("Could not load the Fantasy data files.");
   state.projections = parseCsv(await projectionResponse.text());
+  renderLastUpdated(state.projections);
   state.audits = parseCsv(await auditResponse.text());
   state.auditRows = parseCsv(await auditRowsResponse.text());
   state.priceThresholds = parseCsv(await priceThresholdResponse.text());
