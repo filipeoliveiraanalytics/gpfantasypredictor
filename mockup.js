@@ -633,7 +633,7 @@ function renderRaceContext() {
   const constructors = rows.filter((row) => row.entity_type === "constructor");
   const retainedConstructors = constructors.filter((row) => current.has(row.key));
   const totalCost = rows.reduce((sum, row) => sum + number(row.price_m), 0);
-  const priceDelta = rows.reduce((sum, row) => sum + number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m)), 0);
+  const priceDelta = rows.reduce((sum, row) => sum + number(row.projected_price_delta_m), 0);
   const chip = chipSummary(state.recommendation.chip);
   const limitless = state.recommendation.chip?.includes("Limitless");
   const budgetLeft = number(els.budget.value) - totalCost;
@@ -666,7 +666,7 @@ function renderRaceContext() {
 
 function renderRecommendationSummary(rows, result, incoming, boost) {
   const totalCost = rows.reduce((sum, row) => sum + number(row.price_m), 0);
-  const projectedValue = rows.reduce((sum, row) => sum + number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m)), 0);
+  const projectedValue = rows.reduce((sum, row) => sum + number(row.projected_price_delta_m), 0);
   const budgetLeft = number(els.budget.value) - totalCost;
   const limitless = result.chip?.includes("Limitless");
   const transferLabel = `${incoming.length} move${incoming.length === 1 ? "" : "s"}`;
