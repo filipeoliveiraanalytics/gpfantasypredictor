@@ -215,7 +215,7 @@ dd { margin: 4px 0 0; font-size: 18px; font-family: Georgia, 'Times New Roman', 
 .save-toggle input:focus-visible + span { outline: 2px solid var(--yellow); outline-offset: 2px; }
 
 .analysis-panel { min-width: 0; background: var(--surface); border: 1px solid var(--rule); }
-.race-header { min-height: 172px; padding: 28px 27px 24px; display: grid; grid-template-columns: minmax(260px, 1.25fr) minmax(150px, .8fr) auto; align-items: center; gap: 26px; border-bottom: 1px solid var(--rule); }
+.race-header { min-height: 172px; padding: 28px 27px 24px; display: grid; grid-template-columns: minmax(0, 1.25fr) auto; align-items: center; gap: 26px; border-bottom: 1px solid var(--rule); }
 .race-title { min-width: 0; }
 .race-meta { display: flex; align-items: center; gap: 11px; }
 .race-meta .kicker { margin: 0; }
@@ -230,15 +230,14 @@ dd { margin: 4px 0 0; font-size: 18px; font-family: Georgia, 'Times New Roman', 
 .race-header h2 { margin: 9px 0 7px; font-size: 40px; line-height: .95; }
 .race-header p:not(.kicker) { margin: 0; color: var(--muted); font-size: 12px; }
 .divider { margin: 0 5px; color: var(--rule); }
-.track-map { width: 100%; max-width: 142px; margin: 0; justify-self: center; }
-.track-map img { width: 100%; display: block; opacity: .86; }
+.track-map { width: 100%; max-width: 200px; aspect-ratio: 4 / 3; margin: 0; justify-self: center; grid-column: 1 / -1; order: -1; }
+.track-map img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .track-facts { margin: 0; padding-left: 23px; display: grid; gap: 8px; border-left: 1px solid var(--rule); }
 .track-facts div { display: grid; grid-template-columns: 86px auto; align-items: baseline; gap: 10px; }
 .track-facts dd { margin: 0; font-size: 12px; white-space: nowrap; }
 
 @media (max-width: 1350px) {
   .race-header { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  .track-map { display: none; }
   .track-facts { padding: 12px 0 0; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--soft-rule); border-left: 0; }
   .track-facts div { display: block; }
   .track-facts dd { margin-top: 3px; }
@@ -426,11 +425,11 @@ td strong { font-size: 11px; }
   .team-list b { font-size: 14px; }
   .primary, .quiet, .save-toggle { min-height: 48px; font-size: 14px; }
 
-  .race-header { min-height: 196px; padding: 32px 34px 28px; grid-template-columns: minmax(0, 1.35fr) minmax(118px, .5fr) minmax(150px, .65fr); gap: 22px; }
+  .race-header { min-height: 196px; padding: 32px 34px 28px; grid-template-columns: minmax(0, 1.35fr) minmax(150px, .65fr); gap: 22px; }
   .race-header h2 { font-size: 44px; }
   .race-header p:not(.kicker) { font-size: 14px; }
   .flag { width: 42px; height: 29px; }
-  .track-map { max-width: 158px; }
+  .track-map { max-width: 200px; }
   .track-facts { padding-left: 28px; gap: 10px; }
   .track-facts div { grid-template-columns: 96px auto; }
   .track-facts dt { font-size: 11px; }
@@ -485,7 +484,6 @@ td strong { font-size: 11px; }
   .context-panel { padding-left: 24px; }
 
   .race-header { grid-template-columns: minmax(0, 1fr) minmax(160px, .58fr); }
-  .track-map { display: none; }
   .track-facts { padding-left: 20px; }
 
   .recommendation-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }

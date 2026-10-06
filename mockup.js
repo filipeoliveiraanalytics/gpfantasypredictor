@@ -301,12 +301,14 @@ function priceTrendTiers(row) {
   const premiumAsset = number(row.price_m) >= 18.5;
   const tiers = premiumAsset ? { good: 0.1, great: 0.3, poor: 0.1 } : { good: 0.2, great: 0.6, poor: 0.2 };
   const whole = (value) => format(value, 0);
-  const labels = [
-    [`+$${format(tiers.great)}M`, `>= ${whole(threshold.great_min)} pts`],
-    [`+$${format(tiers.good)}M`, `${whole(threshold.good_min)} to ${whole(threshold.good_max)} pts`],
-    [`-$${format(tiers.poor)}M`, `${whole(threshold.poor_min)} to ${whole(threshold.poor_max)} pts`],
-    [`-$${format(tiers.great)}M`, `<= ${whole(threshold.terrible_max)} pts`],
-  ];
+  const present = (key) => String(threshold[key] ?? "").trim() !== "";
+  const labels = [];
+  if (present("great_min")) labels.push([`+$${format(tiers.great)}M`, `>= ${whole(threshold.great_min)} pts`]);
+  if (present("good_min")) labels.push([`+$${format(tiers.good)}M`, `${whole(threshold.good_min)} to ${whole(threshold.good_max)} pts`]);
+  if (present("zero_min")) labels.push(["$0.0M", `>= ${whole(threshold.zero_min)} pts`]);
+  if (present("zero_max")) labels.push(["$0.0M", `<= ${whole(threshold.zero_max)} pts`]);
+  if (present("poor_min")) labels.push([`-$${format(tiers.poor)}M`, `${whole(threshold.poor_min)} to ${whole(threshold.poor_max)} pts`]);
+  if (present("terrible_max")) labels.push([`-$${format(tiers.great)}M`, `<= ${whole(threshold.terrible_max)} pts`]);
   return {
     aria: `Price change after this GP. ${labels.map(([change, range]) => `${change}: ${range}`).join(". ")}.`,
     markup: `<span class="trend-tooltip" role="tooltip"><b>Price change after this GP</b>${labels.map(([change, range]) => `<span><em>${change}</em><i>${range}</i></span>`).join("")}</span>`,
@@ -422,7 +424,7 @@ function saveTeam({ announce = true } = {}) {
   };
   try {
     window.localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(saved));
-    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the Bahrain GP in Malaysia.";
+    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the Singapore GP.";
   } catch {
     if (announce) els.stageCopy.textContent = "This browser could not save the team.";
   }
@@ -506,9 +508,9 @@ function populateAuditSelect() {
   els.auditSelect.innerHTML = audits.map((audit) =>
     `<option value="${escapeHtml(auditKey(audit))}">${escapeHtml(audit.gp_display)} | ${escapeHtml(audit.mode)}</option>`
   ).join("");
-  const preferred = audits.find((audit) => audit.gp_key === "Azerbaijan" && audit.mode === "Post-Quali") || audits[0];
+  const preferred = audits.find((audit) => audit.gp_key === "Bahrain" && audit.mode === "Post-Quali") || audits[0];
   els.auditSelect.value = auditKey(preferred);
-  els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Azerbaijan.";
+  els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Bahrain.";
   els.auditButtonLabel.textContent = "Browse forecast reviews";
   renderAudit();
 }
@@ -611,11 +613,11 @@ function renderContextRows(rows) {
 
 function renderRaceContext() {
   if (!els.contextList) return;
-  const trackLogic = "Sepang combines fast corners and long straights. Tyre management, high-speed balance and traction all matter.";
-  const priceWatch = "Price trends use provisional F1 Focal tables for Bahrain in Malaysia. Final scoring may change these bands. Hadjar's maximum-rise threshold is corrected to 11 points per the author's follow-up; his lower bands remain unverified. These are community estimates, not official guarantees.";
+  const trackLogic = "Marina Bay rewards low-speed balance, traction and qualifying. Sprint points are included using an approximate Sprint model.";
+  const priceWatch = "Price trends use the user-supplied Singapore thresholds and updated post-Bahrain prices. The table is not independently verified. Mercedes has a zero-change ceiling; minimum-price assets retain their zero-change bands.";
   if (!state.recommendation) {
-    els.contextTitle.textContent = "Sepang context.";
-    els.contextIntro.textContent = "The pre-weekend Sepang forecast is ready with updated post-Baku prices.";
+    els.contextTitle.textContent = "Singapore context.";
+    els.contextIntro.textContent = "The pre-weekend Singapore Sprint forecast uses updated post-Bahrain prices.";
     renderContextRows([
       ["Track logic", trackLogic],
       ["Constructor logic", "Prioritize efficient cars that can convert qualifying pace into track position and defend on the main straight."],
@@ -641,8 +643,8 @@ function renderRaceContext() {
     ? { out: nameList(outgoing), in: nameList(incoming) }
     : "The model retains your current squad, so no transfer is needed.";
   const constructorDetail = retainedConstructors.length === constructors.length
-    ? `${nameList(constructors)} keep your existing constructor exposure, which the model rates strongly for Sepang.`
-    : `${nameList(constructors)} are the model's best constructor fit for Sepang's high-speed and tyre-management demands.`;
+    ? `${nameList(constructors)} keep your existing constructor exposure, which the model rates strongly for Singapore.`
+    : `${nameList(constructors)} are the model's best constructor fit for Singapore's qualifying and traction demands.`;
   const chipDetail = chip === "No chip"
     ? "Hold your chips. No available option creates enough projected upside over the standard transfer route."
     : limitless
@@ -652,7 +654,7 @@ function renderRaceContext() {
     ? `The standard-price equivalent is $${format(totalCost)}m, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`
     : `$${format(Math.max(0, budgetLeft))}m remains after changes, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`;
 
-  els.contextTitle.textContent = "Your Sepang plan.";
+  els.contextTitle.textContent = "Your Singapore plan.";
   els.contextIntro.textContent = `${state.recommendation.points} projected from a lineup tailored to your saved team, budget, and transfer plan.`;
   renderContextRows([
     ["Track logic", trackLogic],
@@ -837,9 +839,12 @@ function renderAuditDialog() {
     Italy: ["italy", "Italy"],
     Madrid: ["spain", "Spain"],
     Azerbaijan: ["azerbaijan", "Azerbaijan"],
+    Bahrain: ["malaysia", "Malaysia"],
   };
   const [flagClass, flagLabel] = auditFlags[audit.gp_key] || ["spain", "Spain"];
   els.auditFlag.className = `audit-flag flag-${flagClass}`;
+  els.auditFlag.style.backgroundImage = audit.gp_key === "Bahrain" ? 'url("malaysia-flag.svg")' : "";
+  els.auditFlag.style.backgroundSize = audit.gp_key === "Bahrain" ? "100% 100%" : "";
   els.auditFlag.setAttribute("aria-label", `${flagLabel} flag`);
   els.auditTitle.textContent = `${audit.gp_display} | ${audit.mode}`;
   els.auditNote.textContent = audit.forecast_source === "replayed"
