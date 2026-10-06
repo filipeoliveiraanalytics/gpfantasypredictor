@@ -645,13 +645,13 @@ function renderRaceContext() {
   const constructorDetail = retainedConstructors.length === constructors.length
     ? `${nameList(constructors)} keep your existing constructor exposure, which the model rates strongly for Singapore.`
     : `${nameList(constructors)} are the model's best constructor fit for Singapore's qualifying and traction demands.`;
-  const chipDetail = chip === "No chip"
+  const chipDetail = state.recommendation.chipReason || (chip === "No chip"
     ? "Hold your chips. No available option creates enough projected upside over the standard transfer route."
     : limitless
       ? "Limitless is recommended because it unlocks the highest projected squad without the usual budget ceiling."
-      : `${chip} is the recommended edge under your current budget and transfer constraints.`;
+      : `${chip} is the recommended edge under your current budget and transfer constraints.`);
   const budgetDetail = limitless
-    ? `The standard-price equivalent is $${format(totalCost)}m, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`
+    ? "This is a temporary squad. Your original team returns after the weekend; temporary picks are not counted as lasting budget growth."
     : `$${format(Math.max(0, budgetLeft))}m remains after changes, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`;
 
   els.contextTitle.textContent = "Your Singapore plan.";
@@ -674,6 +674,7 @@ function renderRecommendationSummary(rows, result, incoming, boost) {
   const transferLabel = `${incoming.length} move${incoming.length === 1 ? "" : "s"}`;
   const transferDetail = limitless
     ? "Limitless removes transfer penalties"
+    : result.chip === "Wildcard" ? "Wildcard removes transfer penalties"
     : result.paidTransfers ? `${result.paidTransfers} paid` : "Free moves cover it";
   const valueDirection = projectedValue >= 0 ? "up" : "down";
   const valueArrow = projectedValue >= 0 ? "&uarr;" : "&darr;";
@@ -682,9 +683,9 @@ function renderRecommendationSummary(rows, result, incoming, boost) {
     <div><span>Projected</span><strong>${escapeHtml(result.points)}</strong><small>Net of penalties</small></div>
     <div><span>Squad cost</span><strong>$${format(totalCost)}m</strong><small>${limitless ? "No budget cap" : `${format(Math.max(0, budgetLeft))}m left`}</small></div>
     <div><span>Transfers</span><strong>${transferLabel}</strong><small>${transferDetail}</small></div>
-    <div><span>2x boost</span><strong>${escapeHtml(boost?.name || "--")}</strong><small>Selected driver</small></div>
+    <div><span>${result.tripleBoost ? "3x / 2x boosts" : "2x boost"}</span><strong>${escapeHtml(result.tripleBoost?.name || boost?.name || "--")}</strong><small>${result.tripleBoost ? `2x: ${escapeHtml(boost?.name || "--")}` : "Selected driver"}</small></div>
     <div><span>Chip</span><strong>${escapeHtml(chipSummary(result.chip))}</strong><small>${result.chip ? "Recommended" : "Save for later"}</small></div>
-    <div class="projected-value ${valueDirection}"><span>Projected value</span><strong><i aria-hidden="true">${valueArrow}</i> ${format(Math.abs(projectedValue))}m</strong><small>Expected price path</small></div>`;
+    <div class="projected-value ${valueDirection}"><span>Projected value</span><strong>${limitless ? "Temporary squad" : `<i aria-hidden="true">${valueArrow}</i> ${format(Math.abs(projectedValue))}m`}</strong><small>${limitless ? "Original team returns" : "Expected price path"}</small></div>`;
 }
 
 function renderRecommendation(rows, result) {
@@ -732,7 +733,14 @@ function optimizerDriverPool() {
   return [...new Map([...current, ...cheapest, ...strongest].map((row) => [row.key, row])).values()];
 }
 
-function scoreLineup(drivers, constructors, { ignoreBudget = false, unlimitedTransfers = false } = {}) {
+function negativeProtection(row) {
+  // Approximation: negative expected categories, not simulated category outcomes.
+  return ["dnf_penalty_points_est", "sprint_dnf_penalty_points_est", "position_change_points_est",
+    "sprint_position_change_points_est", "qualifying_points_est", "constructor_bonus_points_est"]
+    .reduce((sum, field) => sum + Math.max(0, -number(row[field])), 0);
+}
+
+function scoreLineup(drivers, constructors, { ignoreBudget = false, unlimitedTransfers = false, activeChip = "" } = {}) {
   const rows = [...drivers, ...constructors];
   const cost = rows.reduce((total, row) => total + number(row.price_m), 0);
   const budget = number(els.budget.value);
@@ -744,16 +752,20 @@ function scoreLineup(drivers, constructors, { ignoreBudget = false, unlimitedTra
   const freeTransfers = Math.max(0, Math.floor(number(els.transfers.value)));
   const paidTransfers = unlimitedTransfers ? 0 : Math.max(0, transferCount - freeTransfers);
   const expected = rows.reduce((total, row) => total + number(row.expected_fantasy_points), 0);
-  const boost = [...drivers].sort((left, right) => number(right.expected_fantasy_points) - number(left.expected_fantasy_points))[0];
-  const netPoints = expected + number(boost?.expected_fantasy_points) - paidTransfers * 10;
+  const pointsFor = (row) => number(row.expected_fantasy_points) + (activeChip === "no_negative" ? negativeProtection(row) : 0);
+  const ranked = [...drivers].sort((left, right) => pointsFor(right) - pointsFor(left));
+  const tripleBoost = activeChip === "x3" ? ranked[0] : null;
+  const boost = ranked[tripleBoost ? 1 : 0];
+  const protection = activeChip === "no_negative" ? rows.reduce((sum, row) => sum + negativeProtection(row), 0) : 0;
+  const netPoints = expected + protection + pointsFor(boost) + (tripleBoost ? 2 * pointsFor(tripleBoost) : 0) - paidTransfers * 10;
   const pricePath = rows.reduce((total, row) => total + number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m)), 0);
   const strategy = els.strategy.value;
   const strategyScore = strategy === "budget_growth"
-    ? netPoints + pricePath * 14
+    ? netPoints + (activeChip === "limitless" ? 0 : pricePath * 14)
     : strategy === "current_friendly"
-      ? netPoints - transferCount * 1.5
+      ? netPoints - (unlimitedTransfers ? 0 : transferCount * 1.5)
       : netPoints;
-  return { rows, cost, incoming, transferCount, paidTransfers, boost, netPoints, strategyScore };
+  return { rows, cost, incoming, transferCount, paidTransfers, boost, tripleBoost, netPoints, strategyScore, activeChip };
 }
 
 function findBestLineup(options = {}) {
@@ -779,7 +791,24 @@ function directRecommendation() {
     base = findBestLineup({ allowPaidTransfers: true });
   }
   if (!base) throw new Error("No valid lineup fits the current budget. Edit your team or budget and try again.");
-  return { ...base, chip: "" };
+  const available = new Set(els.chips.filter((input) => input.checked).map((input) => input.value));
+  const labels = { x3: "Triple Boost", limitless: "Limitless", no_negative: "No Negative", wildcard: "Wildcard" };
+  const candidates = [];
+  for (const activeChip of Object.keys(labels)) {
+    if (!available.has(activeChip)) continue;
+    const unlimitedTransfers = activeChip === "limitless" || activeChip === "wildcard";
+    const candidate = findBestLineup({ activeChip, unlimitedTransfers, ignoreBudget: activeChip === "limitless" });
+    if (candidate) candidates.push({ ...candidate, chip: labels[activeChip], gain: candidate.netPoints - base.netPoints });
+  }
+  const finalSprint = base.rows.some((row) => row.next_gp === "Singapore" && row.sprint_weekend === "TRUE");
+  const best = candidates.filter((row) => row.gain > 0 && row.strategyScore > base.strategyScore)
+    .sort((a, b) => b.strategyScore - a.strategyScore)[0];
+  const comparison = candidates.map((row) => `${row.chip}: ${row.gain >= 0 ? "+" : ""}${format(row.gain)} pts${row.activeChip === "no_negative" ? " (approx.)" : ""}`).join("; ");
+  const limits = `${available.has("final_fix") ? " Final Fix is deferred until qualifying results are available." : ""}${available.has("auto_pilot") ? " Auto Pilot's gain is not quantified without joint driver-score simulations." : ""}`;
+  const context = finalSprint ? "Last Sprint weekend: no future Sprint is being reserved for these chips. " : "Current-weekend comparison only; future chip value is not modelled. ";
+  return { ...(best || base), chip: best?.chip || "", chipReason: context +
+    (best ? `${best.chip} has the strongest score under your selected approach. ` : "No evaluated chip improves the selected strategy. ") +
+    comparison + "." + limits };
 }
 
 function runOptimizer() {
@@ -812,6 +841,8 @@ function runOptimizer() {
         paidTransfers: result.paidTransfers,
         boost: result.boost,
         chip: result.chip,
+        tripleBoost: result.tripleBoost,
+        chipReason: result.chipReason,
       });
       els.stageCopy.textContent = `${state.modelMode} recommendation updated from the live optimizer.`;
       trackEvent("optimizer_result", {

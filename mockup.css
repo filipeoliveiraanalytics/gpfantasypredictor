@@ -609,7 +609,7 @@ td strong { font-size: 11px; }
   aspect-ratio: 4 / 3;
 }
 .race-header .track-map img { filter: brightness(.48); }
-.race-header .track-map { transform: translateX(-14px); }
+.race-header .track-map { transform: translateX(-20px); }
 .race-header .track-facts {
   grid-column: 3;
   grid-row: 1;

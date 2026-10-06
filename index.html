@@ -23,7 +23,7 @@
   <meta name="twitter:title" content="F1 Fantasy Predictor & Team Optimizer">
   <meta name="twitter:description" content="A fan-made F1 Fantasy predictor powered by GP prediction modelling.">
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png">
-  <link rel="stylesheet" href="mockup.css?v=singapore-outline-20261006">
+  <link rel="stylesheet" href="mockup.css?v=singapore-offset20-20261006">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -71,7 +71,7 @@
         <label data-tooltip="After qualifying, change one driver before the race."><input type="checkbox" value="final_fix" checked><span>Final Fix</span></label>
         <label data-tooltip="The game assigns your 2x boosted driver after the weekend."><input type="checkbox" value="auto_pilot" checked><span>Auto Pilot</span></label>
         <label data-tooltip="Protects against negative scoring from a driver or constructor."><input type="checkbox" value="no_negative" checked><span>No Negative</span></label>
-        <label data-tooltip="Raises your selected driver's score from 2x to 3x."><input type="checkbox" value="x3" checked><span>Triple Boost</span></label>
+        <label data-tooltip="Gives one driver 3x points and a different driver the regular 2x boost."><input type="checkbox" value="x3" checked><span>Triple Boost</span></label>
       </fieldset>
       <section><div class="section-label"><span>Drivers</span><button type="button" class="text-button" data-picker="driver">Edit 5</button></div><ol class="team-list" id="current-drivers"></ol></section>
       <section><div class="section-label"><span>Constructors</span><button type="button" class="text-button" data-picker="constructor">Edit 2</button></div><ol class="team-list" id="current-constructors"></ol></section>
@@ -147,6 +147,6 @@
   <dialog id="picker-dialog" class="dialog"><form method="dialog"><header><div><p class="kicker">Current Team</p><h2 id="picker-title">Choose drivers</h2></div><button class="icon-button" value="cancel" aria-label="Close picker">×</button></header><p id="picker-help" class="muted"></p><div id="picker-options" class="picker-options"></div><footer><button id="apply-picker" class="primary" type="button">Apply selection <span>→</span></button></footer></form></dialog>
   <dialog id="audit-dialog" class="dialog audit-dialog"><form method="dialog"><header><div><p class="kicker">Forecast vs Real Points</p><h2 class="audit-title"><span id="audit-flag" class="audit-flag flag-spain" aria-label="Spain flag"></span><span id="audit-title">Selected audit</span></h2></div><button class="icon-button" value="cancel" aria-label="Close audit">×</button></header><p id="audit-note" class="muted"></p><label class="audit-select-label">Grand Prix and forecast stage<select id="audit-select" aria-label="Select forecast audit"></select></label><div class="audit-tables"><section><h3>Drivers</h3><table><thead><tr><th>Asset</th><th>Est.</th><th>Actual</th><th>Delta</th></tr></thead><tbody id="audit-driver-rows"></tbody></table></section><section><h3>Constructors</h3><table><thead><tr><th>Asset</th><th>Est.</th><th>Actual</th><th>Delta</th></tr></thead><tbody id="audit-constructor-rows"></tbody></table></section></div></form></dialog>
   <script>window.GA_MEASUREMENT_ID = "G-0GCZQDW467";</script>
-  <script src="mockup.js?v=singapore-20261006"></script>
+  <script src="mockup.js?v=singapore-chips-20261006"></script>
 </body>
 </html>
