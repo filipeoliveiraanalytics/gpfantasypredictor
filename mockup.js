@@ -611,10 +611,25 @@ function renderContextRows(rows) {
   }).join("");
 }
 
+function squadPriceWatch(rows, limitless = false) {
+  if (limitless) return "Limitless picks are temporary, so their price rises will not build your retained squad's value.";
+  const movers = rows.filter((row) => String(row.projected_price_delta_m ?? "").trim() !== "");
+  const rises = movers.filter((row) => number(row.projected_price_delta_m) > 0)
+    .sort((a, b) => number(b.projected_price_delta_m) - number(a.projected_price_delta_m));
+  const falls = movers.filter((row) => number(row.projected_price_delta_m) < 0)
+    .sort((a, b) => number(a.projected_price_delta_m) - number(b.projected_price_delta_m));
+  const describe = (row) => `${row.name} (${number(row.projected_price_delta_m) > 0 ? "+" : "-"}$${format(Math.abs(number(row.projected_price_delta_m)))}M)`;
+  const parts = [];
+  if (rises.length) parts.push(`Largest projected rises: ${rises.slice(0, 3).map(describe).join(", ")}.`);
+  if (falls.length) parts.push(`Watch for falls: ${falls.map(describe).join(", ")}.`);
+  if (!parts.length) return movers.length ? "No price moves are projected for this squad at the current points estimates." : "Price projections are not available for this squad yet.";
+  return `${parts.join(" ")} These depend on the points scored this weekend.`;
+}
+
 function renderRaceContext() {
   if (!els.contextList) return;
-  const trackLogic = "Marina Bay rewards low-speed balance, traction and qualifying. Sprint points are included using an approximate Sprint model.";
-  const priceWatch = "Price trends use the user-supplied Singapore thresholds and updated post-Bahrain prices. The table is not independently verified. Mercedes has a zero-change ceiling; minimum-price assets retain their zero-change bands.";
+  const trackLogic = "Marina Bay's tight corners and short acceleration zones reward low-speed balance and traction. Limited overtaking puts a premium on qualifying, while the walls leave little room for mistakes.";
+  const priceWatch = "The strongest points pick is not always the best value builder. Look for drivers close to a price-rise threshold without sacrificing too much scoring potential.";
   if (!state.recommendation) {
     els.contextTitle.textContent = "Singapore context.";
     els.contextIntro.textContent = "The pre-weekend Singapore Sprint forecast uses updated post-Bahrain prices.";
@@ -660,7 +675,7 @@ function renderRaceContext() {
     ["Track logic", trackLogic],
     ["Constructor logic", constructorDetail],
     ["Chip plan", chipDetail],
-    ["Price watch", priceWatch],
+    ["Price watch", squadPriceWatch(rows, limitless)],
     ["Transfer plan", transferDetail],
     ["Budget outlook", budgetDetail],
   ]);
