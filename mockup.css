@@ -217,7 +217,7 @@ dd { margin: 4px 0 0; font-size: 18px; font-family: Georgia, 'Times New Roman', 
 .analysis-panel { min-width: 0; background: var(--surface); border: 1px solid var(--rule); }
 .race-header { min-height: 172px; padding: 28px 27px 24px; display: grid; grid-template-columns: minmax(0, 1.25fr) auto; align-items: center; gap: 26px; border-bottom: 1px solid var(--rule); }
 .race-title { min-width: 0; }
-.race-header .race-title .forecast-update { margin-top: 12px; font-size: 11px; line-height: 1.5; color: var(--muted); }
+.lineup .forecast-update { margin: 0 0 14px; font-size: 11px; line-height: 1.5; color: var(--muted); }
 .forecast-update strong { color: var(--ink); }
 .race-meta { display: flex; align-items: center; gap: 11px; }
 .race-meta .kicker { margin: 0; }
