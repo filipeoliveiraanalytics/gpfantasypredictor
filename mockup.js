@@ -907,8 +907,9 @@ function renderAuditDialog() {
   els.auditFlag.setAttribute("aria-label", `${flagLabel} flag`);
   els.auditTitle.textContent = `${audit.gp_display} | ${audit.mode}`;
   els.auditNote.textContent = audit.forecast_source === "replayed"
-    ? "Reconstructed from the archived stage model using the current Fantasy scoring code, not an original saved Fantasy forecast. Compared with official Fantasy scores."
+    ? ""
     : "Locked forecast compared with official F1 Fantasy scoring. DNF-affected assets remain marked in the source audit.";
+  els.auditNote.hidden = !els.auditNote.textContent;
   const tableRows = (type) => rows.filter((row) => row.entity_type === type).sort((left, right) => Math.abs(auditDelta(left)) - Math.abs(auditDelta(right)) || left.name.localeCompare(right.name))
     .map((row) => {
       const delta = auditDelta(row);
