@@ -904,6 +904,18 @@ function renderAuditDialog() {
     }).join("");
   els.auditDriverRows.innerHTML = tableRows("driver");
   els.auditConstructorRows.innerHTML = tableRows("constructor");
+  for (const [type, body] of [["driver", els.auditDriverRows], ["constructor", els.auditConstructorRows]]) {
+    const group = rows.filter((row) => row.entity_type === type);
+    const section = body.closest("section");
+    let metric = section.querySelector(".audit-deviation");
+    if (!metric) {
+      metric = document.createElement("p");
+      metric.className = "audit-deviation";
+      section.querySelector("h3").after(metric);
+    }
+    const deviation = group.length ? group.reduce((sum, row) => sum + Math.abs(auditDelta(row)), 0) / group.length : null;
+    metric.textContent = deviation === null ? "Average absolute deviation: unavailable" : `Average absolute deviation: ${format(deviation)} pts (${group.length} ${type === "driver" ? "drivers" : "constructors"})`;
+  }
   if (!els.auditDialog.open) els.auditDialog.showModal();
 }
 
