@@ -428,3 +428,69 @@ Bahrain,Bahrain Grand Prix,Post-Quali,archived,constructor,AUD,Audi,Audi,19.29,3
 Bahrain,Bahrain Grand Prix,Post-Quali,archived,constructor,WIL,Williams,Williams,1.17,5,Yes
 Bahrain,Bahrain Grand Prix,Post-Quali,archived,constructor,CAD,Cadillac,Cadillac,-5.86,-12,Yes
 Bahrain,Bahrain Grand Prix,Post-Quali,archived,constructor,AMR,Aston Martin,Aston Martin,-3.93,36,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,RUS,George Russell,Mercedes,28.29,-5,Yes
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,NOR,Lando Norris,McLaren,26.05,16,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,ANT,Kimi Antonelli,Mercedes,25.42,29,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,PIA,Oscar Piastri,McLaren,19.47,29,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,LEC,Charles Leclerc,Ferrari,13.44,33,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,HAM,Lewis Hamilton,Ferrari,13.59,32,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,VER,Max Verstappen,Red Bull Racing,10.04,57,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,LAW,Liam Lawson,Racing Bulls,7.92,17,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,GAS,Pierre Gasly,Alpine,4.88,0,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,HUL,Nico Hulkenberg,Audi,4.9,19,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,COL,Franco Colapinto,Alpine,1.47,13,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,BOR,Gabriel Bortoleto,Audi,1.6,4,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,OCO,Esteban Ocon,Haas F1 Team,1.31,12,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,HAD,Isack Hadjar,Red Bull Racing,3.93,25,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,SAI,Carlos Sainz,Williams,-0.79,4,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,BEA,Oliver Bearman,Haas F1 Team,-0.27,7,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,ALB,Alexander Albon,Williams,-2.3,-10,Yes
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,LIN,Arvid Lindblad,Racing Bulls,8.64,28,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,ALO,Fernando Alonso,Aston Martin,-2.56,17,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,PER,Sergio Perez,Cadillac,-3.1,9,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,BOT,Valtteri Bottas,Cadillac,-5.53,-20,Yes
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,driver,STR,Lance Stroll,Aston Martin,-7.67,11,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,constructor,MER,Mercedes,Mercedes,63.71,39,Yes
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,constructor,FER,Ferrari,Ferrari,37.03,80,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,constructor,MCL,McLaren,McLaren,55.52,57,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,constructor,RBR,Red Bull Racing,Red Bull Racing,18.97,97,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,constructor,HAA,Haas F1 Team,Haas F1 Team,0.04,20,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,constructor,ALP,Alpine,Alpine,11.35,28,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,constructor,RBL,Racing Bulls,Racing Bulls,26.56,53,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,constructor,WIL,Williams,Williams,-2.09,5,Yes
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,constructor,CAD,Cadillac,Cadillac,-9.63,-12,Yes
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,constructor,AUD,Audi,Audi,9.5,38,No
+Bahrain,Bahrain Grand Prix,Pre-Weekend,replayed,constructor,AMR,Aston Martin,Aston Martin,-11.23,36,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,RUS,George Russell,Mercedes,26.7,-5,Yes
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,NOR,Lando Norris,McLaren,23.98,16,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,ANT,Kimi Antonelli,Mercedes,20.44,29,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,PIA,Oscar Piastri,McLaren,19.06,29,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,VER,Max Verstappen,Red Bull Racing,16.93,57,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,HAM,Lewis Hamilton,Ferrari,15.63,32,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,LEC,Charles Leclerc,Ferrari,14.9,33,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,HAD,Isack Hadjar,Red Bull Racing,9.71,25,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,GAS,Pierre Gasly,Alpine,3.89,0,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,LAW,Liam Lawson,Racing Bulls,5.05,17,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,HUL,Nico Hulkenberg,Audi,4.38,19,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,BOR,Gabriel Bortoleto,Audi,1.41,4,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,OCO,Esteban Ocon,Haas F1 Team,1.6,12,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,ALO,Fernando Alonso,Aston Martin,-2.65,17,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,BEA,Oliver Bearman,Haas F1 Team,0.03,7,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,SAI,Carlos Sainz,Williams,0.75,4,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,ALB,Alexander Albon,Williams,-0.38,-10,Yes
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,LIN,Arvid Lindblad,Racing Bulls,6.73,28,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,COL,Franco Colapinto,Alpine,1.65,13,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,STR,Lance Stroll,Aston Martin,-8.38,11,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,PER,Sergio Perez,Cadillac,-3.14,9,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,driver,BOT,Valtteri Bottas,Cadillac,-5.35,-20,Yes
+Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,MER,Mercedes,Mercedes,57.14,39,Yes
+Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,FER,Ferrari,Ferrari,40.53,80,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,MCL,McLaren,McLaren,53.04,57,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,RBR,Red Bull Racing,Red Bull Racing,36.64,97,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,HAA,Haas F1 Team,Haas F1 Team,0.63,20,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,ALP,Alpine,Alpine,10.54,28,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,RBL,Racing Bulls,Racing Bulls,16.78,53,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,WIL,Williams,Williams,-0.63,5,Yes
+Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,CAD,Cadillac,Cadillac,-9.49,-12,Yes
+Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,AUD,Audi,Audi,8.79,38,No
+Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,AMR,Aston Martin,Aston Martin,-10.03,36,No
