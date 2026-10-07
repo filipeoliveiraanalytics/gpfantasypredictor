@@ -592,6 +592,20 @@ td strong { font-size: 11px; }
   .rating-prompt { right: 14px; bottom: 14px; width: calc(100vw - 28px); }
 }
 
+.audit-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 24px; margin-bottom: 20px; }
+.audit-controls .audit-select-label { margin: 0; }
+.audit-stage-control { margin: 0; padding: 0; border: 0; min-width: 0; }
+.audit-stage-control legend { color: var(--muted); font-size: 10px; text-transform: uppercase; padding: 0; margin-bottom: 8px; }
+#audit-stage-options { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; min-height: 38px; }
+#audit-stage-options label { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-size: 12px; text-transform: none; cursor: pointer; }
+#audit-stage-options input { width: 14px; height: 14px; margin: 0; accent-color: #007f7a; }
+#audit-stage-options label:has(input:disabled) { opacity: .45; cursor: default; }
+@media (max-width: 700px) { .audit-controls { grid-template-columns: minmax(0, 1fr); gap: 14px; } }
+.audit-deviation { margin: 12px 0 18px; display: grid; gap: 5px; }
+.audit-deviation > span { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0; }
+.audit-deviation > strong { color: var(--ink); font-size: 30px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.audit-deviation small { color: var(--muted); font-size: 12px; font-weight: normal; }
+
 /* Size the event header to its panel, not the surrounding three-column page. */
 .analysis-panel { container-type: inline-size; container-name: race-panel; }
 .analysis-panel .race-header {

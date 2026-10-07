@@ -439,7 +439,9 @@ function auditKey(audit) {
 }
 
 function activeAudit() {
-  return state.audits.find((audit) => auditKey(audit) === els.auditSelect.value) || state.audits[0];
+  const stage = document.querySelector('input[name="audit-stage"]:checked')?.value;
+  return state.audits.find((audit) => audit.gp_key === els.auditSelect.value && audit.mode === stage)
+    || state.audits.find((audit) => audit.gp_key === els.auditSelect.value) || state.audits[0];
 }
 
 function auditDelta(row) {
@@ -505,14 +507,25 @@ function populateAuditSelect() {
   const audits = [...state.audits].sort((left, right) =>
     right.scored_at.localeCompare(left.scored_at) || stageOrder[left.mode] - stageOrder[right.mode]
   );
-  els.auditSelect.innerHTML = audits.map((audit) =>
-    `<option value="${escapeHtml(auditKey(audit))}">${escapeHtml(audit.gp_display)} | ${escapeHtml(audit.mode)}</option>`
+  const gps = [...new Map(audits.map((audit) => [audit.gp_key, audit])).values()];
+  els.auditSelect.innerHTML = gps.map((audit) =>
+    `<option value="${escapeHtml(audit.gp_key)}">${escapeHtml(audit.gp_display)}</option>`
   ).join("");
   const preferred = audits.find((audit) => audit.gp_key === "Bahrain" && audit.mode === "Post-Quali") || audits[0];
-  els.auditSelect.value = auditKey(preferred);
+  els.auditSelect.value = preferred.gp_key;
+  renderAuditStages(preferred.mode);
   els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Bahrain.";
   els.auditButtonLabel.textContent = "Browse forecast reviews";
   renderAudit();
+}
+
+function renderAuditStages(preferredMode) {
+  const modes = ["Pre-Weekend", "After Practice", "Post-Quali"];
+  const available = new Set(state.audits.filter((audit) => audit.gp_key === els.auditSelect.value).map((audit) => audit.mode));
+  const selected = available.has(preferredMode) ? preferredMode : modes.find((mode) => available.has(mode));
+  document.querySelector("#audit-stage-options").innerHTML = modes.map((mode) =>
+    `<label><input type="radio" name="audit-stage" value="${mode}" ${mode === selected ? "checked" : ""} ${available.has(mode) ? "" : "disabled"}><span>${mode}</span></label>`
+  ).join("");
 }
 
 function openPicker(type) {
@@ -914,7 +927,7 @@ function renderAuditDialog() {
       section.querySelector("h3").after(metric);
     }
     const deviation = group.length ? group.reduce((sum, row) => sum + Math.abs(auditDelta(row)), 0) / group.length : null;
-    metric.textContent = deviation === null ? "Average absolute deviation: unavailable" : `Average absolute deviation: ${format(deviation)} pts (${group.length} ${type === "driver" ? "drivers" : "constructors"})`;
+    metric.innerHTML = `<span>Average absolute deviation</span><strong>${deviation === null ? "--" : format(deviation)}<small> pts</small></strong>`;
   }
   if (!els.auditDialog.open) els.auditDialog.showModal();
 }
@@ -1023,6 +1036,13 @@ els.saveTeam.addEventListener("change", () => {
   renderRaceContext();
 }));
 els.auditSelect.addEventListener("change", () => {
+  renderAuditStages(document.querySelector('input[name="audit-stage"]:checked')?.value);
+  renderAudit();
+  if (els.auditDialog.open) renderAuditDialog();
+  const audit = activeAudit();
+  trackEvent("audit_selection_changed", { grand_prix: audit?.gp_key || "", stage: audit?.mode || "" });
+});
+document.querySelector("#audit-stage-options").addEventListener("change", () => {
   renderAudit();
   if (els.auditDialog.open) renderAuditDialog();
   const audit = activeAudit();
