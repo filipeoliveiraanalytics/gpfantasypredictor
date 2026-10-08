@@ -297,9 +297,14 @@ dd { margin: 4px 0 0; font-size: 18px; font-family: Georgia, 'Times New Roman', 
 .column-help { position: relative; display: inline-grid; place-items: center; width: 16px; height: 16px; margin-left: 3px; padding: 0; border: 1px solid currentColor; border-radius: 50%; background: transparent; color: var(--muted); font: bold 10px Arial, sans-serif; cursor: help; vertical-align: middle; }
 .column-help > span { display: none; position: absolute; z-index: 30; top: 23px; right: 0; width: 210px; padding: 10px; background: var(--ink); color: white; font: normal 11px/1.5 Arial, sans-serif; text-align: left; text-transform: none; letter-spacing: 0; }
 .column-help:hover > span, .column-help:focus > span { display: block; }
+.lineup thead th { vertical-align: middle; }
+.lineup thead th:nth-child(3), .lineup thead th:nth-child(6) { white-space: nowrap; }
 @media (min-width: 821px) {
   .lineup table th, .lineup table td { text-align: center; }
-  .lineup table .asset-name { padding-left: 12px; padding-right: 12px; }
+  .lineup table th:nth-child(2), .lineup table td:nth-child(2) { width: 32%; text-align: left; padding-left: 4%; padding-right: 10px; }
+  .lineup table th:nth-child(2) { padding-left: calc(4% + 15px); }
+  .lineup table th:nth-child(3), .lineup table td:nth-child(3) { width: 22%; }
+  .lineup table th:nth-child(6), .lineup table td:nth-child(6) { width: 14%; }
   .lineup table .asset-name > span { text-align: left; max-width: calc(100% - 18px); }
   .lineup table .asset-name strong { white-space: normal; overflow-wrap: anywhere; }
 }
