@@ -645,7 +645,7 @@ function renderRaceContext() {
   const priceWatch = "The strongest points pick is not always the best value builder. Look for drivers close to a price-rise threshold without sacrificing too much scoring potential.";
   if (!state.recommendation) {
     els.contextTitle.textContent = "Singapore context.";
-    els.contextIntro.textContent = "The pre-weekend Singapore Sprint forecast uses updated post-Bahrain prices.";
+    els.contextIntro.textContent = `${state.modelMode} Singapore forecast using updated post-Bahrain prices.`;
     renderContextRows([
       ["Track logic", trackLogic],
       ["Constructor logic", "Prioritize efficient cars that can convert qualifying pace into track position and defend on the main straight."],
@@ -970,11 +970,11 @@ async function initialise() {
   renderChipCount();
   renderCurrentTeam();
   renderLineupTable();
-  renderRaceContext();
   renderSchedule();
   populateAuditSelect();
   const sample = state.projections[0];
   state.modelMode = sample.mode;
+  renderRaceContext();
   renderPredictionStage(sample.mode);
   state.dataReady = true;
   initialiseRatingPrompt();
