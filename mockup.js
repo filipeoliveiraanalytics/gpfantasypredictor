@@ -943,7 +943,6 @@ function renderLastUpdated(rows) {
   }).filter(Boolean);
   const container = document.getElementById("last-updated");
   container.hidden = !dates.length;
-  document.getElementById("topbar-updated").hidden = !dates.length;
   if (!dates.length) return;
   const latest = new Date(Math.max(...dates.map((date) => date.getTime())));
   const time = document.getElementById("last-updated-time");
@@ -952,12 +951,33 @@ function renderLastUpdated(rows) {
     day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
     timeZone: "UTC", timeZoneName: "short", hourCycle: "h23",
   }).format(latest);
-  const headerTime = document.getElementById("topbar-updated-time");
-  headerTime.dateTime = time.dateTime;
-  headerTime.textContent = time.textContent;
+}
+
+async function renderSiteUpdated() {
+  const container = document.getElementById("topbar-updated");
+  container.hidden = true;
+  try {
+    const pageUrl = new URL(window.location.href);
+    pageUrl.search = "";
+    pageUrl.hash = "";
+    const response = await fetch(pageUrl, { method: "HEAD", cache: "no-store" });
+    const modified = response.headers.get("Last-Modified");
+    const date = new Date(modified || "");
+    if (!response.ok || !Number.isFinite(date.getTime())) return;
+    const time = document.getElementById("topbar-updated-time");
+    time.dateTime = date.toISOString();
+    time.textContent = new Intl.DateTimeFormat("en-GB", {
+      day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+      timeZone: "UTC", timeZoneName: "short", hourCycle: "h23",
+    }).format(date);
+    container.hidden = false;
+  } catch {
+    // Do not substitute the model run time or the visitor's current time.
+  }
 }
 
 async function initialise() {
+  void renderSiteUpdated();
   const [projectionResponse, auditResponse, auditRowsResponse, priceThresholdResponse] = await Promise.all([
     fetch(`${DATA_ROOT}/fantasy_projections.csv`, { cache: "no-store" }),
     fetch(`${DATA_ROOT}/fantasy_forecast_tracker.csv`, { cache: "no-store" }),
