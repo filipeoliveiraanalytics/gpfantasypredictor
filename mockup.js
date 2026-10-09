@@ -943,6 +943,7 @@ function renderLastUpdated(rows) {
   }).filter(Boolean);
   const container = document.getElementById("last-updated");
   container.hidden = !dates.length;
+  document.getElementById("topbar-updated").hidden = !dates.length;
   if (!dates.length) return;
   const latest = new Date(Math.max(...dates.map((date) => date.getTime())));
   const time = document.getElementById("last-updated-time");
@@ -951,6 +952,9 @@ function renderLastUpdated(rows) {
     day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
     timeZone: "UTC", timeZoneName: "short", hourCycle: "h23",
   }).format(latest);
+  const headerTime = document.getElementById("topbar-updated-time");
+  headerTime.dateTime = time.dateTime;
+  headerTime.textContent = time.textContent;
 }
 
 async function initialise() {

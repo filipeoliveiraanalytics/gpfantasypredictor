@@ -23,7 +23,7 @@
   <meta name="twitter:title" content="F1 Fantasy Predictor & Team Optimizer">
   <meta name="twitter:description" content="A fan-made F1 Fantasy predictor powered by GP prediction modelling.">
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png">
-  <link rel="stylesheet" href="mockup.css?v=tooltip-wrap-20261008">
+  <link rel="stylesheet" href="mockup.css?v=header-updated-20261009">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -42,7 +42,7 @@
 <body>
   <header class="topbar">
     <div class="brand"><img class="brand-mark" src="/logo-gp-header.png?v=gp-header-v1" alt="GP" width="58" height="32">Fantasy Predictor</div>
-    <div class="topbar-meta">Singapore GP <span class="topbar-separator"></span> <span id="topbar-stage">Pre-Weekend</span></div>
+    <div class="topbar-meta">Singapore GP <span class="topbar-separator"></span> <span id="topbar-stage">Pre-Weekend</span><span id="topbar-updated" class="topbar-updated" hidden>Last updated: <time id="topbar-updated-time"></time></span></div>
     <div class="mobile-actions" aria-label="Team actions">
       <button id="mobile-team-cta" type="button" aria-controls="team-panel" aria-expanded="false">Team</button>
       <button id="mobile-optimize" type="button" disabled>Optimize</button>
@@ -148,6 +148,6 @@
   <dialog id="picker-dialog" class="dialog"><form method="dialog"><header><div><p class="kicker">Current Team</p><h2 id="picker-title">Choose drivers</h2></div><button class="icon-button" value="cancel" aria-label="Close picker">×</button></header><p id="picker-help" class="muted"></p><div id="picker-options" class="picker-options"></div><footer><button id="apply-picker" class="primary" type="button">Apply selection <span>→</span></button></footer></form></dialog>
 <dialog id="audit-dialog" class="dialog audit-dialog"><form method="dialog"><header><div><p class="kicker">Forecast vs Real Points</p><h2 class="audit-title"><span id="audit-flag" class="audit-flag flag-spain" aria-label="Spain flag"></span><span id="audit-title">Selected audit</span></h2></div><button class="icon-button" value="cancel" aria-label="Close audit">×</button></header><p id="audit-note" class="muted"></p><div class="audit-controls"><label class="audit-select-label">Grand Prix<select id="audit-select" aria-label="Grand Prix"></select></label><fieldset class="audit-stage-control"><legend>Forecast stage</legend><div id="audit-stage-options"></div></fieldset></div><div class="audit-tables"><section><h3>Drivers</h3><table><thead><tr><th aria-label="Name"></th><th>Est.</th><th>Actual</th><th>Delta</th></tr></thead><tbody id="audit-driver-rows"></tbody></table></section><section><h3>Constructors</h3><table><thead><tr><th aria-label="Name"></th><th>Est.</th><th>Actual</th><th>Delta</th></tr></thead><tbody id="audit-constructor-rows"></tbody></table></section></div></form></dialog>
   <script>window.GA_MEASUREMENT_ID = "G-0GCZQDW467";</script>
-  <script src="mockup.js?v=singapore-fp1-20261009"></script>
+  <script src="mockup.js?v=header-updated-20261009"></script>
 </body>
 </html>
