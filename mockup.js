@@ -316,6 +316,9 @@ function priceTrendTiers(row) {
 }
 
 function projectedPointsBreakdown(row) {
+  const reportedCompleted = row.sprint_scoring_status === "completed_user_reported_total";
+  const completedSprint = (row.sprint_scoring_status || "").startsWith("completed_");
+  const pendingSprintOvertakes = row.sprint_scoring_status === "completed_pending_overtakes";
   const components = [
     ["Qualifying", row.qualifying_points_est],
     ["Race finish", row.race_finish_points_est],
@@ -333,13 +336,22 @@ function projectedPointsBreakdown(row) {
     ["Sprint position change", row.sprint_position_change_points_est],
     ["Sprint overtakes", row.sprint_overtake_points_est],
     ["Sprint fastest lap", row.sprint_fastest_lap_points_est],
-    ["Sprint DNF risk", row.sprint_dnf_penalty_points_est],
+    [completedSprint ? "Sprint NC penalty (actual)" : "Sprint DNF risk", row.sprint_dnf_penalty_points_est],
   );
+  if (reportedCompleted) {
+    for (let index = components.length - 1; index >= 0; index -= 1) {
+      if (components[index][0] === "Qualifying" || components[index][0] === "Constructor bonus" || components[index][0].startsWith("Sprint")) components.splice(index, 1);
+    }
+    components.unshift(["Qualifying + Sprint (reported)", row.completed_sessions_reported_total]);
+  } else {
+    components.push(["Reported scoring adjustment", row.completed_sessions_adjustment_points]);
+  }
+  const scoringNote = reportedCompleted ? "Combined total reported from F1 Fantasy; component breakdown not reconciled." : pendingSprintOvertakes ? "Sprint overtake bonuses pending verification; excluded from total." : "";
   const entries = components.filter(([, value]) => Math.abs(number(value)) >= 0.05);
   const signed = (value) => `${number(value) > 0 ? "+" : ""}${format(value)} pts`;
   return {
-    aria: `Projected points breakdown. ${entries.map(([label, value]) => `${label}: ${signed(value)}`).join(". ")}.`,
-    markup: `<span class="points-tooltip" role="tooltip"><b>Projected points</b>${entries.map(([label, value]) => `<span><em>${escapeHtml(label)}</em><i>${signed(value)}</i></span>`).join("")}</span>`,
+    aria: `Projected points breakdown. ${entries.map(([label, value]) => `${label}: ${signed(value)}`).join(". ")}. ${scoringNote}`,
+    markup: `<span class="points-tooltip" role="tooltip"><b>Projected points</b>${entries.map(([label, value]) => `<span><em>${escapeHtml(label)}</em><i>${signed(value)}</i></span>`).join("")}${scoringNote ? `<small>${scoringNote}</small>` : ""}</span>`,
   };
 }
 
@@ -649,7 +661,7 @@ function renderRaceContext() {
     renderContextRows([
       ["Track logic", trackLogic],
       ["Constructor logic", "Prioritize efficient cars that can convert qualifying pace into track position and defend on the main straight."],
-      ["Chip plan", "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
+      ["Chip plan", state.modelMode === "Post-Quali" ? "The weekend deadline has passed. New weekend chips cannot be activated. Final Fix, if eligible, requires a separate Sunday-only comparison." : "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
       ["Price watch", priceWatch],
     ]);
     return;
@@ -819,6 +831,9 @@ function directRecommendation() {
     base = findBestLineup({ allowPaidTransfers: true });
   }
   if (!base) throw new Error("No valid lineup fits the current budget. Edit your team or budget and try again.");
+  if (state.modelMode === "Post-Quali") {
+    return { ...base, chip: "", chipReason: "The weekend deadline has passed. This is a lineup comparison, not a new transfer or chip instruction. Already activated chips remain locked. Final Fix eligibility and Sunday-only gains are not evaluated here." };
+  }
   const available = new Set(els.chips.filter((input) => input.checked).map((input) => input.value));
   const labels = { x3: "Triple Boost", limitless: "Limitless", no_negative: "No Negative", wildcard: "Wildcard" };
   const candidates = [];
