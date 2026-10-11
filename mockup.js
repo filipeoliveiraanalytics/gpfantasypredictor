@@ -309,11 +309,9 @@ function priceTrendTiers(row) {
   if (present("zero_max")) labels.push(["$0.0M", `<= ${whole(threshold.zero_max)} pts`]);
   if (present("poor_min")) labels.push([`-$${format(tiers.poor)}M`, `${whole(threshold.poor_min)} to ${whole(threshold.poor_max)} pts`]);
   if (present("terrible_max")) labels.push([`-$${format(tiers.great)}M`, `<= ${whole(threshold.terrible_max)} pts`]);
-  const methodNote = threshold.method === "rolling_3race"
-    ? `Calculated from the last two weekends (${threshold.previous_score_1} and ${threshold.previous_score_2} pts) using the rolling three-race PPM model.` : "";
   return {
-    aria: `Price change after this GP. ${labels.map(([change, range]) => `${change}: ${range}`).join(". ")}. ${methodNote}`,
-    markup: `<span class="trend-tooltip" role="tooltip"><b>Price change after this GP</b>${labels.map(([change, range]) => `<span><em>${change}</em><i>${range}</i></span>`).join("")}${methodNote ? `<small>${escapeHtml(methodNote)}</small>` : ""}</span>`,
+    aria: `Price change after this GP. ${labels.map(([change, range]) => `${change}: ${range}`).join(". ")}.`,
+    markup: `<span class="trend-tooltip" role="tooltip"><b>Price change after this GP</b>${labels.map(([change, range]) => `<span><em>${change}</em><i>${range}</i></span>`).join("")}</span>`,
   };
 }
 
