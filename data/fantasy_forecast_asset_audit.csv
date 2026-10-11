@@ -494,3 +494,102 @@ Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,WIL,Williams,Will
 Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,CAD,Cadillac,Cadillac,-9.49,-12,Yes
 Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,AUD,Audi,Audi,8.79,38,No
 Bahrain,Bahrain Grand Prix,After Practice,replayed,constructor,AMR,Aston Martin,Aston Martin,-10.03,36,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,constructor,MER,Mercedes,Mercedes,89.37,65,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,constructor,FER,Ferrari,Ferrari,65.2,91,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,constructor,RBR,Red Bull Racing,Red Bull Racing,50.4,66,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,constructor,MCL,McLaren,McLaren,48.99,36,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,constructor,RBL,Racing Bulls,Racing Bulls,14.74,34,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,constructor,ALP,Alpine,Alpine,11.22,-20,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,constructor,HAA,Haas F1 Team,Haas F1 Team,9.89,35,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,constructor,AUD,Audi,Audi,9.25,-9,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,constructor,WIL,Williams,Williams,-0.23,6,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,constructor,CAD,Cadillac,Cadillac,-3.52,-21,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,constructor,AMR,Aston Martin,Aston Martin,-8.31,-13,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,RUS,George Russell,Mercedes,39.94,17,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,ANT,Kimi Antonelli,Mercedes,36.31,33,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,HAM,Lewis Hamilton,Ferrari,26.82,33,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,LEC,Charles Leclerc,Ferrari,25.65,43,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,VER,Max Verstappen,Red Bull Racing,24.2,53,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,NOR,Lando Norris,McLaren,18.49,18,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,PIA,Oscar Piastri,McLaren,17.15,6,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,HAD,Isack Hadjar,Red Bull Racing,12.94,8,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,HUL,Nico Hulkenberg,Audi,4.96,17,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,LAW,Liam Lawson,Racing Bulls,4.02,18,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,LIN,Arvid Lindblad,Racing Bulls,3.89,1,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,GAS,Pierre Gasly,Alpine,1.7,3,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,OCO,Esteban Ocon,Haas F1 Team,1.59,12,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,COL,Franco Colapinto,Alpine,0.81,-28,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,PER,Sergio Perez,Cadillac,-0.24,-9,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,BOR,Gabriel Bortoleto,Audi,-0.39,-29,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,BEA,Oliver Bearman,Haas F1 Team,-0.54,18,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,SAI,Carlos Sainz,Williams,-0.66,13,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,ALO,Fernando Alonso,Aston Martin,-2.63,11,No
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,ALB,Alexander Albon,Williams,-4.48,-10,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,BOT,Valtteri Bottas,Cadillac,-5.81,-11,Yes
+Singapore,Singapore Grand Prix,Pre-Weekend,archived,driver,STR,Lance Stroll,Aston Martin,-8.35,-28,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,constructor,MER,Mercedes,Mercedes,82.73,65,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,constructor,FER,Ferrari,Ferrari,66.78,91,No
+Singapore,Singapore Grand Prix,After Practice,archived,constructor,RBR,Red Bull Racing,Red Bull Racing,54.13,66,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,constructor,MCL,McLaren,McLaren,53.7,36,No
+Singapore,Singapore Grand Prix,After Practice,archived,constructor,RBL,Racing Bulls,Racing Bulls,18.05,34,No
+Singapore,Singapore Grand Prix,After Practice,archived,constructor,AUD,Audi,Audi,9.19,-9,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,constructor,ALP,Alpine,Alpine,8.44,-20,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,constructor,HAA,Haas F1 Team,Haas F1 Team,7.26,35,No
+Singapore,Singapore Grand Prix,After Practice,archived,constructor,WIL,Williams,Williams,-0.72,6,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,constructor,CAD,Cadillac,Cadillac,-2.06,-21,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,constructor,AMR,Aston Martin,Aston Martin,-11.25,-13,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,driver,RUS,George Russell,Mercedes,43.06,17,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,driver,VER,Max Verstappen,Red Bull Racing,30.8,53,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,LEC,Charles Leclerc,Ferrari,30.56,43,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,ANT,Kimi Antonelli,Mercedes,25.97,33,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,HAM,Lewis Hamilton,Ferrari,23.67,33,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,PIA,Oscar Piastri,McLaren,22.89,6,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,NOR,Lando Norris,McLaren,17.57,18,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,HAD,Isack Hadjar,Red Bull Racing,10.39,8,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,driver,LIN,Arvid Lindblad,Racing Bulls,4.92,1,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,LAW,Liam Lawson,Racing Bulls,4.24,18,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,HUL,Nico Hulkenberg,Audi,2.97,17,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,OCO,Esteban Ocon,Haas F1 Team,2.79,12,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,GAS,Pierre Gasly,Alpine,1.79,3,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,PER,Sergio Perez,Cadillac,1.05,-9,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,driver,SAI,Carlos Sainz,Williams,0.99,13,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,BEA,Oliver Bearman,Haas F1 Team,-0.4,18,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,BOR,Gabriel Bortoleto,Audi,-0.41,-29,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,driver,COL,Franco Colapinto,Alpine,-1.99,-28,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,driver,ALO,Fernando Alonso,Aston Martin,-3.91,11,No
+Singapore,Singapore Grand Prix,After Practice,archived,driver,ALB,Alexander Albon,Williams,-4.68,-10,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,driver,BOT,Valtteri Bottas,Cadillac,-5.64,-11,Yes
+Singapore,Singapore Grand Prix,After Practice,archived,driver,STR,Lance Stroll,Aston Martin,-10.01,-28,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,constructor,FER,Ferrari,Ferrari,86.93,91,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,constructor,MER,Mercedes,Mercedes,48.01,65,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,constructor,RBL,Racing Bulls,Racing Bulls,41.96,34,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,constructor,RBR,Red Bull Racing,Red Bull Racing,35.42,66,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,constructor,MCL,McLaren,McLaren,32.37,36,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,constructor,HAA,Haas F1 Team,Haas F1 Team,32.13,35,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,constructor,AUD,Audi,Audi,10.87,-9,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,constructor,ALP,Alpine,Alpine,6.03,-20,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,constructor,WIL,Williams,Williams,-0.99,6,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,constructor,AMR,Aston Martin,Aston Martin,-13.06,-13,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,constructor,CAD,Cadillac,Cadillac,-22.81,-21,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,HAM,Lewis Hamilton,Ferrari,43.4,33,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,VER,Max Verstappen,Red Bull Racing,36.38,53,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,ANT,Kimi Antonelli,Mercedes,31.5,33,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,LEC,Charles Leclerc,Ferrari,30.9,43,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,NOR,Lando Norris,McLaren,18.01,18,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,LAW,Liam Lawson,Racing Bulls,16.32,18,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,BEA,Oliver Bearman,Haas F1 Team,16.13,18,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,HUL,Nico Hulkenberg,Audi,13.05,17,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,LIN,Arvid Lindblad,Racing Bulls,12.1,1,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,GAS,Pierre Gasly,Alpine,10.05,3,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,SAI,Carlos Sainz,Williams,9.36,13,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,OCO,Esteban Ocon,Haas F1 Team,9.32,12,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,PIA,Oscar Piastri,McLaren,4.84,6,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,RUS,George Russell,Mercedes,2.36,17,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,ALO,Fernando Alonso,Aston Martin,1.91,11,No
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,BOR,Gabriel Bortoleto,Audi,-8.6,-29,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,HAD,Isack Hadjar,Red Bull Racing,-9.22,8,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,PER,Sergio Perez,Cadillac,-10.03,-9,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,COL,Franco Colapinto,Alpine,-10.56,-28,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,ALB,Alexander Albon,Williams,-15.17,-10,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,BOT,Valtteri Bottas,Cadillac,-15.26,-11,Yes
+Singapore,Singapore Grand Prix,Post-Quali,archived,driver,STR,Lance Stroll,Aston Martin,-17.57,-28,Yes
