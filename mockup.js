@@ -309,9 +309,11 @@ function priceTrendTiers(row) {
   if (present("zero_max")) labels.push(["$0.0M", `<= ${whole(threshold.zero_max)} pts`]);
   if (present("poor_min")) labels.push([`-$${format(tiers.poor)}M`, `${whole(threshold.poor_min)} to ${whole(threshold.poor_max)} pts`]);
   if (present("terrible_max")) labels.push([`-$${format(tiers.great)}M`, `<= ${whole(threshold.terrible_max)} pts`]);
+  const methodNote = threshold.method === "rolling_3race"
+    ? `Calculated from the last two weekends (${threshold.previous_score_1} and ${threshold.previous_score_2} pts) using the rolling three-race PPM model.` : "";
   return {
-    aria: `Price change after this GP. ${labels.map(([change, range]) => `${change}: ${range}`).join(". ")}.`,
-    markup: `<span class="trend-tooltip" role="tooltip"><b>Price change after this GP</b>${labels.map(([change, range]) => `<span><em>${change}</em><i>${range}</i></span>`).join("")}</span>`,
+    aria: `Price change after this GP. ${labels.map(([change, range]) => `${change}: ${range}`).join(". ")}. ${methodNote}`,
+    markup: `<span class="trend-tooltip" role="tooltip"><b>Price change after this GP</b>${labels.map(([change, range]) => `<span><em>${change}</em><i>${range}</i></span>`).join("")}${methodNote ? `<small>${escapeHtml(methodNote)}</small>` : ""}</span>`,
   };
 }
 
@@ -436,7 +438,7 @@ function saveTeam({ announce = true } = {}) {
   };
   try {
     window.localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(saved));
-    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the Singapore GP.";
+    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the United States GP.";
   } catch {
     if (announce) els.stageCopy.textContent = "This browser could not save the team.";
   }
@@ -523,10 +525,10 @@ function populateAuditSelect() {
   els.auditSelect.innerHTML = gps.map((audit) =>
     `<option value="${escapeHtml(audit.gp_key)}">${escapeHtml(audit.gp_display)}</option>`
   ).join("");
-  const preferred = audits.find((audit) => audit.gp_key === "Bahrain" && audit.mode === "Post-Quali") || audits[0];
+  const preferred = audits.find((audit) => audit.gp_key === gps[0].gp_key && audit.mode === "Post-Quali") || audits[0];
   els.auditSelect.value = preferred.gp_key;
   renderAuditStages(preferred.mode);
-  els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Bahrain.";
+  els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Singapore.";
   els.auditButtonLabel.textContent = "Browse forecast reviews";
   renderAudit();
 }
@@ -653,14 +655,14 @@ function squadPriceWatch(rows, limitless = false) {
 
 function renderRaceContext() {
   if (!els.contextList) return;
-  const trackLogic = "Marina Bay's tight corners and short acceleration zones reward low-speed balance and traction. Limited overtaking puts a premium on qualifying, while the walls leave little room for mistakes.";
-  const priceWatch = "The strongest points pick is not always the best value builder. Look for drivers close to a price-rise threshold without sacrificing too much scoring potential.";
+  const trackLogic = "COTA combines fast direction changes through the esses with heavy braking and a technical final sector. High-speed balance, traction and tyre management matter, while the long back straight creates overtaking opportunities.";
+  const priceWatch = "Austin's price thresholds use the last two weekends' scores and current prices. Compare each asset's projected points with the score needed for its next rise.";
   if (!state.recommendation) {
-    els.contextTitle.textContent = "Singapore context.";
-    els.contextIntro.textContent = `${state.modelMode} Singapore forecast using updated post-Bahrain prices.`;
+    els.contextTitle.textContent = "Austin context.";
+    els.contextIntro.textContent = `${state.modelMode} United States forecast using updated post-Singapore prices.`;
     renderContextRows([
       ["Track logic", trackLogic],
-      ["Constructor logic", "Prioritize efficient cars that can convert qualifying pace into track position and defend on the main straight."],
+      ["Constructor logic", "Prioritize cars with strong high-speed balance and tyre management, backed by consistent execution from both drivers."],
       ["Chip plan", state.modelMode === "Post-Quali" ? "The weekend deadline has passed. New weekend chips cannot be activated. Final Fix, if eligible, requires a separate Sunday-only comparison." : "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
       ["Price watch", priceWatch],
     ]);
@@ -676,6 +678,7 @@ function renderRaceContext() {
   const retainedConstructors = constructors.filter((row) => current.has(row.key));
   const totalCost = rows.reduce((sum, row) => sum + number(row.price_m), 0);
   const priceDelta = rows.reduce((sum, row) => sum + number(row.projected_price_delta_m), 0);
+  const priceOutlookAvailable = rows.every((row) => String(row.projected_price_delta_m ?? "").trim() !== "");
   const chip = chipSummary(state.recommendation.chip);
   const limitless = state.recommendation.chip?.includes("Limitless");
   const budgetLeft = number(els.budget.value) - totalCost;
@@ -683,8 +686,8 @@ function renderRaceContext() {
     ? { out: nameList(outgoing), in: nameList(incoming) }
     : "The model retains your current squad, so no transfer is needed.";
   const constructorDetail = retainedConstructors.length === constructors.length
-    ? `${nameList(constructors)} keep your existing constructor exposure, which the model rates strongly for Singapore.`
-    : `${nameList(constructors)} are the model's best constructor fit for Singapore's qualifying and traction demands.`;
+    ? `${nameList(constructors)} keep your existing constructor exposure, which the model rates strongly for Austin.`
+    : `${nameList(constructors)} are the model's best constructor fit for Austin's high-speed balance and tyre-management demands.`;
   const chipDetail = state.recommendation.chipReason || (chip === "No chip"
     ? "Hold your chips. No available option creates enough projected upside over the standard transfer route."
     : limitless
@@ -692,9 +695,11 @@ function renderRaceContext() {
       : `${chip} is the recommended edge under your current budget and transfer constraints.`);
   const budgetDetail = limitless
     ? "This is a temporary squad. Your original team returns after the weekend; temporary picks are not counted as lasting budget growth."
-    : `$${format(Math.max(0, budgetLeft))}m remains after changes, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`;
+    : priceOutlookAvailable
+      ? `$${format(Math.max(0, budgetLeft))}m remains after changes, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`
+      : `$${format(Math.max(0, budgetLeft))}m remains after changes. Price growth is pending Austin's thresholds.`;
 
-  els.contextTitle.textContent = "Your Singapore plan.";
+  els.contextTitle.textContent = "Your Austin plan.";
   els.contextIntro.textContent = `${state.recommendation.points} projected from a lineup tailored to your saved team, budget, and transfer plan.`;
   renderContextRows([
     ["Track logic", trackLogic],
@@ -709,6 +714,7 @@ function renderRaceContext() {
 function renderRecommendationSummary(rows, result, incoming, boost) {
   const totalCost = rows.reduce((sum, row) => sum + number(row.price_m), 0);
   const projectedValue = rows.reduce((sum, row) => sum + number(row.projected_price_delta_m), 0);
+  const priceOutlookAvailable = rows.every((row) => String(row.projected_price_delta_m ?? "").trim() !== "");
   const budgetLeft = number(els.budget.value) - totalCost;
   const limitless = result.chip?.includes("Limitless");
   const transferLabel = `${incoming.length} move${incoming.length === 1 ? "" : "s"}`;
@@ -716,7 +722,7 @@ function renderRecommendationSummary(rows, result, incoming, boost) {
     ? "Limitless removes transfer penalties"
     : result.chip === "Wildcard" ? "Wildcard removes transfer penalties"
     : result.paidTransfers ? `${result.paidTransfers} paid` : "Free moves cover it";
-  const valueDirection = projectedValue >= 0 ? "up" : "down";
+  const valueDirection = priceOutlookAvailable ? (projectedValue >= 0 ? "up" : "down") : "";
   const valueArrow = projectedValue >= 0 ? "&uarr;" : "&darr;";
   els.summary.hidden = false;
   els.summary.innerHTML = `
@@ -725,7 +731,7 @@ function renderRecommendationSummary(rows, result, incoming, boost) {
     <div><span>Transfers</span><strong>${transferLabel}</strong><small>${transferDetail}</small></div>
     <div><span>${result.tripleBoost ? "3x / 2x boosts" : "2x boost"}</span><strong>${escapeHtml(result.tripleBoost?.name || boost?.name || "--")}</strong><small>${result.tripleBoost ? `2x: ${escapeHtml(boost?.name || "--")}` : "Selected driver"}</small></div>
     <div><span>Chip</span><strong>${escapeHtml(chipSummary(result.chip))}</strong><small>${result.chip ? "Recommended" : "Save for later"}</small></div>
-    <div class="projected-value ${valueDirection}"><span>Projected value</span><strong>${limitless ? "Temporary squad" : `<i aria-hidden="true">${valueArrow}</i> ${format(Math.abs(projectedValue))}m`}</strong><small>${limitless ? "Original team returns" : "Expected price path"}</small></div>`;
+    <div class="projected-value ${valueDirection}"><span>Projected value</span><strong>${limitless ? "Temporary squad" : priceOutlookAvailable ? `<i aria-hidden="true">${valueArrow}</i> ${format(Math.abs(projectedValue))}m` : "--"}</strong><small>${limitless ? "Original team returns" : priceOutlookAvailable ? "Expected price path" : "Thresholds pending"}</small></div>`;
 }
 
 function renderRecommendation(rows, result) {
@@ -914,11 +920,13 @@ function renderAuditDialog() {
     Madrid: ["spain", "Spain"],
     Azerbaijan: ["azerbaijan", "Azerbaijan"],
     Bahrain: ["malaysia", "Malaysia"],
+    Singapore: ["singapore", "Singapore"],
   };
   const [flagClass, flagLabel] = auditFlags[audit.gp_key] || ["spain", "Spain"];
   els.auditFlag.className = `audit-flag flag-${flagClass}`;
-  els.auditFlag.style.backgroundImage = audit.gp_key === "Bahrain" ? 'url("malaysia-flag.svg")' : "";
-  els.auditFlag.style.backgroundSize = audit.gp_key === "Bahrain" ? "100% 100%" : "";
+  const flagImage = { Bahrain: "malaysia-flag.svg", Singapore: "singapore-flag.svg" }[audit.gp_key];
+  els.auditFlag.style.backgroundImage = flagImage ? `url("${flagImage}")` : "";
+  els.auditFlag.style.backgroundSize = flagImage ? "100% 100%" : "";
   els.auditFlag.setAttribute("aria-label", `${flagLabel} flag`);
   els.auditTitle.textContent = `${audit.gp_display} | ${audit.mode}`;
   els.auditNote.textContent = audit.forecast_source === "replayed"
