@@ -1150,53 +1150,6 @@ function comboSummary(rows, type, inputs) {
   };
 }
 
-function entityPoolScore(row, inputs) {
-  const points = toNumber(row.expected_fantasy_points);
-  const price = toNumber(row.price_m);
-  const value = price ? points / price : 0;
-  const priceDelta = budgetGrowthDelta(row);
-  const growthScore = priceGrowthScore(row);
-  const growthWeight = inputs.strategy === "budget_growth" ? 12 : 4;
-  return points + value * 3 + priceDelta * 12 + growthScore * growthWeight;
-}
-
-function pickDriverPool(inputs) {
-  const currentKeys = inputs.currentDrivers;
-  const byKey = new Map(state.availableDrivers.map((row) => [row.key, row]));
-  const selected = new Map();
-  const poolLimit = inputs.strategy === "budget_growth" ? 16 : 15;
-
-  currentKeys.forEach((key) => {
-    const row = byKey.get(key);
-    if (row) selected.set(key, row);
-  });
-
-  const cheapest = [...state.availableDrivers].sort((a, b) => toNumber(a.price_m) - toNumber(b.price_m));
-  const ranked = [...state.availableDrivers].sort((a, b) => entityPoolScore(b, inputs) - entityPoolScore(a, inputs));
-
-  // Keep realistic funding paths before filling the remaining places with the
-  // best model targets. This caps the expensive 5-driver search without
-  // removing a user's current lineup or low-cost enablers.
-  cheapest.slice(0, 6).forEach((row) => {
-    if (selected.size < poolLimit) selected.set(row.key, row);
-  });
-
-  ranked.forEach((row) => {
-    if (selected.size < poolLimit) selected.set(row.key, row);
-    else if (inputs.strategy === "budget_growth" && hasBudgetRisePath(row)) {
-      const replaceable = [...selected.values()]
-        .filter((candidate) => !currentKeys.has(candidate.key) && !hasBudgetRisePath(candidate))
-        .sort((a, b) => entityPoolScore(a, inputs) - entityPoolScore(b, inputs))[0];
-      if (replaceable && entityPoolScore(row, inputs) > entityPoolScore(replaceable, inputs)) {
-        selected.delete(replaceable.key);
-        selected.set(row.key, row);
-      }
-    }
-  });
-
-  return [...selected.values()];
-}
-
 function currentNearbyDriverCombos(inputs) {
   if (inputs.currentDrivers.size !== 5) return [];
 
@@ -1252,7 +1205,6 @@ function findTopTeams(inputs) {
   const currentConstructorMask = maskFromKeys(inputs.currentConstructors, state.constructorKeyBits);
   const budgetGrowth = inputs.strategy === "budget_growth";
   const transferFriendly = inputs.strategy === "current_friendly" && !hasUnlimitedTransfers(inputs.activeChip);
-  const driverPoolMask = pickDriverPool(inputs).reduce((mask, row) => mask | row._bit, 0);
   const currentDriverCombo = state.driverCombos.find((combo) => combo.mask === currentDriverMask);
   const currentConstructorCombo = state.constructorCombos.find((combo) => combo.mask === currentConstructorMask);
   const currentBaseline =
@@ -1274,7 +1226,6 @@ function findTopTeams(inputs) {
   }
 
   const driverCandidates = state.driverCombos
-    .filter((combo) => (combo.mask & driverPoolMask) === combo.mask)
     .map((combo) => cachedComboRunMeta(combo, "driver", currentDriverMask, state.availableDrivers))
     .filter(
       (meta) =>

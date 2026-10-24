@@ -768,21 +768,6 @@ function combinations(items, size) {
   return result;
 }
 
-function optimizerAssetScore(row) {
-  const points = number(row.expected_fantasy_points);
-  const value = number(row.value_per_million);
-  const pricePath = number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m));
-  return points + value * 3 + pricePath * 4;
-}
-
-function optimizerDriverPool() {
-  const drivers = rowsFor("driver");
-  const current = selectedRows("driver");
-  const cheapest = [...drivers].sort((left, right) => number(left.price_m) - number(right.price_m)).slice(0, 5);
-  const strongest = [...drivers].sort((left, right) => optimizerAssetScore(right) - optimizerAssetScore(left)).slice(0, 9);
-  return [...new Map([...current, ...cheapest, ...strongest].map((row) => [row.key, row])).values()];
-}
-
 function negativeProtection(row) {
   // Approximation: negative expected categories, not simulated category outcomes.
   return ["dnf_penalty_points_est", "sprint_dnf_penalty_points_est", "position_change_points_est",
@@ -821,18 +806,41 @@ function scoreLineup(drivers, constructors, { ignoreBudget = false, unlimitedTra
 function findBestLineup(options = {}) {
   const currentFriendly = els.strategy.value === "current_friendly" && !options.unlimitedTransfers && !options.allowPaidTransfers;
   const freeTransfers = Math.max(0, Math.floor(number(els.transfers.value)));
+  const current = new Set([...state.currentDrivers, ...state.currentConstructors]);
+  const budget = options.ignoreBudget ? Infinity : number(els.budget.value) + 0.001;
+  const strategy = els.strategy.value;
+  // Summarize every combination once; no driver shortlist can discard a funding path.
+  const summarize = (rows, driverGroup) => {
+    const points = rows.map((row) => number(row.expected_fantasy_points) +
+      (options.activeChip === "no_negative" ? negativeProtection(row) : 0));
+    const ranked = driverGroup ? [...points].sort((a, b) => b - a) : [];
+    return {
+      rows,
+      cost: rows.reduce((sum, row) => sum + number(row.price_m), 0),
+      points: points.reduce((sum, value) => sum + value, 0) +
+        (driverGroup ? (options.activeChip === "x3" ? 2 * ranked[0] + ranked[1] : ranked[0]) : 0),
+      transfers: rows.filter((row) => !current.has(row.key)).length,
+      pricePath: rows.reduce((sum, row) => sum + number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m)), 0),
+    };
+  };
   let best = null;
-  const driverCombos = combinations(optimizerDriverPool(), 5);
-  const constructorCombos = combinations(rowsFor("constructor"), 2);
-
-  driverCombos.forEach((drivers) => {
-    constructorCombos.forEach((constructors) => {
-      const lineup = scoreLineup(drivers, constructors, options);
-      if (!lineup || (currentFriendly && lineup.transferCount > freeTransfers)) return;
-      if (!best || lineup.strategyScore > best.strategyScore) best = lineup;
-    });
-  });
-  return best;
+  const driverCombos = combinations(rowsFor("driver"), 5).map((rows) => summarize(rows, true));
+  const constructorCombos = combinations(rowsFor("constructor"), 2).map((rows) => summarize(rows, false));
+  for (const drivers of driverCombos) {
+    if (drivers.cost > budget) continue;
+    for (const constructors of constructorCombos) {
+      if (drivers.cost + constructors.cost > budget) continue;
+      const transfers = drivers.transfers + constructors.transfers;
+      if (currentFriendly && transfers > freeTransfers) continue;
+      const penalty = options.unlimitedTransfers ? 0 : Math.max(0, transfers - freeTransfers) * 10;
+      const netPoints = drivers.points + constructors.points - penalty;
+      const strategyScore = strategy === "budget_growth"
+        ? netPoints + (options.activeChip === "limitless" ? 0 : (drivers.pricePath + constructors.pricePath) * 14)
+        : strategy === "current_friendly" ? netPoints - (options.unlimitedTransfers ? 0 : transfers * 1.5) : netPoints;
+      if (!best || strategyScore > best.strategyScore) best = { drivers, constructors, strategyScore };
+    }
+  }
+  return best ? scoreLineup(best.drivers.rows, best.constructors.rows, options) : null;
 }
 
 function directRecommendation() {
