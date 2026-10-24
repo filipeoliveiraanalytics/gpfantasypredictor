@@ -398,7 +398,7 @@ td strong { font-size: 11px; }
 .picker-no-results { padding: 20px 0; color: var(--muted); font-size: 14px; }
 .dialog .primary:disabled { cursor: not-allowed; opacity: .45; }
 .lineup-empty p { margin-bottom: 14px; }
-.lineup-empty .primary { max-width: 280px; margin: auto; font-style: normal; }
+.lineup-empty .primary { display: none; max-width: 280px; margin: auto; font-style: normal; }
 .audit-dialog { width: min(980px, calc(100vw - 32px)); }
 .audit-tables { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .audit-tables h3 { margin: 4px 0 10px; font-size: 17px; }
@@ -752,7 +752,7 @@ td strong { font-size: 11px; }
   .lineup table td:nth-child(4) { text-align: left; }
   .lineup table td:nth-child(5)::before { content: "Pts/$M "; }
   .lineup-empty td { font-size: 14px !important; font-style: normal; }
-  .lineup-empty .primary { max-width: none; min-height: 48px; font-size: 15px; }
+  .lineup-empty .primary { display: flex; max-width: none; min-height: 48px; font-size: 15px; }
   .team-panel:not(.mobile-team-expanded) { display: none; }
   .workspace.mobile-editing .analysis-panel, .workspace.mobile-editing .context-panel { display: none; }
   .team-panel.mobile-team-expanded { order: 0; margin: 0; border: 0; scroll-margin-top: 78px; }
