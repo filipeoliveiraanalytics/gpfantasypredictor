@@ -655,8 +655,8 @@ function renderRaceContext() {
   if (!els.contextList) return;
   const trackLogic = "COTA combines fast direction changes through the esses with heavy braking and a technical final sector. High-speed balance, traction and tyre management matter, while the long back straight creates overtaking opportunities.";
   const priceWatch = "Austin's price thresholds use the last two weekends' scores and current prices. Compare each asset's projected points with the score needed for its next rise.";
-  const fridayContext = state.modelMode === "After Practice" ? [
-    ["Friday running", "FP1 and FP2 included. Ferrari led single-lap running; Mercedes improved in FP2. McLaren reports stronger long-run pace than its soft-tyre positions suggest."],
+  const practiceContext = state.modelMode === "After Practice" ? [
+    ["Practice running", "FP1, FP2 and FP3 included, with deleted laps excluded. Hamilton led FP3 ahead of Verstappen and Leclerc. Race pace uses valid laps across all three sessions."],
     ["Grid penalties", "Bortoleto: 20 places. Colapinto: 10 places. Lindblad: 5 places. Race starts remain provisional until qualifying and the final grid."],
   ] : [];
   if (!state.recommendation) {
@@ -665,7 +665,7 @@ function renderRaceContext() {
     renderContextRows([
       ["Track logic", trackLogic],
       ["Constructor logic", "Prioritize cars with strong high-speed balance and tyre management, backed by consistent execution from both drivers."],
-      ...fridayContext,
+      ...practiceContext,
       ["Chip plan", state.modelMode === "Post-Quali" ? "The weekend deadline has passed. New weekend chips cannot be activated. Final Fix, if eligible, requires a separate Sunday-only comparison." : "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
       ["Price watch", priceWatch],
     ]);
@@ -707,7 +707,7 @@ function renderRaceContext() {
   renderContextRows([
     ["Track logic", trackLogic],
     ["Constructor logic", constructorDetail],
-    ...fridayContext,
+    ...practiceContext,
     ["Chip plan", chipDetail],
     ["Price watch", squadPriceWatch(rows, limitless)],
     ["Transfer plan", transferDetail],
