@@ -374,6 +374,7 @@ function renderCurrentTeam() {
   els.constructors.innerHTML = renderList("constructor");
   updateBudgetWarning();
   renderMobileTeamState();
+  if (!state.recommendation) renderLineupTable();
 }
 
 function renderMobileTeamState() {
@@ -606,6 +607,13 @@ function rowsForLineupView() {
   return sortedAssets((left, right) => number(right.expected_fantasy_points) - number(left.expected_fantasy_points));
 }
 
+function emptyLineupMarkup() {
+  const ready = hasCompleteTeam() && number(els.budget.value) > 0 && els.transfers.value !== "";
+  const message = ready ? "Your team is ready." : "No lineup yet.";
+  const label = ready ? "Optimize Team" : "Set up team";
+  return `<tr class="lineup-empty"><td colspan="6"><p>${message}</p><button type="button" class="primary" data-setup-team data-lineup-action="${ready ? "optimize" : "setup"}">${label} <span aria-hidden="true">→</span></button></td></tr>`;
+}
+
 function renderLineupTable() {
   const rows = rowsForLineupView();
   els.viewControls.forEach((button) => {
@@ -615,7 +623,7 @@ function renderLineupTable() {
     button.setAttribute("aria-selected", String(selected));
   });
   if (!rows.length) {
-    els.rows.innerHTML = '<tr class="lineup-empty"><td colspan="6"><p>No lineup yet.</p><button type="button" class="primary" data-setup-team>Set up team <span aria-hidden="true">→</span></button></td></tr>';
+    els.rows.innerHTML = emptyLineupMarkup();
     return;
   }
   els.rows.innerHTML = rows.map((row, index) => {
@@ -1084,7 +1092,8 @@ els.mobileRaceCta.addEventListener("click", () => {
   context.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 els.rows.addEventListener("click", (event) => {
-  if (event.target.closest("[data-setup-team]")) openMobileTeam();
+  if (event.target.closest('[data-lineup-action="optimize"]')) els.optimize.click();
+  else if (event.target.closest("[data-setup-team]")) openMobileTeam();
 });
 els.mobileTeamCollapse.addEventListener("click", closeMobileTeam);
 els.mobileOptimize.addEventListener("click", () => els.optimize.click());
@@ -1119,6 +1128,7 @@ els.saveTeam.addEventListener("change", () => {
   if (input === els.transfers) trackEvent("transfers_changed", { free_transfers: Math.max(0, Math.floor(number(els.transfers.value))) });
   updateBudgetWarning();
   renderMobileTeamState();
+  if (!state.recommendation) renderLineupTable();
   persistTeamIfEnabled();
   renderRaceContext();
 }));
