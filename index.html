@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>F1 Fantasy Predictor & Team Optimizer | GP Fantasy Predictor</title>
   <meta name="description" content="Build a stronger F1 Fantasy lineup with GP-specific projections, transfer planning, price value, chips, and model-backed race context.">
   <meta name="author" content="Filipe Oliveira Analytics">
@@ -23,7 +23,7 @@
   <meta name="twitter:title" content="F1 Fantasy Predictor & Team Optimizer">
   <meta name="twitter:description" content="A fan-made F1 Fantasy predictor powered by GP prediction modelling.">
   <meta name="twitter:image" content="https://gpfantasypredictor.com/og-image.png">
-  <link rel="stylesheet" href="mockup.css?v=mobile-layout-20261009">
+  <link rel="stylesheet" href="mockup.css?v=mobile-first-20261024">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -43,8 +43,9 @@
   <header class="topbar">
     <div class="brand"><img class="brand-mark" src="logo-gp-header.png?v=gp-header-v1" alt="GP" width="58" height="32">Fantasy Predictor</div>
     <div class="topbar-meta">United States GP <span class="topbar-separator"></span> <span id="topbar-stage">Pre-Weekend</span><span id="topbar-updated" class="topbar-updated" hidden>Last updated: <time id="topbar-updated-time"></time></span></div>
-    <div class="mobile-actions" aria-label="Team actions">
+    <div class="mobile-actions" role="group" aria-label="Mobile actions">
       <button id="mobile-team-cta" type="button" aria-controls="team-panel" aria-expanded="false">Team</button>
+      <button id="mobile-race-cta" type="button" aria-controls="race-context">Race</button>
       <button id="mobile-optimize" type="button" disabled>Optimize</button>
     </div>
   </header>
@@ -62,6 +63,7 @@
         <label>Free transfers <input id="transfers-input" type="number" min="0" step="1" placeholder="e.g. 2"></label>
       </div>
       <p id="budget-warning" class="budget-warning" role="status" hidden></p>
+      <p id="team-status" class="budget-warning" role="status" hidden></p>
       <label class="strategy-field">Approach
         <select id="strategy-input"><option value="current_friendly">Transfer Friendly</option><option value="max_points">Max Points</option><option value="budget_growth">Budget Growth</option></select>
       </label>
@@ -112,7 +114,7 @@
 
     </section>
 
-    <aside class="context-panel" aria-label="Race context">
+    <aside id="race-context" class="context-panel" aria-label="Race context" tabindex="-1">
       <p class="kicker">Race context</p>
       <h2 id="context-title">Austin context.</h2>
       <p id="context-intro" class="context-intro">Fast direction changes, heavy braking and long straights demand a balanced car.</p>
@@ -143,9 +145,9 @@
     <label class="rating-feedback"><span>What should we improve? <small>Optional - opens your email to send it.</small></span><textarea id="site-rating-feedback" rows="3" maxlength="500" placeholder="Share a thought"></textarea></label>
     <button id="submit-site-rating" class="rating-submit" type="button" disabled>Send feedback <span aria-hidden="true">→</span></button>
   </aside>
-  <dialog id="picker-dialog" class="dialog"><form method="dialog"><header><div><p class="kicker">Current Team</p><h2 id="picker-title">Choose drivers</h2></div><button class="icon-button" value="cancel" aria-label="Close picker">×</button></header><p id="picker-help" class="muted"></p><div id="picker-options" class="picker-options"></div><footer><button id="apply-picker" class="primary" type="button">Apply selection <span>→</span></button></footer></form></dialog>
+  <dialog id="picker-dialog" class="dialog" aria-labelledby="picker-title"><form method="dialog"><header><div><p class="kicker">Current Team</p><h2 id="picker-title">Choose drivers</h2></div><button class="icon-button" value="cancel" aria-label="Close picker">×</button></header><label class="picker-search">Search drivers or teams<input id="picker-search" type="search" placeholder="Name or team" autocomplete="off"></label><p id="picker-help" class="muted" role="status" aria-live="polite"></p><div id="picker-options" class="picker-options"></div><footer><button id="apply-picker" class="primary" type="button">Apply selection <span>→</span></button></footer></form></dialog>
 <dialog id="audit-dialog" class="dialog audit-dialog"><form method="dialog"><header><div><p class="kicker">Forecast vs Real Points</p><h2 class="audit-title"><span id="audit-flag" class="audit-flag flag-spain" aria-label="Spain flag"></span><span id="audit-title">Selected audit</span></h2></div><button class="icon-button" value="cancel" aria-label="Close audit">×</button></header><p id="audit-note" class="muted"></p><div class="audit-controls"><label class="audit-select-label">Grand Prix<select id="audit-select" aria-label="Grand Prix"></select></label><fieldset class="audit-stage-control"><legend>Forecast stage</legend><div id="audit-stage-options"></div></fieldset></div><div class="audit-tables"><section><h3>Drivers</h3><table><thead><tr><th aria-label="Name"></th><th>Est.</th><th>Actual</th><th>Delta</th></tr></thead><tbody id="audit-driver-rows"></tbody></table></section><section><h3>Constructors</h3><table><thead><tr><th aria-label="Name"></th><th>Est.</th><th>Actual</th><th>Delta</th></tr></thead><tbody id="audit-constructor-rows"></tbody></table></section></div></form></dialog>
   <script>window.GA_MEASUREMENT_ID = "G-0GCZQDW467";</script>
-  <script src="mockup.js?v=full-search-20261024"></script>
+  <script src="mockup.js?v=mobile-first-20261024"></script>
 </body>
 </html>

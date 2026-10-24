@@ -25,6 +25,9 @@ const els = {
   budget: document.querySelector("#budget-input"),
   transfers: document.querySelector("#transfers-input"),
   budgetWarning: document.querySelector("#budget-warning"),
+  teamStatus: document.querySelector("#team-status"),
+  workspace: document.querySelector("#workspace"),
+  mobileRaceCta: document.querySelector("#mobile-race-cta"),
   strategy: document.querySelector("#strategy-input"),
   chips: [...document.querySelectorAll(".chip-settings input")],
   chipCount: document.querySelector("#chip-count"),
@@ -61,6 +64,7 @@ const els = {
   pickerDialog: document.querySelector("#picker-dialog"),
   pickerTitle: document.querySelector("#picker-title"),
   pickerHelp: document.querySelector("#picker-help"),
+  pickerSearch: document.querySelector("#picker-search"),
   pickerOptions: document.querySelector("#picker-options"),
   applyPicker: document.querySelector("#apply-picker"),
   auditDialog: document.querySelector("#audit-dialog"),
@@ -382,20 +386,29 @@ function renderMobileTeamState() {
   els.mobileTeamCopy.textContent = teamReady
     ? `$${format(cost)}m current squad · ${Math.max(0, Math.floor(number(els.transfers.value)))} free transfers`
     : `${drivers}/5 drivers · ${constructors}/2 constructors selected`;
-  els.mobileTeamCta.textContent = "Team";
+  els.mobileTeamCta.textContent = els.teamPanel.classList.contains("mobile-team-expanded") ? "Lineup" : "Team";
   els.mobileOptimize.disabled = !teamReady || number(els.budget.value) <= 0 || els.transfers.value === "" || !state.dataReady;
 }
 
 function openMobileTeam() {
   els.teamPanel.classList.add("mobile-team-expanded");
+  els.workspace.classList.add("mobile-editing");
   els.mobileTeamCta.setAttribute("aria-expanded", "true");
+  renderMobileTeamState();
   els.teamPanel.scrollIntoView({ behavior: "smooth", block: "start" });
   trackEvent("mobile_team_opened");
 }
 
 function closeMobileTeam() {
   els.teamPanel.classList.remove("mobile-team-expanded");
+  els.workspace.classList.remove("mobile-editing");
   els.mobileTeamCta.setAttribute("aria-expanded", "false");
+  renderMobileTeamState();
+  if (window.matchMedia("(max-width: 820px)").matches) {
+    els.lineupHeading.setAttribute("tabindex", "-1");
+    els.lineupHeading.focus({ preventScroll: true });
+    els.lineupHeading.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 function renderChipCount() {
@@ -543,21 +556,28 @@ function renderAuditStages(preferredMode) {
 function openPicker(type) {
   state.pickerType = type;
   state.pickerSelection = new Set(type === "driver" ? state.currentDrivers : state.currentConstructors);
-  const maximum = type === "driver" ? 5 : 2;
   els.pickerTitle.textContent = type === "driver" ? "Choose current drivers" : "Choose current constructors";
-  els.pickerHelp.textContent = `Select exactly ${maximum} assets. These are your existing Fantasy picks, not the recommendation.`;
+  els.pickerSearch.value = "";
+  els.pickerSearch.placeholder = type === "driver" ? "Driver or team" : "Constructor";
   renderPickerOptions();
   els.pickerDialog.showModal();
   trackEvent("team_picker_opened", { asset_type: type });
 }
 
 function renderPickerOptions() {
+  const maximum = state.pickerType === "driver" ? 5 : 2;
+  const query = els.pickerSearch.value.trim().toLowerCase();
+  const scrollTop = els.pickerOptions.scrollTop;
+  els.pickerHelp.textContent = `${state.pickerSelection.size} of ${maximum} selected`;
+  els.applyPicker.disabled = state.pickerSelection.size !== maximum;
   els.pickerOptions.innerHTML = rowsFor(state.pickerType)
+    .filter((row) => `${row.name} ${row.team}`.toLowerCase().includes(query))
     .sort((left, right) => left.name.localeCompare(right.name))
     .map((row) => {
       const selected = state.pickerSelection.has(row.key);
-      return `<button class="picker-option ${selected ? "selected" : ""}" type="button" data-picker-key="${escapeHtml(row.key)}"><i class="team-swatch" style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.team)} | $${format(row.price_m)}m</small></span><b>${selected ? "Selected" : ""}</b></button>`;
-    }).join("");
+      return `<button class="picker-option ${selected ? "selected" : ""}" type="button" aria-pressed="${selected}" data-picker-key="${escapeHtml(row.key)}"><i class="team-swatch" style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.team)} | $${format(row.price_m)}m</small></span><b>${selected ? "Selected" : ""}</b></button>`;
+    }).join("") || '<p class="picker-no-results">No matching assets.</p>';
+  els.pickerOptions.scrollTop = scrollTop;
 }
 
 function applyPicker() {
@@ -595,7 +615,7 @@ function renderLineupTable() {
     button.setAttribute("aria-selected", String(selected));
   });
   if (!rows.length) {
-    els.rows.innerHTML = '<tr class="lineup-empty"><td colspan="6">Run the optimizer to build a lineup.</td></tr>';
+    els.rows.innerHTML = '<tr class="lineup-empty"><td colspan="6"><p>No lineup yet.</p><button type="button" class="primary" data-setup-team>Set up team <span aria-hidden="true">→</span></button></td></tr>';
     return;
   }
   els.rows.innerHTML = rows.map((row, index) => {
@@ -873,13 +893,20 @@ function directRecommendation() {
 }
 
 function runOptimizer() {
+  els.teamStatus.hidden = true;
   if (!hasCompleteTeam()) {
     els.stageCopy.textContent = "Choose 5 drivers and 2 constructors before optimizing.";
+    els.teamStatus.textContent = els.stageCopy.textContent;
+    els.teamStatus.hidden = false;
+    openMobileTeam();
     trackEvent("optimizer_validation_failed", { reason: "incomplete_team" });
     return;
   }
   if (number(els.budget.value) <= 0 || els.transfers.value === "") {
     els.stageCopy.textContent = "Enter your budget and free transfers before optimizing.";
+    els.teamStatus.textContent = els.stageCopy.textContent;
+    els.teamStatus.hidden = false;
+    openMobileTeam();
     trackEvent("optimizer_validation_failed", { reason: "missing_team_settings" });
     return;
   }
@@ -906,6 +933,7 @@ function runOptimizer() {
         chipReason: result.chipReason,
       });
       els.stageCopy.textContent = `${state.modelMode} recommendation updated from the live optimizer.`;
+      if (window.matchMedia("(max-width: 820px)").matches) closeMobileTeam();
       trackEvent("optimizer_result", {
         strategy: els.strategy.value,
         transfer_count: result.transferCount,
@@ -914,6 +942,9 @@ function runOptimizer() {
       });
     } catch (error) {
       els.stageCopy.textContent = error.message;
+      els.teamStatus.textContent = error.message;
+      els.teamStatus.hidden = false;
+      openMobileTeam();
       trackEvent("optimizer_error", { reason: "no_valid_lineup" });
     } finally {
       els.optimize.disabled = false;
@@ -1034,10 +1065,27 @@ els.pickerOptions.addEventListener("click", (event) => {
   if (state.pickerSelection.has(key)) state.pickerSelection.delete(key);
   else if (state.pickerSelection.size < maximum) state.pickerSelection.add(key);
   renderPickerOptions();
+  els.pickerOptions.querySelector(`[data-picker-key="${CSS.escape(key)}"]`)?.focus({ preventScroll: true });
+});
+els.pickerSearch.addEventListener("input", renderPickerOptions);
+els.pickerSearch.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") event.preventDefault();
 });
 els.applyPicker.addEventListener("click", applyPicker);
 els.optimize.addEventListener("click", runOptimizer);
-els.mobileTeamCta.addEventListener("click", openMobileTeam);
+els.mobileTeamCta.addEventListener("click", () => {
+  if (els.teamPanel.classList.contains("mobile-team-expanded")) closeMobileTeam();
+  else openMobileTeam();
+});
+els.mobileRaceCta.addEventListener("click", () => {
+  if (els.teamPanel.classList.contains("mobile-team-expanded")) closeMobileTeam();
+  const context = document.querySelector("#race-context");
+  context.focus({ preventScroll: true });
+  context.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+els.rows.addEventListener("click", (event) => {
+  if (event.target.closest("[data-setup-team]")) openMobileTeam();
+});
 els.mobileTeamCollapse.addEventListener("click", closeMobileTeam);
 els.mobileOptimize.addEventListener("click", () => els.optimize.click());
 els.viewControls.forEach((button) => button.addEventListener("click", () => {
@@ -1103,15 +1151,30 @@ els.ratingFeedback.addEventListener("input", () => {
   const toggleGuidance = (event) => {
     const cell = event.target.closest(".trend-cell, .points-cell");
     if (!cell) return;
-    const shown = cell.classList.toggle("show-table-tooltip");
+    const shown = !cell.classList.contains("show-table-tooltip");
+    closeTableGuidance();
+    cell.classList.toggle("show-table-tooltip", shown);
     cell.setAttribute("aria-expanded", String(shown));
   };
   list.addEventListener("click", toggleGuidance);
   list.addEventListener("keydown", (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
+    if (!event.target.closest(".trend-cell, .points-cell")) return;
     event.preventDefault();
     toggleGuidance(event);
   });
+});
+function closeTableGuidance() {
+  els.rows.querySelectorAll(".show-table-tooltip").forEach((cell) => {
+    cell.classList.remove("show-table-tooltip");
+    cell.setAttribute("aria-expanded", "false");
+  });
+}
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".trend-cell, .points-cell")) closeTableGuidance();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeTableGuidance();
 });
 document.querySelectorAll("[data-analytics-link]").forEach((link) => link.addEventListener("click", () => {
   trackEvent("outbound_link_clicked", { destination: link.dataset.analyticsLink });
