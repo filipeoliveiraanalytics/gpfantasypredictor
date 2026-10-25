@@ -683,9 +683,12 @@ function renderRaceContext() {
   if (!els.contextList) return;
   const trackLogic = "COTA combines fast direction changes through the esses with heavy braking and a technical final sector. High-speed balance, traction and tyre management matter, while the long back straight creates overtaking opportunities.";
   const priceWatch = "Austin's price thresholds use the last two weekends' scores and current prices. Compare each asset's projected points with the score needed for its next rise.";
-  const practiceContext = state.modelMode === "After Practice" ? [
+  const practiceContext = ["After Practice", "Post-Quali"].includes(state.modelMode) ? [
     ["Practice running", "FP1, FP2 and FP3 included, with deleted laps excluded. Hamilton led FP3 ahead of Verstappen and Leclerc. Race pace uses valid laps across all three sessions."],
-    ["Grid penalties", "Bortoleto: 20 places. Colapinto: 10 places. Lindblad: 5 places. Race starts remain provisional until qualifying and the final grid."],
+    ...(state.modelMode === "Post-Quali" ? [
+      ["Qualifying", "Antonelli on pole ahead of Verstappen and Hadjar. Leclerc fourth, Hamilton fifth and Russell sixth. Norris is eighth after his final lap was deleted."],
+      ["Starting grid", "Published grid applied: Lindblad 14th, Colapinto 21st and Bortoleto 22nd. Qualifying points use the final qualifying classification, not the penalised starting grid."],
+    ] : [["Grid penalties", "Bortoleto: 20 places. Colapinto: 10 places. Lindblad: 5 places. Race starts remain provisional until qualifying and the final grid."]]),
   ] : [];
   if (!state.recommendation) {
     els.contextTitle.textContent = "Austin context.";
