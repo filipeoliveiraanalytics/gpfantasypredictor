@@ -37,7 +37,7 @@ const CHIP_CONFIG = {
 const STRATEGY_NOTES = {
   max_points: "Max Points ranks the strongest projected lineup, even if it uses paid transfers.",
   current_friendly: "Transfer Friendly avoids paid transfers unless a selected chip changes the transfer rules.",
-  budget_growth: "Budget Growth targets assets projected into price-rise bands while keeping total points close.",
+  budget_growth: "Balanced Growth weighs projected points alongside risk-adjusted price growth.",
 };
 const TOP_TEAM_LIMIT = 5;
 
@@ -2714,8 +2714,8 @@ function priceContext(team) {
     const incoming = transferInRows(team);
     const names = incoming.map(growthPathLabel).join(", ");
     return incoming.length
-      ? `Budget Growth improved the risk-adjusted full-lineup price outlook with these moves: ${names}. The score checks projected points against each asset's rise threshold before chasing budget.`
-      : "Budget Growth found no transfer with a better risk-adjusted rise path, so it kept the current structure.";
+      ? `Balanced Growth improved the risk-adjusted full-lineup price outlook with these moves: ${names}. The score checks projected points against each asset's rise threshold before chasing budget.`
+      : "Balanced Growth found no transfer with a better risk-adjusted rise path, so it kept the current structure.";
   }
   if (team.projectedBudgetDelta > 0.4) {
     return `This lineup has ${formatSignedMoney(team.projectedBudgetDelta)} risk-adjusted price momentum, useful if you want to grow budget for future GPs.`;
