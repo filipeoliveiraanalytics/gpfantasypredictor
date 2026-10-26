@@ -450,7 +450,7 @@ function saveTeam({ announce = true } = {}) {
   };
   try {
     window.localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(saved));
-    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the United States GP.";
+    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the Mexico GP.";
   } catch {
     if (announce) els.stageCopy.textContent = "This browser could not save the team.";
   }
@@ -540,7 +540,7 @@ function populateAuditSelect() {
   const preferred = audits.find((audit) => audit.gp_key === gps[0].gp_key && audit.mode === "Post-Quali") || audits[0];
   els.auditSelect.value = preferred.gp_key;
   renderAuditStages(preferred.mode);
-  els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Singapore.";
+  els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Austin.";
   els.auditButtonLabel.textContent = "Browse forecast reviews";
   renderAudit();
 }
@@ -681,21 +681,18 @@ function squadPriceWatch(rows, limitless = false) {
 
 function renderRaceContext() {
   if (!els.contextList) return;
-  const trackLogic = "COTA combines fast direction changes through the esses with heavy braking and a technical final sector. High-speed balance, traction and tyre management matter, while the long back straight creates overtaking opportunities.";
-  const priceWatch = "Austin's price thresholds use the last two weekends' scores and current prices. Compare each asset's projected points with the score needed for its next rise.";
-  const practiceContext = ["After Practice", "Post-Quali"].includes(state.modelMode) ? [
-    ["Practice running", "FP1, FP2 and FP3 included, with deleted laps excluded. Hamilton led FP3 ahead of Verstappen and Leclerc. Race pace uses valid laps across all three sessions."],
-    ...(state.modelMode === "Post-Quali" ? [
-      ["Qualifying", "Antonelli on pole ahead of Verstappen and Hadjar. Leclerc fourth, Hamilton fifth and Russell sixth. Norris is eighth after his final lap was deleted."],
-      ["Starting grid", "Published grid applied: Lindblad 14th, Colapinto 21st and Bortoleto 22nd. Qualifying points use the final qualifying classification, not the penalised starting grid."],
-    ] : [["Grid penalties", "Bortoleto: 20 places. Colapinto: 10 places. Lindblad: 5 places. Race starts remain provisional until qualifying and the final grid."]]),
-  ] : [];
+  const trackLogic = "Mexico's high altitude reduces air density, making cooling and aerodynamic efficiency important. Long straights, heavy braking and the slow stadium sector also reward traction and straight-line performance.";
+  const priceWatch = "Mexico's thresholds use verified Singapore and Austin scores with post-Austin prices. Compare projected points with the score needed for the next rise. Price changes remain estimates.";
+  const practiceContext = [
+    ["Model status", "Pre-weekend forecast using recent race history, including Austin. Mexico practice and qualifying are not included yet. Confidence is low before on-track running."],
+    ["Grid outlook", "No Mexico grid penalties are applied. Austin's penalties do not carry over; starting positions remain provisional."],
+  ];
   if (!state.recommendation) {
-    els.contextTitle.textContent = "Austin context.";
-    els.contextIntro.textContent = `${state.modelMode} United States forecast using updated post-Singapore prices.`;
+    els.contextTitle.textContent = "Mexico context.";
+    els.contextIntro.textContent = `${state.modelMode} Mexico forecast using verified post-Austin prices.`;
     renderContextRows([
       ["Track logic", trackLogic],
-      ["Constructor logic", "Prioritize cars with strong high-speed balance and tyre management, backed by consistent execution from both drivers."],
+      ["Constructor logic", "Balance cooling, aerodynamic efficiency and traction with reliable points from both drivers. Practice will help test the current pecking order."],
       ...practiceContext,
       ["Chip plan", state.modelMode === "Post-Quali" ? "The weekend deadline has passed. New weekend chips cannot be activated. Final Fix, if eligible, requires a separate Sunday-only comparison." : "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
       ["Price watch", priceWatch],
@@ -720,8 +717,8 @@ function renderRaceContext() {
     ? { out: nameList(outgoing), in: nameList(incoming) }
     : "The model retains your current squad, so no transfer is needed.";
   const constructorDetail = retainedConstructors.length === constructors.length
-    ? `${nameList(constructors)} keep your existing constructor exposure, which the model rates strongly for Austin.`
-    : `${nameList(constructors)} are the model's best constructor fit for Austin's high-speed balance and tyre-management demands.`;
+    ? `${nameList(constructors)} retain your existing constructor exposure under the current budget and strategy.`
+    : `${nameList(constructors)} provide the best projected constructor combination under your current budget and strategy. This remains a pre-practice estimate.`;
   const chipDetail = state.recommendation.chipReason || (chip === "No chip"
     ? "Hold your chips. No available option creates enough projected upside over the standard transfer route."
     : limitless
@@ -731,9 +728,9 @@ function renderRaceContext() {
     ? "This is a temporary squad. Your original team returns after the weekend; temporary picks are not counted as lasting budget growth."
     : priceOutlookAvailable
       ? `$${format(Math.max(0, budgetLeft))}m remains after changes, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`
-      : `$${format(Math.max(0, budgetLeft))}m remains after changes. Price growth is pending Austin's thresholds.`;
+      : `$${format(Math.max(0, budgetLeft))}m remains after changes. Price growth is pending Mexico's thresholds.`;
 
-  els.contextTitle.textContent = "Your Austin plan.";
+  els.contextTitle.textContent = "Your Mexico plan.";
   els.contextIntro.textContent = `${state.recommendation.points} projected from a lineup tailored to your saved team, budget, and transfer plan.`;
   renderContextRows([
     ["Track logic", trackLogic],
@@ -975,10 +972,11 @@ function renderAuditDialog() {
     Azerbaijan: ["azerbaijan", "Azerbaijan"],
     Bahrain: ["malaysia", "Malaysia"],
     Singapore: ["singapore", "Singapore"],
+    "United States": ["usa", "United States"],
   };
   const [flagClass, flagLabel] = auditFlags[audit.gp_key] || ["spain", "Spain"];
   els.auditFlag.className = `audit-flag flag-${flagClass}`;
-  const flagImage = { Bahrain: "malaysia-flag.svg", Singapore: "singapore-flag.svg" }[audit.gp_key];
+  const flagImage = { Bahrain: "malaysia-flag.svg", Singapore: "singapore-flag.svg", "United States": "usa-flag.svg" }[audit.gp_key];
   els.auditFlag.style.backgroundImage = flagImage ? `url("${flagImage}")` : "";
   els.auditFlag.style.backgroundSize = flagImage ? "100% 100%" : "";
   els.auditFlag.setAttribute("aria-label", `${flagLabel} flag`);
