@@ -470,3 +470,36 @@ constructor,AUD,Audi,Audi,10.4,238,2026-10-11,TRUE
 constructor,WIL,Williams,Williams,12.6,187,2026-10-11,TRUE
 constructor,CAD,Cadillac,Cadillac,3.0,-84,2026-10-11,TRUE
 constructor,AMR,Aston Martin,Aston Martin,4.5,-90,2026-10-11,TRUE
+driver,ANT,Kimi Antonelli,Mercedes,27.4,720,2026-10-26,TRUE
+driver,VER,Max Verstappen,Red Bull Racing,28.5,513,2026-10-26,TRUE
+driver,HAM,Lewis Hamilton,Ferrari,24.7,483,2026-10-26,TRUE
+driver,LEC,Charles Leclerc,Ferrari,24.4,480,2026-10-26,TRUE
+driver,RUS,George Russell,Mercedes,27.6,434,2026-10-26,TRUE
+driver,NOR,Lando Norris,McLaren,26.0,380,2026-10-26,TRUE
+driver,PIA,Oscar Piastri,McLaren,23.3,278,2026-10-26,TRUE
+driver,HAD,Isack Hadjar,Red Bull Racing,16.5,214,2026-10-26,TRUE
+driver,LAW,Liam Lawson,Racing Bulls,10.5,174,2026-10-26,TRUE
+driver,OCO,Esteban Ocon,Haas F1 Team,10.1,168,2026-10-26,TRUE
+driver,LIN,Arvid Lindblad,Racing Bulls,10.6,147,2026-10-26,TRUE
+driver,GAS,Pierre Gasly,Alpine,9.6,139,2026-10-26,TRUE
+driver,SAI,Carlos Sainz,Williams,8.2,120,2026-10-26,TRUE
+driver,COL,Franco Colapinto,Alpine,8.2,105,2026-10-26,TRUE
+driver,BOR,Gabriel Bortoleto,Audi,6.4,84,2026-10-26,TRUE
+driver,BEA,Oliver Bearman,Haas F1 Team,6.2,81,2026-10-26,TRUE
+driver,HUL,Nico Hulkenberg,Audi,7.2,47,2026-10-26,TRUE
+driver,ALO,Fernando Alonso,Aston Martin,6.0,39,2026-10-26,TRUE
+driver,PER,Sergio Perez,Cadillac,3.0,19,2026-10-26,TRUE
+driver,ALB,Alexander Albon,Williams,4.0,0,2026-10-26,TRUE
+driver,BOT,Valtteri Bottas,Cadillac,3.0,-117,2026-10-26,TRUE
+driver,STR,Lance Stroll,Aston Martin,3.0,-147,2026-10-26,TRUE
+constructor,MER,Mercedes,Mercedes,34.0,1430,2026-10-26,TRUE
+constructor,FER,Ferrari,Ferrari,28.5,1179,2026-10-26,TRUE
+constructor,RBR,Red Bull Racing,Red Bull Racing,33.0,934,2026-10-26,TRUE
+constructor,MCL,McLaren,McLaren,32.7,894,2026-10-26,TRUE
+constructor,RBL,Racing Bulls,Racing Bulls,17.1,559,2026-10-26,TRUE
+constructor,ALP,Alpine,Alpine,18.5,372,2026-10-26,TRUE
+constructor,HAA,Haas F1 Team,Haas F1 Team,12.6,297,2026-10-26,TRUE
+constructor,AUD,Audi,Audi,11.0,267,2026-10-26,TRUE
+constructor,WIL,Williams,Williams,12.0,198,2026-10-26,TRUE
+constructor,AMR,Aston Martin,Aston Martin,5.1,-73,2026-10-26,TRUE
+constructor,CAD,Cadillac,Cadillac,3.0,-102,2026-10-26,TRUE
