@@ -683,9 +683,14 @@ function renderRaceContext() {
   if (!els.contextList) return;
   const trackLogic = "Mexico's high altitude reduces air density, making cooling and aerodynamic efficiency important. Long straights, heavy braking and the slow stadium sector also reward traction and straight-line performance.";
   const priceWatch = "Mexico's thresholds use verified Singapore and Austin scores with post-Austin prices. Compare projected points with the score needed for the next rise. Price changes remain estimates.";
-  const practiceContext = [
+  const afterPractice = state.modelMode === "After Practice";
+  const practiceContext = afterPractice ? [
+    ["Practice running", "FP1 and FP2 included. Leclerc led both sessions; Norris and Russell followed in FP2. Deleted laps, pit laps and red-flag/VSC periods are excluded from usable pace evidence. FP3 and qualifying are not included."],
+    ["Sample limits", "Ten substitute drivers ran in FP1; their laps are not assigned to the regular drivers. Hamilton completed only 13 FP2 laps after a power issue. Bortoleto had limited running, so their evidence is less complete."],
+    ["Grid penalties", "Bottas: 50 places, modelled at the back. Verstappen and Lawson: one place each. Qualifying positions and the final starting grid remain provisional."],
+  ] : [
     ["Model status", "Pre-weekend forecast using recent race history, including Austin. Mexico practice and qualifying are not included yet. Confidence is low before on-track running."],
-    ["Grid outlook", "No Mexico grid penalties are applied. Austin's penalties do not carry over; starting positions remain provisional."],
+    ["Grid outlook", "Starting positions remain provisional until qualifying and the final published grid."],
   ];
   if (!state.recommendation) {
     els.contextTitle.textContent = "Mexico context.";
@@ -718,7 +723,7 @@ function renderRaceContext() {
     : "The model retains your current squad, so no transfer is needed.";
   const constructorDetail = retainedConstructors.length === constructors.length
     ? `${nameList(constructors)} retain your existing constructor exposure under the current budget and strategy.`
-    : `${nameList(constructors)} provide the best projected constructor combination under your current budget and strategy. This remains a pre-practice estimate.`;
+    : `${nameList(constructors)} provide the best projected constructor combination under your current budget and strategy. ${afterPractice ? "Friday practice is included; qualifying and the final grid are still pending." : "This remains a pre-practice estimate."}`;
   const chipDetail = state.recommendation.chipReason || (chip === "No chip"
     ? "Hold your chips. No available option creates enough projected upside over the standard transfer route."
     : limitless
