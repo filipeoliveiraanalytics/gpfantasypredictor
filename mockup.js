@@ -684,7 +684,14 @@ function renderRaceContext() {
   const trackLogic = "Mexico's high altitude reduces air density, making cooling and aerodynamic efficiency important. Long straights, heavy braking and the slow stadium sector also reward traction and straight-line performance.";
   const priceWatch = "Mexico's thresholds use verified Singapore and Austin scores with post-Austin prices. Compare projected points with the score needed for the next rise. Price changes remain estimates.";
   const afterPractice = state.modelMode === "After Practice";
-  const practiceContext = afterPractice ? [
+  const postQuali = state.modelMode === "Post-Quali";
+  const practiceContext = postQuali ? [
+    ["Qualifying", "Final FIA classification: Hamilton on pole, Russell second and Leclerc third. Deleted laps are already reflected in the official times. Lawson was disqualified; his qualifying score is -5, with no invalidated times used as pace evidence."],
+    ["Starting grid", "FIA provisional grid applied directly: Antonelli fourth, Verstappen fifth, Bottas 21st and Lawson 22nd. Penalties are not applied twice. Race recovery uses starting positions, while qualifying points use the qualifying classification."],
+    ["Practice evidence", "FP1/FP2 lap timing and the finalized FP3 classification remain included. FP3 long-run timing is unavailable; race pace uses Friday timing. No race-result data is included."],
+    ["Constructor scoring", "Qualifying progression is tracked separately from final positions: Hulkenberg reached Q2, not Q3; Albon remained a Q1 elimination. Lawson's disqualification is included in Racing Bulls scoring."],
+    ["Driver change", "Hirakawa replaces Ocon at $6.0M. Ocon is unavailable; his history is not inherited. Hirakawa's price thresholds remain unverified and withheld."],
+  ] : afterPractice ? [
     ["Practice running", "FP1/FP2 lap timing plus the finalized FP3 classification. Norris led FP3 by 0.001s from Antonelli, with Leclerc third. FP3 informs one-lap pace only; race pace still uses Friday timing. Qualifying is not included."],
     ["Sample limits", "Full FP3 lap/stint timing is unavailable. Its official classification accounts for deleted laps; Friday deleted, pit and red-flag/VSC laps are excluded separately. Bortoleto and Perez set no FP3 time. Confidence remains medium."],
     ["Driver change", "Ryo Hirakawa replaces Ocon at Haas, at the corrected $6.0M Fantasy price. Ocon is unavailable. Hirakawa does not inherit Ocon's driver history; his price-movement thresholds are unverified and withheld."],
@@ -698,7 +705,7 @@ function renderRaceContext() {
     els.contextIntro.textContent = `${state.modelMode} Mexico forecast using verified post-Austin prices.`;
     renderContextRows([
       ["Track logic", trackLogic],
-      ["Constructor logic", "Balance cooling, aerodynamic efficiency and traction with reliable points from both drivers. Practice will help test the current pecking order."],
+      ["Constructor logic", postQuali ? "Constructor projections include completed qualifying scores and forecast race points for both drivers." : "Balance cooling, aerodynamic efficiency and traction with reliable points from both drivers. Practice will help test the current pecking order."],
       ...practiceContext,
       ["Chip plan", state.modelMode === "Post-Quali" ? "The weekend deadline has passed. New weekend chips cannot be activated. Final Fix, if eligible, requires a separate Sunday-only comparison." : "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
       ["Price watch", priceWatch],
@@ -724,7 +731,7 @@ function renderRaceContext() {
     : "The model retains your current squad, so no transfer is needed.";
   const constructorDetail = retainedConstructors.length === constructors.length
     ? `${nameList(constructors)} retain your existing constructor exposure under the current budget and strategy.`
-    : `${nameList(constructors)} provide the best projected constructor combination under your current budget and strategy. ${afterPractice ? "Friday practice is included; qualifying and the final grid are still pending." : "This remains a pre-practice estimate."}`;
+    : `${nameList(constructors)} provide the best projected constructor combination under your current budget and strategy. ${postQuali ? "Final qualifying and the provisional starting grid are included." : afterPractice ? "Practice is included; qualifying and the final grid are still pending." : "This remains a pre-practice estimate."}`;
   const chipDetail = state.recommendation.chipReason || (chip === "No chip"
     ? "Hold your chips. No available option creates enough projected upside over the standard transfer route."
     : limitless
@@ -734,7 +741,7 @@ function renderRaceContext() {
     ? "This is a temporary squad. Your original team returns after the weekend; temporary picks are not counted as lasting budget growth."
     : priceOutlookAvailable
       ? `$${format(Math.max(0, budgetLeft))}m remains after changes, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`
-      : `$${format(Math.max(0, budgetLeft))}m remains after changes. Price growth is pending Mexico's thresholds.`;
+      : `$${format(Math.max(0, budgetLeft))}m remains after changes. Price growth is unavailable for at least one selected asset.`;
 
   els.contextTitle.textContent = "Your Mexico plan.";
   els.contextIntro.textContent = `${state.recommendation.points} projected from a lineup tailored to your saved team, budget, and transfer plan.`;
