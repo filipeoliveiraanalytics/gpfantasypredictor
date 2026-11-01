@@ -685,8 +685,9 @@ function renderRaceContext() {
   const priceWatch = "Mexico's thresholds use verified Singapore and Austin scores with post-Austin prices. Compare projected points with the score needed for the next rise. Price changes remain estimates.";
   const afterPractice = state.modelMode === "After Practice";
   const practiceContext = afterPractice ? [
-    ["Practice running", "FP1 and FP2 included. Leclerc led both sessions; Norris and Russell followed in FP2. Deleted laps, pit laps and red-flag/VSC periods are excluded from usable pace evidence. FP3 and qualifying are not included."],
-    ["Sample limits", "Ten substitute drivers ran in FP1; their laps are not assigned to the regular drivers. Hamilton completed only 13 FP2 laps after a power issue. Bortoleto had limited running, so their evidence is less complete."],
+    ["Practice running", "FP1/FP2 lap timing plus the finalized FP3 classification. Norris led FP3 by 0.001s from Antonelli, with Leclerc third. FP3 informs one-lap pace only; race pace still uses Friday timing. Qualifying is not included."],
+    ["Sample limits", "Full FP3 lap/stint timing is unavailable. Its official classification accounts for deleted laps; Friday deleted, pit and red-flag/VSC laps are excluded separately. Bortoleto and Perez set no FP3 time. Confidence remains medium."],
+    ["Driver change", "Ryo Hirakawa replaces Ocon at Haas, at the corrected $6.0M Fantasy price. Ocon is unavailable. Hirakawa does not inherit Ocon's driver history; his price-movement thresholds are unverified and withheld."],
     ["Grid penalties", "Bottas: 50 places, modelled at the back. Verstappen and Lawson: one place each. Qualifying positions and the final starting grid remain provisional."],
   ] : [
     ["Model status", "Pre-weekend forecast using recent race history, including Austin. Mexico practice and qualifying are not included yet. Confidence is low before on-track running."],
