@@ -450,7 +450,7 @@ function saveTeam({ announce = true } = {}) {
   };
   try {
     window.localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(saved));
-    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the Mexico GP.";
+    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the Brazil GP.";
   } catch {
     if (announce) els.stageCopy.textContent = "This browser could not save the team.";
   }
@@ -540,7 +540,7 @@ function populateAuditSelect() {
   const preferred = audits.find((audit) => audit.gp_key === gps[0].gp_key && audit.mode === "Post-Quali") || audits[0];
   els.auditSelect.value = preferred.gp_key;
   renderAuditStages(preferred.mode);
-  els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Austin.";
+  els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Mexico.";
   els.auditButtonLabel.textContent = "Browse forecast reviews";
   renderAudit();
 }
@@ -576,7 +576,7 @@ function renderPickerOptions() {
     .sort((left, right) => left.name.localeCompare(right.name))
     .map((row) => {
       const selected = state.pickerSelection.has(row.key);
-      return `<button class="picker-option ${selected ? "selected" : ""}" type="button" aria-pressed="${selected}" data-picker-key="${escapeHtml(row.key)}"><i class="team-swatch" style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.team)} | $${format(row.price_m)}m</small></span><b>${selected ? "Selected" : ""}</b></button>`;
+      return `<button class="picker-option ${selected ? "selected" : ""}" type="button" aria-pressed="${selected}" data-picker-key="${escapeHtml(row.key)}"><i class="team-swatch" style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.team)} | $${format(row.price_m)}m${row.key === "CAM" ? " (provisional)" : ""}</small></span><b>${selected ? "Selected" : ""}</b></button>`;
     }).join("") || '<p class="picker-no-results">No matching assets.</p>';
   els.pickerOptions.scrollTop = scrollTop;
 }
@@ -636,7 +636,7 @@ function renderLineupTable() {
     const position = rows.slice(0, index).filter((candidate) => candidate.entity_type === row.entity_type).length + 1;
     const isFirstConstructor = row.entity_type === "constructor" && !rows.slice(0, index).some((candidate) => candidate.entity_type === "constructor");
     const rowClass = [row.entity_type === "constructor" ? "constructor" : "", isFirstConstructor ? "first-constructor" : ""].filter(Boolean).join(" ");
-    const teamLabel = row.entity_type === "driver" ? `<small>${escapeHtml(row.team)}</small>` : "";
+    const teamLabel = row.entity_type === "driver" ? `<small>${escapeHtml(row.team)}${row.key === "CAM" ? " | $6.0M provisional" : ""}</small>` : "";
     const trendTooltip = trendTiers?.markup || "";
     const trendAria = trendTiers?.aria || "Price thresholds are unavailable for this asset.";
     return `<tr class="${rowClass}"><td class="position">${position}</td><td class="asset-name"><i style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong>${teamLabel}</span></td><td class="points points-cell" role="button" tabindex="0" aria-expanded="false" aria-label="${escapeHtml(`${row.name}. ${pointsBreakdown.aria}`)}">${format(row.expected_fantasy_points)}${pointsBreakdown.markup}</td><td>$${format(row.price_m)}m</td><td title="Projected points per $1M">${format(row.value_per_million, 2)}</td><td class="${trendClass} trend-cell" role="button" tabindex="0" aria-expanded="false" aria-label="${escapeHtml(`${row.name}. ${trendAria}`)}">${trendLabel}${trendTooltip}</td></tr>`;
@@ -681,28 +681,20 @@ function squadPriceWatch(rows, limitless = false) {
 
 function renderRaceContext() {
   if (!els.contextList) return;
-  const trackLogic = "Mexico's high altitude reduces air density, making cooling and aerodynamic efficiency important. Long straights, heavy braking and the slow stadium sector also reward traction and straight-line performance.";
-  const priceWatch = "Mexico's thresholds use verified Singapore and Austin scores with post-Austin prices. Compare projected points with the score needed for the next rise. Price changes remain estimates.";
+  const trackLogic = "Interlagos combines flowing corners, long straights and uphill traction. Tyre management and balanced race pace matter; overtaking opportunities allow strategy flexibility.";
+  const priceWatch = "Brazil thresholds use verified Austin and Mexico scores with post-Mexico prices. All 32 established Mexico price changes matched our rolling model. Camara's price movement is withheld.";
   const afterPractice = state.modelMode === "After Practice";
   const postQuali = state.modelMode === "Post-Quali";
-  const practiceContext = postQuali ? [
-    ["Qualifying", "Final FIA classification: Hamilton on pole, Russell second and Leclerc third. Deleted laps are already reflected in the official times. Lawson was disqualified; his qualifying score is -5, with no invalidated times used as pace evidence."],
-    ["Starting grid", "FIA provisional grid applied directly: Antonelli fourth, Verstappen fifth, Bottas 21st and Lawson 22nd. Penalties are not applied twice. Race recovery uses starting positions, while qualifying points use the qualifying classification."],
-    ["Practice evidence", "FP1/FP2 lap timing and the finalized FP3 classification remain included. FP3 long-run timing is unavailable; race pace uses Friday timing. No race-result data is included."],
-    ["Constructor scoring", "Qualifying progression is tracked separately from final positions: Hulkenberg reached Q2, not Q3; Albon remained a Q1 elimination. Lawson's disqualification is included in Racing Bulls scoring."],
-    ["Driver change", "Hirakawa replaces Ocon at $6.0M. Ocon is unavailable; his history is not inherited. Hirakawa's price thresholds remain unverified and withheld."],
-  ] : afterPractice ? [
-    ["Practice running", "FP1/FP2 lap timing plus the finalized FP3 classification. Norris led FP3 by 0.001s from Antonelli, with Leclerc third. FP3 informs one-lap pace only; race pace still uses Friday timing. Qualifying is not included."],
-    ["Sample limits", "Full FP3 lap/stint timing is unavailable. Its official classification accounts for deleted laps; Friday deleted, pit and red-flag/VSC laps are excluded separately. Bortoleto and Perez set no FP3 time. Confidence remains medium."],
-    ["Driver change", "Ryo Hirakawa replaces Ocon at Haas, at the corrected $6.0M Fantasy price. Ocon is unavailable. Hirakawa does not inherit Ocon's driver history; his price-movement thresholds are unverified and withheld."],
-    ["Grid penalties", "Bottas: 50 places, modelled at the back. Verstappen and Lawson: one place each. Qualifying positions and the final starting grid remain provisional."],
-  ] : [
-    ["Model status", "Pre-weekend forecast using recent race history, including Austin. Mexico practice and qualifying are not included yet. Confidence is low before on-track running."],
-    ["Grid outlook", "Starting positions remain provisional until qualifying and the final published grid."],
+  const practiceContext = [
+    ["Model status", "Pre-weekend Brazil forecast using the five completed races through Mexico. No Brazil practice or qualifying is included. Confidence is low before on-track running."],
+    ["Tyres and surface", "C3 Hard, C4 Medium and C5 Soft. Sections between Turns 3-5 and 8-9 have been resurfaced. Grip and degradation effects remain uncertain until practice."],
+    ["Weather", "Weather and safety-car probabilities are circuit priors, not a live forecast. Rain and temperature changes can materially alter this outlook."],
+    ["Driver change", "Rafael Camara replaces Hirakawa at Haas. His $6.0M price is a provisional assumption: he is not listed in F1 Fantasy yet. No inherited driver history or price-change thresholds are used."],
+    ["Grid outlook", "No confirmed Brazil grid penalties are applied. Mexico's penalties do not carry over. Starting positions remain provisional."],
   ];
   if (!state.recommendation) {
-    els.contextTitle.textContent = "Mexico context.";
-    els.contextIntro.textContent = `${state.modelMode} Mexico forecast using verified post-Austin prices.`;
+    els.contextTitle.textContent = "Brazil context.";
+    els.contextIntro.textContent = `${state.modelMode} Brazil forecast using post-Mexico prices; Camara's price is provisional.`;
     renderContextRows([
       ["Track logic", trackLogic],
       ["Constructor logic", postQuali ? "Constructor projections include completed qualifying scores and forecast race points for both drivers." : "Balance cooling, aerodynamic efficiency and traction with reliable points from both drivers. Practice will help test the current pecking order."],
@@ -743,7 +735,7 @@ function renderRaceContext() {
       ? `$${format(Math.max(0, budgetLeft))}m remains after changes, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`
       : `$${format(Math.max(0, budgetLeft))}m remains after changes. Price growth is unavailable for at least one selected asset.`;
 
-  els.contextTitle.textContent = "Your Mexico plan.";
+  els.contextTitle.textContent = "Your Brazil plan.";
   els.contextIntro.textContent = `${state.recommendation.points} projected from a lineup tailored to your saved team, budget, and transfer plan.`;
   renderContextRows([
     ["Track logic", trackLogic],
@@ -986,10 +978,11 @@ function renderAuditDialog() {
     Bahrain: ["malaysia", "Malaysia"],
     Singapore: ["singapore", "Singapore"],
     "United States": ["usa", "United States"],
+    Mexico: ["mexico", "Mexico"],
   };
   const [flagClass, flagLabel] = auditFlags[audit.gp_key] || ["spain", "Spain"];
   els.auditFlag.className = `audit-flag flag-${flagClass}`;
-  const flagImage = { Bahrain: "malaysia-flag.svg", Singapore: "singapore-flag.svg", "United States": "usa-flag.svg" }[audit.gp_key];
+  const flagImage = { Bahrain: "malaysia-flag.svg", Singapore: "singapore-flag.svg", "United States": "usa-flag.svg", Mexico: "mexico-flag.svg" }[audit.gp_key];
   els.auditFlag.style.backgroundImage = flagImage ? `url("${flagImage}")` : "";
   els.auditFlag.style.backgroundSize = flagImage ? "100% 100%" : "";
   els.auditFlag.setAttribute("aria-label", `${flagLabel} flag`);
