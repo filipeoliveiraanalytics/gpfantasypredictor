@@ -301,6 +301,7 @@ function priceTrendTiers(row) {
   const gpName = normalizeGp(row.next_gp);
   const threshold = state.priceThresholds.find((entry) => normalizeGp(entry.source_gp) === gpName && entry.entity_type === row.entity_type && entry.key === row.key);
   if (!threshold) return null;
+  const title = threshold.method === "debut_single_race" ? "Estimated first-race price thresholds" : "Price change after this GP";
 
   const premiumAsset = number(row.price_m) >= 18.5;
   const tiers = premiumAsset ? { good: 0.1, great: 0.3, poor: 0.1 } : { good: 0.2, great: 0.6, poor: 0.2 };
@@ -314,8 +315,8 @@ function priceTrendTiers(row) {
   if (present("poor_min")) labels.push([`-$${format(tiers.poor)}M`, `${whole(threshold.poor_min)} to ${whole(threshold.poor_max)} pts`]);
   if (present("terrible_max")) labels.push([`-$${format(tiers.great)}M`, `<= ${whole(threshold.terrible_max)} pts`]);
   return {
-    aria: `Price change after this GP. ${labels.map(([change, range]) => `${change}: ${range}`).join(". ")}.`,
-    markup: `<span class="trend-tooltip" role="tooltip"><b>Price change after this GP</b>${labels.map(([change, range]) => `<span><em>${change}</em><i>${range}</i></span>`).join("")}</span>`,
+    aria: `${title}. ${labels.map(([change, range]) => `${change}: ${range}`).join(". ")}.`,
+    markup: `<span class="trend-tooltip" role="tooltip"><b>${title}</b>${labels.map(([change, range]) => `<span><em>${change}</em><i>${range}</i></span>`).join("")}</span>`,
   };
 }
 
@@ -576,7 +577,7 @@ function renderPickerOptions() {
     .sort((left, right) => left.name.localeCompare(right.name))
     .map((row) => {
       const selected = state.pickerSelection.has(row.key);
-      return `<button class="picker-option ${selected ? "selected" : ""}" type="button" aria-pressed="${selected}" data-picker-key="${escapeHtml(row.key)}"><i class="team-swatch" style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.team)} | $${format(row.price_m)}m${row.key === "CAM" ? " (provisional)" : ""}</small></span><b>${selected ? "Selected" : ""}</b></button>`;
+      return `<button class="picker-option ${selected ? "selected" : ""}" type="button" aria-pressed="${selected}" data-picker-key="${escapeHtml(row.key)}"><i class="team-swatch" style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.team)} | $${format(row.price_m)}m</small></span><b>${selected ? "Selected" : ""}</b></button>`;
     }).join("") || '<p class="picker-no-results">No matching assets.</p>';
   els.pickerOptions.scrollTop = scrollTop;
 }
@@ -636,7 +637,7 @@ function renderLineupTable() {
     const position = rows.slice(0, index).filter((candidate) => candidate.entity_type === row.entity_type).length + 1;
     const isFirstConstructor = row.entity_type === "constructor" && !rows.slice(0, index).some((candidate) => candidate.entity_type === "constructor");
     const rowClass = [row.entity_type === "constructor" ? "constructor" : "", isFirstConstructor ? "first-constructor" : ""].filter(Boolean).join(" ");
-    const teamLabel = row.entity_type === "driver" ? `<small>${escapeHtml(row.team)}${row.key === "CAM" ? " | $6.0M provisional" : ""}</small>` : "";
+    const teamLabel = row.entity_type === "driver" ? `<small>${escapeHtml(row.team)}${row.price_model_type === "debut_single_race" ? " | Estimated thresholds" : ""}</small>` : "";
     const trendTooltip = trendTiers?.markup || "";
     const trendAria = trendTiers?.aria || "Price thresholds are unavailable for this asset.";
     return `<tr class="${rowClass}"><td class="position">${position}</td><td class="asset-name"><i style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong>${teamLabel}</span></td><td class="points points-cell" role="button" tabindex="0" aria-expanded="false" aria-label="${escapeHtml(`${row.name}. ${pointsBreakdown.aria}`)}">${format(row.expected_fantasy_points)}${pointsBreakdown.markup}</td><td>$${format(row.price_m)}m</td><td title="Projected points per $1M">${format(row.value_per_million, 2)}</td><td class="${trendClass} trend-cell" role="button" tabindex="0" aria-expanded="false" aria-label="${escapeHtml(`${row.name}. ${trendAria}`)}">${trendLabel}${trendTooltip}</td></tr>`;
@@ -682,19 +683,19 @@ function squadPriceWatch(rows, limitless = false) {
 function renderRaceContext() {
   if (!els.contextList) return;
   const trackLogic = "Interlagos combines flowing corners, long straights and uphill traction. Tyre management and balanced race pace matter; overtaking opportunities allow strategy flexibility.";
-  const priceWatch = "Brazil thresholds use verified Austin and Mexico scores with post-Mexico prices. All 32 established Mexico price changes matched our rolling model. Camara's price movement is withheld.";
+  const priceWatch = "Brazil thresholds use Austin and Mexico scores for established assets. Camara's thresholds are a low-confidence estimate based on Brazil points alone.";
   const afterPractice = state.modelMode === "After Practice";
   const postQuali = state.modelMode === "Post-Quali";
   const practiceContext = [
-    ["Model status", "Pre-weekend Brazil forecast using the five completed races through Mexico. No Brazil practice or qualifying is included. Confidence is low before on-track running."],
-    ["Tyres and surface", "C3 Hard, C4 Medium and C5 Soft. Sections between Turns 3-5 and 8-9 have been resurfaced. Grip and degradation effects remain uncertain until practice."],
-    ["Weather", "Weather and safety-car probabilities are circuit priors, not a live forecast. Rain and temperature changes can materially alter this outlook."],
-    ["Driver change", "Rafael Camara replaces Hirakawa at Haas. His $6.0M price is a provisional assumption: he is not listed in F1 Fantasy yet. No inherited driver history or price-change thresholds are used."],
-    ["Grid outlook", "No confirmed Brazil grid penalties are applied. Mexico's penalties do not carry over. Starting positions remain provisional."],
+    ["Model status", afterPractice ? "FP1 and FP2 are included. Norris led FP1; Antonelli led FP2. The model excludes deleted laps and does not transfer substitute times to regular drivers. Hulkenberg set no Friday time." : postQuali ? "Post-qualifying forecast." : "Pre-weekend Brazil forecast using five completed races through Mexico."],
+    ["Tyres and surface", "C3 Hard, C4 Medium and C5 Soft. Sections between Turns 3-5 and 8-9 have been resurfaced." + (afterPractice ? " Long-run pace compares laps on the same compound at similar tyre ages." : "")],
+    ["Weather", "Sunday race-weather assumptions are separate from Friday practice conditions. Rain and temperature changes can materially alter this outlook."],
+    ["Driver change", "Rafael Camara replaces Hirakawa at Haas. His $6.0M Fantasy price is confirmed. His estimated price thresholds do not inherit another driver's scores."],
+    ["Grid outlook", afterPractice || postQuali ? "Russell has a five-place grid penalty for an engine change. Starting positions remain provisional." : "Starting positions remain provisional."],
   ];
   if (!state.recommendation) {
     els.contextTitle.textContent = "Brazil context.";
-    els.contextIntro.textContent = `${state.modelMode} Brazil forecast using post-Mexico prices; Camara's price is provisional.`;
+    els.contextIntro.textContent = `${state.modelMode} Brazil forecast using post-Mexico prices.`;
     renderContextRows([
       ["Track logic", trackLogic],
       ["Constructor logic", postQuali ? "Constructor projections include completed qualifying scores and forecast race points for both drivers." : "Balance cooling, aerodynamic efficiency and traction with reliable points from both drivers. Practice will help test the current pecking order."],
