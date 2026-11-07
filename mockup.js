@@ -692,7 +692,7 @@ function renderRaceContext() {
     ["Tyres and surface", "C3 Hard, C4 Medium and C5 Soft. Sections between Turns 3-5 and 8-9 have been resurfaced." + (afterPractice ? " Long-run pace compares laps on the same compound at similar tyre ages." : "")],
     ["Weather", "Sunday race-weather assumptions are separate from Friday practice conditions. Rain and temperature changes can materially alter this outlook."],
     ["Driver change", "Rafael Camara replaces Hirakawa at Haas. His $6.0M Fantasy price is confirmed. His estimated price thresholds do not inherit another driver's scores."],
-    ["Grid outlook", afterPractice || postQuali ? "Grid penalties: Russell 5 places, Leclerc 10, Hamilton 10. Verstappen and Perez start in the back-of-grid group. Final grid pending." : "Starting positions remain provisional."],
+    ["Grid outlook", afterPractice || postQuali ? "Grid penalties: Russell 5 places, Leclerc 10. Hamilton, Verstappen and Perez start in the back-of-grid group, ordered by qualifying position. Final grid pending." : "Starting positions remain provisional."],
   ];
   if (!state.recommendation) {
     els.contextTitle.textContent = "Brazil context.";
