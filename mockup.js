@@ -687,18 +687,19 @@ function renderRaceContext() {
   const afterPractice = state.modelMode === "After Practice";
   const postQuali = state.modelMode === "Post-Quali";
   const practiceContext = [
-    ["Model status", afterPractice ? "FP1 and FP2 are included. Norris led FP1; Antonelli led FP2. The model excludes deleted laps and does not transfer substitute times to regular drivers. Hulkenberg set no Friday time." : postQuali ? "Post-qualifying forecast." : "Pre-weekend Brazil forecast using five completed races through Mexico."],
+    ["Model status", afterPractice ? "FP1, FP2 and FP3 are included, with deleted laps excluded. Verstappen led FP3 by 0.025s from Antonelli, with Norris third. Hulkenberg returned in FP3; Hamilton had limited running. Qualifying is not included." : postQuali ? "Post-qualifying forecast." : "Pre-weekend Brazil forecast using five completed races through Mexico."],
+    ["Practice outlook", "Mercedes and Antonelli were the Friday benchmark. McLaren reported a positive step from its updates. Different long-run compounds limit direct comparisons; no extra media-based pace bonus is added."],
     ["Tyres and surface", "C3 Hard, C4 Medium and C5 Soft. Sections between Turns 3-5 and 8-9 have been resurfaced." + (afterPractice ? " Long-run pace compares laps on the same compound at similar tyre ages." : "")],
     ["Weather", "Sunday race-weather assumptions are separate from Friday practice conditions. Rain and temperature changes can materially alter this outlook."],
     ["Driver change", "Rafael Camara replaces Hirakawa at Haas. His $6.0M Fantasy price is confirmed. His estimated price thresholds do not inherit another driver's scores."],
-    ["Grid outlook", afterPractice || postQuali ? "Russell has a five-place grid penalty for an engine change. Starting positions remain provisional." : "Starting positions remain provisional."],
+    ["Grid outlook", afterPractice || postQuali ? "Confirmed: Russell 5 places, Leclerc 10, Verstappen 30. Expected from the FIA component report: Hamilton 10, Perez 30; individual decisions pending. The model places the 30-place penalties in the back group. Final grid pending. Camara has a reprimand, not a grid drop." : "Starting positions remain provisional."],
   ];
   if (!state.recommendation) {
     els.contextTitle.textContent = "Brazil context.";
     els.contextIntro.textContent = `${state.modelMode} Brazil forecast using post-Mexico prices.`;
     renderContextRows([
       ["Track logic", trackLogic],
-      ["Constructor logic", postQuali ? "Constructor projections include completed qualifying scores and forecast race points for both drivers." : "Balance cooling, aerodynamic efficiency and traction with reliable points from both drivers. Practice will help test the current pecking order."],
+      ["Constructor logic", postQuali ? "Constructor projections include completed qualifying scores and forecast race points for both drivers." : afterPractice ? "Constructor projections combine practice-informed forecasts for both drivers with the penalty-adjusted starting outlook." : "Balance cooling, aerodynamic efficiency and traction with reliable points from both drivers."],
       ...practiceContext,
       ["Chip plan", state.modelMode === "Post-Quali" ? "The weekend deadline has passed. New weekend chips cannot be activated. Final Fix, if eligible, requires a separate Sunday-only comparison." : "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
       ["Price watch", priceWatch],
