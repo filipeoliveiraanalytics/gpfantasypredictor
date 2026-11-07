@@ -1,0 +1,1206 @@
+const DATA_ROOT = "data";
+const TEAM_STORAGE_KEY = "gp-fantasy-notebook-team-v1";
+const ANALYTICS_CONSENT_KEY = "gp_fantasy_predictor_analytics_consent";
+const SITE_VISIT_KEY = "gp_fantasy_predictor_visited_v1";
+const SITE_RATING_KEY = "gp_fantasy_predictor_site_rating_v1";
+const SITE_RATING_DISMISSED_KEY = "gp_fantasy_predictor_site_rating_dismissed_v1";
+
+const teamColors = {
+  Mercedes: "#20a69b", McLaren: "#ee781d", Ferrari: "#d52d36", "Red Bull Racing": "#20386f",
+  "Racing Bulls": "#224caa", Williams: "#3277cc", Audi: "#b8b7b4", Cadillac: "#77716d",
+  Alpine: "#e56f8f", "Aston Martin": "#007768", "Haas F1 Team": "#9d9d9d",
+};
+
+const state = {
+  projections: [], audits: [], auditRows: [], priceThresholds: [],
+  dataReady: false, modelMode: "Pre-Weekend",
+  currentDrivers: [],
+  currentConstructors: [],
+  pickerType: "driver", pickerSelection: new Set(),
+  recommendedRows: [], recommendation: null, lineupView: "recommended",
+  ratingEligible: false, ratingTimer: null, selectedSiteRating: null,
+};
+
+const els = {
+  budget: document.querySelector("#budget-input"),
+  transfers: document.querySelector("#transfers-input"),
+  budgetWarning: document.querySelector("#budget-warning"),
+  teamStatus: document.querySelector("#team-status"),
+  workspace: document.querySelector("#workspace"),
+  mobileRaceCta: document.querySelector("#mobile-race-cta"),
+  strategy: document.querySelector("#strategy-input"),
+  chips: [...document.querySelectorAll(".chip-settings input")],
+  chipCount: document.querySelector("#chip-count"),
+  drivers: document.querySelector("#current-drivers"),
+  constructors: document.querySelector("#current-constructors"),
+  optimize: document.querySelector("#optimize-button"),
+  teamPanel: document.querySelector("#team-panel"),
+  mobileTeamCta: document.querySelector("#mobile-team-cta"),
+  mobileOptimize: document.querySelector("#mobile-optimize"),
+  mobileTeamCopy: document.querySelector("#mobile-team-copy"),
+  mobileTeamCollapse: document.querySelector("#mobile-team-collapse"),
+  saveTeam: document.querySelector("#save-team"),
+  rows: document.querySelector("#recommended-rows"),
+  summary: document.querySelector("#recommendation-summary"),
+  viewControls: [...document.querySelectorAll("[data-lineup-view]")],
+  contextTitle: document.querySelector("#context-title"),
+  contextIntro: document.querySelector("#context-intro"),
+  contextList: document.querySelector("#context-list"),
+  scheduleHeading: document.querySelector("#schedule-heading"),
+  scheduleTimes: [...document.querySelectorAll("[data-session-start]")],
+  stageCopy: document.querySelector("#stage-copy"),
+  topbarStage: document.querySelector("#topbar-stage"),
+  stages: [...document.querySelectorAll(".stage[data-stage]")],
+  lineupHeading: document.querySelector("#lineup-heading"),
+  auditSelect: document.querySelector("#audit-select"),
+  driverMae: document.querySelector("#driver-mae"),
+  driverMaeDetail: document.querySelector("#driver-mae-detail"),
+  constructorMae: document.querySelector("#constructor-mae"),
+  constructorMaeDetail: document.querySelector("#constructor-mae-detail"),
+  shifts: document.querySelector("#biggest-shifts"),
+  openAudit: document.querySelector("#open-audit"),
+  auditTeaserCopy: document.querySelector("#audit-teaser-copy"),
+  auditButtonLabel: document.querySelector("#audit-button-label"),
+  pickerDialog: document.querySelector("#picker-dialog"),
+  pickerTitle: document.querySelector("#picker-title"),
+  pickerHelp: document.querySelector("#picker-help"),
+  pickerSearch: document.querySelector("#picker-search"),
+  pickerOptions: document.querySelector("#picker-options"),
+  applyPicker: document.querySelector("#apply-picker"),
+  auditDialog: document.querySelector("#audit-dialog"),
+  auditFlag: document.querySelector("#audit-flag"),
+  auditTitle: document.querySelector("#audit-title"),
+  auditNote: document.querySelector("#audit-note"),
+  auditDriverRows: document.querySelector("#audit-driver-rows"),
+  auditConstructorRows: document.querySelector("#audit-constructor-rows"),
+  cookieBanner: document.querySelector("#cookie-banner"),
+  analyticsPreference: document.querySelector("#analytics-preference"),
+  confirmAnalytics: document.querySelector("#confirm-analytics"),
+  ratingPrompt: document.querySelector("#rating-prompt"),
+  closeRatingPrompt: document.querySelector("#close-rating-prompt"),
+  ratingButtons: [...document.querySelectorAll("[data-site-rating]")],
+  ratingFeedback: document.querySelector("#site-rating-feedback"),
+  submitSiteRating: document.querySelector("#submit-site-rating"),
+  ratingStatus: document.querySelector("#rating-status"),
+};
+
+function loadAnalytics() {
+  if (!window.GA_MEASUREMENT_ID || window.gtag) return;
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function gtag() { window.dataLayer.push(arguments); };
+  window.gtag("js", new Date());
+  window.gtag("config", window.GA_MEASUREMENT_ID, { anonymize_ip: true });
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${window.GA_MEASUREMENT_ID}`;
+  document.head.appendChild(script);
+}
+
+function trackEvent(name, parameters = {}) {
+  if (!window.gtag) return;
+  window.gtag("event", name, parameters);
+}
+
+function budgetRange(value) {
+  const budget = number(value);
+  if (budget < 75) return "under_75m";
+  if (budget < 100) return "75_to_99m";
+  if (budget < 115) return "100_to_114m";
+  return "115m_plus";
+}
+
+function initialiseAnalyticsConsent() {
+  const consent = window.localStorage.getItem(ANALYTICS_CONSENT_KEY);
+  if (consent === "accepted") {
+    loadAnalytics();
+  } else if (consent !== "declined") {
+    els.cookieBanner.hidden = false;
+    document.body.classList.add("has-cookie-dialog");
+  }
+}
+
+function confirmAnalyticsConsent() {
+  const accepted = els.analyticsPreference.checked;
+  window.localStorage.setItem(ANALYTICS_CONSENT_KEY, accepted ? "accepted" : "declined");
+  els.cookieBanner.hidden = true;
+  document.body.classList.remove("has-cookie-dialog");
+  if (accepted) {
+    loadAnalytics();
+    trackEvent("analytics_consent", { choice: "accepted" });
+    scheduleRatingPrompt();
+  }
+}
+
+function initialiseRatingPrompt() {
+  const returningVisitor = window.localStorage.getItem(SITE_VISIT_KEY) === "true"
+    || window.localStorage.getItem(ANALYTICS_CONSENT_KEY) === "accepted";
+  const alreadyResponded = window.localStorage.getItem(SITE_RATING_KEY)
+    || window.localStorage.getItem(SITE_RATING_DISMISSED_KEY);
+  window.localStorage.setItem(SITE_VISIT_KEY, "true");
+  state.ratingEligible = returningVisitor && !alreadyResponded;
+  scheduleRatingPrompt();
+}
+
+function scheduleRatingPrompt() {
+  if (!state.dataReady || !state.ratingEligible || window.localStorage.getItem(ANALYTICS_CONSENT_KEY) !== "accepted") return;
+  if (state.ratingTimer || !els.ratingPrompt.hidden) return;
+  state.ratingTimer = window.setTimeout(() => {
+    state.ratingTimer = null;
+    if (!els.pickerDialog.open && !els.auditDialog.open && els.cookieBanner.hidden) {
+      els.ratingPrompt.hidden = false;
+      trackEvent("site_rating_prompted");
+    }
+  }, 4500);
+}
+
+function dismissRatingPrompt() {
+  if (state.ratingTimer) window.clearTimeout(state.ratingTimer);
+  state.ratingTimer = null;
+  state.ratingEligible = false;
+  els.ratingPrompt.hidden = true;
+  if (!window.localStorage.getItem(SITE_RATING_KEY)) {
+    window.localStorage.setItem(SITE_RATING_DISMISSED_KEY, "true");
+    trackEvent("site_rating_dismissed");
+  }
+}
+
+function selectSiteRating(rating) {
+  if (window.localStorage.getItem(SITE_RATING_KEY)) return;
+  state.selectedSiteRating = rating;
+  els.ratingButtons.forEach((button) => {
+    const selected = Number(button.dataset.siteRating) === rating;
+    button.setAttribute("aria-pressed", String(selected));
+    button.disabled = true;
+  });
+  state.ratingEligible = false;
+  window.localStorage.setItem(SITE_RATING_KEY, String(rating));
+  trackEvent("site_rating_submitted", { rating });
+  els.ratingStatus.hidden = false;
+  els.submitSiteRating.disabled = !els.ratingFeedback.value.trim();
+}
+
+function submitSiteRating() {
+  const rating = state.selectedSiteRating;
+  const feedback = els.ratingFeedback.value.trim();
+  if (!rating || !feedback) return;
+  els.ratingPrompt.hidden = true;
+  trackEvent("site_feedback_email_opened", { rating });
+  const subject = "GP Fantasy Predictor feedback";
+  const body = `Rating: ${rating}/5\n\nFeedback:\n${feedback}`;
+  window.location.href = `mailto:filipe@filipeoliveiraanalytics.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let cell = "";
+  let row = [];
+  let quoted = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    const next = text[index + 1];
+    if (character === '"' && next === '"') {
+      cell += '"';
+      index += 1;
+    } else if (character === '"') {
+      quoted = !quoted;
+    } else if (character === "," && !quoted) {
+      row.push(cell);
+      cell = "";
+    } else if ((character === "\n" || character === "\r") && !quoted) {
+      if (character === "\r" && next === "\n") index += 1;
+      row.push(cell);
+      if (row.some((value) => value.trim())) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += character;
+    }
+  }
+  if (cell || row.length) rows.push([...row, cell]);
+  const [headers, ...values] = rows;
+  return values.map((entry) => Object.fromEntries(headers.map((header, index) => [header, entry[index] || ""])));
+}
+
+function number(value, fallback = 0) {
+  const parsed = Number(String(value ?? "").replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function format(value, decimals = 1) {
+  return number(value).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function rowsFor(type) {
+  return state.projections.filter((row) => row.entity_type === type && String(row.is_available).toUpperCase() !== "FALSE");
+}
+
+function rowForKey(key) {
+  return state.projections.find((row) => row.key === key);
+}
+
+function selectedRows(type) {
+  const keys = type === "driver" ? state.currentDrivers : state.currentConstructors;
+  return keys.map(rowForKey).filter(Boolean);
+}
+
+function hasCompleteTeam() {
+  return state.currentDrivers.length === 5 && state.currentConstructors.length === 2;
+}
+
+function updateBudgetWarning() {
+  if (!els.budgetWarning) return;
+  const budget = number(els.budget.value);
+  const rows = [...selectedRows("driver"), ...selectedRows("constructor")];
+  if (!hasCompleteTeam() || rows.length !== 7 || budget <= 0) {
+    els.budgetWarning.hidden = true;
+    els.budgetWarning.textContent = "";
+    return;
+  }
+
+  const cost = rows.reduce((total, row) => total + number(row.price_m), 0);
+  const overBudget = cost - budget;
+  if (overBudget <= 0.01) {
+    els.budgetWarning.hidden = true;
+    els.budgetWarning.textContent = "";
+    return;
+  }
+
+  els.budgetWarning.hidden = false;
+  els.budgetWarning.textContent = `Current team costs $${format(cost)}m, $${format(overBudget)}m over budget.`;
+}
+
+function swatch(row) {
+  return `<i style="background:${teamColors[row.team] || "#555"}"></i>`;
+}
+
+function priceTrendTiers(row) {
+  if (row.price_model_type === "returning_asset_reset_history") {
+    return {
+      aria: row.price_model_notes,
+      markup: `<span class="trend-tooltip" role="tooltip"><b>Returning driver: provisional</b><span><em>History</em><i>Baku actual + current forecast</i></span><span><em>Method</em><i>Assumed reset at Baku</i></span><span><em>Confidence</em><i>Low; not officially confirmed</i></span></span>`,
+    };
+  }
+
+  if (row.price_model_type === "returning_asset_active_history") {
+    const recentPoints = format(number(row.price_last_two_points), 0);
+    return {
+      aria: `Returning asset price outlook. It uses ${recentPoints} points from the two most recent active rounds and excludes inactive rounds. Low confidence until F1 Fantasy confirms the calculation.`,
+      markup: `<span class="trend-tooltip" role="tooltip"><b>Returning asset price outlook</b><span><em>History</em><i>${recentPoints} pts from two active rounds</i></span><span><em>Method</em><i>Inactive rounds excluded</i></span><span><em>Confidence</em><i>Low until official confirmation</i></span></span>`,
+    };
+  }
+  const normalizeGp = (value) => String(value || "").replace(/\s+Grand Prix\s*$/i, "").trim().toLowerCase();
+  const gpName = normalizeGp(row.next_gp);
+  const threshold = state.priceThresholds.find((entry) => normalizeGp(entry.source_gp) === gpName && entry.entity_type === row.entity_type && entry.key === row.key);
+  if (!threshold) return null;
+  const title = threshold.method === "debut_single_race" ? "Estimated first-race price thresholds" : "Price change after this GP";
+
+  const premiumAsset = number(row.price_m) >= 18.5;
+  const tiers = premiumAsset ? { good: 0.1, great: 0.3, poor: 0.1 } : { good: 0.2, great: 0.6, poor: 0.2 };
+  const whole = (value) => format(value, 0);
+  const present = (key) => String(threshold[key] ?? "").trim() !== "";
+  const labels = [];
+  if (present("great_min")) labels.push([`+$${format(tiers.great)}M`, `>= ${whole(threshold.great_min)} pts`]);
+  if (present("good_min")) labels.push([`+$${format(tiers.good)}M`, `${whole(threshold.good_min)} to ${whole(threshold.good_max)} pts`]);
+  if (present("zero_min")) labels.push(["$0.0M", `>= ${whole(threshold.zero_min)} pts`]);
+  if (present("zero_max")) labels.push(["$0.0M", `<= ${whole(threshold.zero_max)} pts`]);
+  if (present("poor_min")) labels.push([`-$${format(tiers.poor)}M`, `${whole(threshold.poor_min)} to ${whole(threshold.poor_max)} pts`]);
+  if (present("terrible_max")) labels.push([`-$${format(tiers.great)}M`, `<= ${whole(threshold.terrible_max)} pts`]);
+  return {
+    aria: `${title}. ${labels.map(([change, range]) => `${change}: ${range}`).join(". ")}.`,
+    markup: `<span class="trend-tooltip" role="tooltip"><b>${title}</b>${labels.map(([change, range]) => `<span><em>${change}</em><i>${range}</i></span>`).join("")}</span>`,
+  };
+}
+
+function projectedPointsBreakdown(row) {
+  const reportedCompleted = row.sprint_scoring_status === "completed_user_reported_total";
+  const completedSprint = (row.sprint_scoring_status || "").startsWith("completed_");
+  const pendingSprintOvertakes = row.sprint_scoring_status === "completed_pending_overtakes";
+  const components = [
+    ["Qualifying", row.qualifying_points_est],
+    ["Race finish", row.race_finish_points_est],
+    ["Position change", row.position_change_points_est],
+    ["Overtakes", row.overtake_points_est],
+    ["Fastest lap", row.fastest_lap_points_est],
+    ["Driver of the Day", row.dotd_points_est],
+    ["DNF risk", row.dnf_penalty_points_est],
+  ];
+  if (row.entity_type === "constructor") {
+    components.push(["Constructor bonus", row.constructor_bonus_points_est], ["Pit stops", row.pit_stop_points_est]);
+  }
+  components.push(
+    ["Sprint finish", row.sprint_finish_points_est],
+    ["Sprint position change", row.sprint_position_change_points_est],
+    ["Sprint overtakes", row.sprint_overtake_points_est],
+    ["Sprint fastest lap", row.sprint_fastest_lap_points_est],
+    [completedSprint ? "Sprint NC penalty (actual)" : "Sprint DNF risk", row.sprint_dnf_penalty_points_est],
+  );
+  if (reportedCompleted) {
+    for (let index = components.length - 1; index >= 0; index -= 1) {
+      if (components[index][0] === "Qualifying" || components[index][0] === "Constructor bonus" || components[index][0].startsWith("Sprint")) components.splice(index, 1);
+    }
+    components.unshift(["Qualifying + Sprint (reported)", row.completed_sessions_reported_total]);
+  } else {
+    components.push(["Reported scoring adjustment", row.completed_sessions_adjustment_points]);
+  }
+  const scoringNote = reportedCompleted ? "Combined total reported from F1 Fantasy; component breakdown not reconciled." : pendingSprintOvertakes ? "Sprint overtake bonuses pending verification; excluded from total." : "";
+  const entries = components.filter(([, value]) => Math.abs(number(value)) >= 0.05);
+  const signed = (value) => `${number(value) > 0 ? "+" : ""}${format(value)} pts`;
+  return {
+    aria: `Projected points breakdown. ${entries.map(([label, value]) => `${label}: ${signed(value)}`).join(". ")}. ${scoringNote}`,
+    markup: `<span class="points-tooltip" role="tooltip"><b>Projected points</b>${entries.map(([label, value]) => `<span><em>${escapeHtml(label)}</em><i>${signed(value)}</i></span>`).join("")}${scoringNote ? `<small>${scoringNote}</small>` : ""}</span>`,
+  };
+}
+
+function renderCurrentTeam() {
+  const renderList = (type) => {
+    const rows = selectedRows(type);
+    if (!rows.length) {
+      const count = type === "driver" ? "5 drivers" : "2 constructors";
+      return `<li class="team-empty">Choose ${count}</li>`;
+    }
+    return rows
+      .map((row) => `<li>${swatch(row)}<span>${escapeHtml(row.name)}${type === "driver" ? `<small>${escapeHtml(row.team)}</small>` : ""}</span><b>$${format(row.price_m)}m</b></li>`)
+      .join("");
+  };
+  els.drivers.innerHTML = renderList("driver");
+  els.constructors.innerHTML = renderList("constructor");
+  updateBudgetWarning();
+  renderMobileTeamState();
+  if (!state.recommendation) renderLineupTable();
+}
+
+function renderMobileTeamState() {
+  if (!els.mobileTeamCopy) return;
+  const drivers = state.currentDrivers.length;
+  const constructors = state.currentConstructors.length;
+  const teamReady = hasCompleteTeam();
+  const cost = [...selectedRows("driver"), ...selectedRows("constructor")]
+    .reduce((total, row) => total + number(row.price_m), 0);
+  els.mobileTeamCopy.textContent = teamReady
+    ? `$${format(cost)}m current squad · ${Math.max(0, Math.floor(number(els.transfers.value)))} free transfers`
+    : `${drivers}/5 drivers · ${constructors}/2 constructors selected`;
+  els.mobileTeamCta.textContent = els.teamPanel.classList.contains("mobile-team-expanded") ? "Lineup" : "Team";
+  els.mobileOptimize.disabled = !teamReady || number(els.budget.value) <= 0 || els.transfers.value === "" || !state.dataReady;
+}
+
+function openMobileTeam() {
+  els.teamPanel.classList.add("mobile-team-expanded");
+  els.workspace.classList.add("mobile-editing");
+  els.mobileTeamCta.setAttribute("aria-expanded", "true");
+  renderMobileTeamState();
+  els.teamPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  trackEvent("mobile_team_opened");
+}
+
+function closeMobileTeam() {
+  els.teamPanel.classList.remove("mobile-team-expanded");
+  els.workspace.classList.remove("mobile-editing");
+  els.mobileTeamCta.setAttribute("aria-expanded", "false");
+  renderMobileTeamState();
+  if (window.matchMedia("(max-width: 820px)").matches) {
+    els.lineupHeading.setAttribute("tabindex", "-1");
+    els.lineupHeading.focus({ preventScroll: true });
+    els.lineupHeading.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function renderChipCount() {
+  const available = els.chips.filter((chip) => chip.checked).length;
+  els.chipCount.textContent = `${available} active`;
+}
+
+function restoreSavedTeam() {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(TEAM_STORAGE_KEY) || "null");
+    if (!saved) return false;
+    const availableKeys = new Set(state.projections.map((row) => row.key));
+    const hasValidLineup = Array.isArray(saved.drivers) && saved.drivers.length === 5
+      && Array.isArray(saved.constructors) && saved.constructors.length === 2
+      && [...saved.drivers, ...saved.constructors].every((key) => availableKeys.has(key));
+    if (!hasValidLineup) return false;
+    state.currentDrivers = saved.drivers;
+    state.currentConstructors = saved.constructors;
+    if (Number.isFinite(Number(saved.budget)) && Number(saved.budget) > 0) els.budget.value = saved.budget;
+    if (Number.isInteger(Number(saved.transfers)) && Number(saved.transfers) >= 0) els.transfers.value = saved.transfers;
+    if ([...els.strategy.options].some((option) => option.value === saved.strategy)) els.strategy.value = saved.strategy;
+    if (Array.isArray(saved.chips)) els.chips.forEach((chip) => { chip.checked = saved.chips.includes(chip.value); });
+    els.saveTeam.checked = true;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function saveTeam({ announce = true } = {}) {
+  const saved = {
+    drivers: state.currentDrivers,
+    constructors: state.currentConstructors,
+    budget: els.budget.value,
+    transfers: els.transfers.value,
+    strategy: els.strategy.value,
+    chips: els.chips.filter((chip) => chip.checked).map((chip) => chip.value),
+  };
+  try {
+    window.localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(saved));
+    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the Brazil GP.";
+  } catch {
+    if (announce) els.stageCopy.textContent = "This browser could not save the team.";
+  }
+}
+
+function persistTeamIfEnabled() {
+  if (els.saveTeam.checked) saveTeam({ announce: false });
+}
+
+function auditKey(audit) {
+  return `${audit.gp_key}|${audit.mode}|${audit.status}`;
+}
+
+function activeAudit() {
+  const stage = document.querySelector('input[name="audit-stage"]:checked')?.value;
+  return state.audits.find((audit) => audit.gp_key === els.auditSelect.value && audit.mode === stage)
+    || state.audits.find((audit) => audit.gp_key === els.auditSelect.value) || state.audits[0];
+}
+
+function auditDelta(row) {
+  return number(row.actual_points) - number(row.estimated_points);
+}
+
+function formatLocalSession(isoDate) {
+  const session = new Date(isoDate);
+  const dateParts = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "2-digit", weekday: "short" })
+    .formatToParts(session)
+    .reduce((parts, part) => ({ ...parts, [part.type]: part.value }), {});
+  const time = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(session);
+  return `${dateParts.day}/${dateParts.month} (${dateParts.weekday}) · ${time}`;
+}
+
+function renderSchedule() {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  els.scheduleHeading.title = `Times shown in ${timeZone.replace(/_/g, " ")}`;
+  els.scheduleTimes.forEach((time) => {
+    const value = time.dataset.sessionStart;
+    time.dateTime = value;
+    time.textContent = formatLocalSession(value);
+  });
+}
+
+function auditRowsFor(audit) {
+  return state.auditRows.filter((row) => row.gp_key === audit.gp_key && row.mode === audit.mode);
+}
+
+function metric(value, element, detail) {
+  element.innerHTML = `${format(value)} <small>pts</small>`;
+  detail.textContent = "DNF-adjusted scoring";
+}
+
+function renderPredictionStage(mode) {
+  const selectedStage = els.stages.find((stage) => stage.dataset.stage === mode) || els.stages[0];
+  els.topbarStage.textContent = selectedStage.dataset.stage;
+  els.stages.forEach((stage, index) => {
+    const selected = stage === selectedStage;
+    stage.classList.toggle("selected", selected);
+    if (selected) stage.setAttribute("aria-current", "step");
+    else stage.removeAttribute("aria-current");
+    stage.querySelector(".stage-mark").textContent = selected ? "✓" : String(index + 1);
+  });
+}
+
+function renderAudit() {
+  const audit = activeAudit();
+  if (!audit) return;
+  metric(audit.driver_mean_absolute_error, els.driverMae, els.driverMaeDetail);
+  metric(audit.constructor_mean_absolute_error, els.constructorMae, els.constructorMaeDetail);
+  const shifts = auditRowsFor(audit)
+    .sort((left, right) => Math.abs(auditDelta(right)) - Math.abs(auditDelta(left)))
+    .slice(0, 4);
+  els.shifts.innerHTML = shifts.map((row) => {
+    const delta = auditDelta(row);
+    return `<li><span>${escapeHtml(row.name)}<small>${escapeHtml(row.team || "Constructor")}</small></span><b class="${delta >= 0 ? "up" : "down"}">${delta >= 0 ? "+" : ""}${format(delta)}</b></li>`;
+  }).join("");
+}
+
+function populateAuditSelect() {
+  const stageOrder = { "Pre-Weekend": 0, "After Practice": 1, "Post-Quali": 2 };
+  const audits = [...state.audits].sort((left, right) =>
+    right.scored_at.localeCompare(left.scored_at) || stageOrder[left.mode] - stageOrder[right.mode]
+  );
+  const gps = [...new Map(audits.map((audit) => [audit.gp_key, audit])).values()];
+  els.auditSelect.innerHTML = gps.map((audit) =>
+    `<option value="${escapeHtml(audit.gp_key)}">${escapeHtml(audit.gp_display)}</option>`
+  ).join("");
+  const preferred = audits.find((audit) => audit.gp_key === gps[0].gp_key && audit.mode === "Post-Quali") || audits[0];
+  els.auditSelect.value = preferred.gp_key;
+  renderAuditStages(preferred.mode);
+  els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Mexico.";
+  els.auditButtonLabel.textContent = "Browse forecast reviews";
+  renderAudit();
+}
+
+function renderAuditStages(preferredMode) {
+  const modes = ["Pre-Weekend", "After Practice", "Post-Quali"];
+  const available = new Set(state.audits.filter((audit) => audit.gp_key === els.auditSelect.value).map((audit) => audit.mode));
+  const selected = available.has(preferredMode) ? preferredMode : modes.find((mode) => available.has(mode));
+  document.querySelector("#audit-stage-options").innerHTML = modes.map((mode) =>
+    `<label><input type="radio" name="audit-stage" value="${mode}" ${mode === selected ? "checked" : ""} ${available.has(mode) ? "" : "disabled"}><span>${mode}</span></label>`
+  ).join("");
+}
+
+function openPicker(type) {
+  state.pickerType = type;
+  state.pickerSelection = new Set(type === "driver" ? state.currentDrivers : state.currentConstructors);
+  els.pickerTitle.textContent = type === "driver" ? "Choose current drivers" : "Choose current constructors";
+  els.pickerSearch.value = "";
+  els.pickerSearch.placeholder = type === "driver" ? "Driver or team" : "Constructor";
+  renderPickerOptions();
+  els.pickerDialog.showModal();
+  trackEvent("team_picker_opened", { asset_type: type });
+}
+
+function renderPickerOptions() {
+  const maximum = state.pickerType === "driver" ? 5 : 2;
+  const query = els.pickerSearch.value.trim().toLowerCase();
+  const scrollTop = els.pickerOptions.scrollTop;
+  els.pickerHelp.textContent = `${state.pickerSelection.size} of ${maximum} selected`;
+  els.applyPicker.disabled = state.pickerSelection.size !== maximum;
+  els.pickerOptions.innerHTML = rowsFor(state.pickerType)
+    .filter((row) => `${row.name} ${row.team}`.toLowerCase().includes(query))
+    .sort((left, right) => left.name.localeCompare(right.name))
+    .map((row) => {
+      const selected = state.pickerSelection.has(row.key);
+      return `<button class="picker-option ${selected ? "selected" : ""}" type="button" aria-pressed="${selected}" data-picker-key="${escapeHtml(row.key)}"><i class="team-swatch" style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.team)} | $${format(row.price_m)}m</small></span><b>${selected ? "Selected" : ""}</b></button>`;
+    }).join("") || '<p class="picker-no-results">No matching assets.</p>';
+  els.pickerOptions.scrollTop = scrollTop;
+}
+
+function applyPicker() {
+  const maximum = state.pickerType === "driver" ? 5 : 2;
+  if (state.pickerSelection.size !== maximum) {
+    els.pickerHelp.textContent = `Select exactly ${maximum}; you currently have ${state.pickerSelection.size}.`;
+    return;
+  }
+  if (state.pickerType === "driver") state.currentDrivers = [...state.pickerSelection];
+  else state.currentConstructors = [...state.pickerSelection];
+  renderCurrentTeam();
+  renderRaceContext();
+  persistTeamIfEnabled();
+  els.pickerDialog.close();
+  els.stageCopy.textContent = "Current team updated. Run the optimizer to refresh the recommendation.";
+  trackEvent("team_selection_applied", { asset_type: state.pickerType, selection_size: maximum });
+}
+
+function sortedAssets(compare) {
+  return ["driver", "constructor"].flatMap((type) => rowsFor(type).sort(compare));
+}
+
+function rowsForLineupView() {
+  if (!state.recommendation) return [];
+  if (state.lineupView === "recommended") return state.recommendedRows;
+  return sortedAssets((left, right) => number(right.expected_fantasy_points) - number(left.expected_fantasy_points));
+}
+
+function emptyLineupMarkup() {
+  const ready = hasCompleteTeam() && number(els.budget.value) > 0 && els.transfers.value !== "";
+  const message = ready ? "Your team is ready." : "No lineup yet.";
+  const label = ready ? "Optimize Team" : "Set up team";
+  return `<tr class="lineup-empty"><td colspan="6"><p>${message}</p><button type="button" class="primary" data-setup-team data-lineup-action="${ready ? "optimize" : "setup"}">${label} <span aria-hidden="true">→</span></button></td></tr>`;
+}
+
+function renderLineupTable() {
+  const rows = rowsForLineupView();
+  els.viewControls.forEach((button) => {
+    const selected = button.dataset.lineupView === state.lineupView;
+    button.disabled = !state.recommendation;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-selected", String(selected));
+  });
+  if (!rows.length) {
+    els.rows.innerHTML = emptyLineupMarkup();
+    return;
+  }
+  els.rows.innerHTML = rows.map((row, index) => {
+    const delta = number(row.projected_price_delta_m);
+    const hasMaterialPriceMove = Math.abs(delta) >= 0.05;
+    const trendClass = hasMaterialPriceMove ? (delta > 0 ? "up" : "down") : "neutral";
+    const trendLabel = hasMaterialPriceMove ? `${delta > 0 ? "+" : ""}${format(delta)}m` : "--";
+    const trendTiers = priceTrendTiers(row);
+    const pointsBreakdown = projectedPointsBreakdown(row);
+    const position = rows.slice(0, index).filter((candidate) => candidate.entity_type === row.entity_type).length + 1;
+    const isFirstConstructor = row.entity_type === "constructor" && !rows.slice(0, index).some((candidate) => candidate.entity_type === "constructor");
+    const rowClass = [row.entity_type === "constructor" ? "constructor" : "", isFirstConstructor ? "first-constructor" : ""].filter(Boolean).join(" ");
+    const teamLabel = row.entity_type === "driver" ? `<small>${escapeHtml(row.team)}${row.price_model_type === "debut_single_race" ? " | Estimated thresholds" : ""}</small>` : "";
+    const trendTooltip = trendTiers?.markup || "";
+    const trendAria = trendTiers?.aria || "Price thresholds are unavailable for this asset.";
+    return `<tr class="${rowClass}"><td class="position">${position}</td><td class="asset-name"><i style="--team-color:${teamColors[row.team] || "#555"}"></i><span><strong>${escapeHtml(row.name)}</strong>${teamLabel}</span></td><td class="points points-cell" role="button" tabindex="0" aria-expanded="false" aria-label="${escapeHtml(`${row.name}. ${pointsBreakdown.aria}`)}">${format(row.expected_fantasy_points)}${pointsBreakdown.markup}</td><td>$${format(row.price_m)}m</td><td title="Projected points per $1M">${format(row.value_per_million, 2)}</td><td class="${trendClass} trend-cell" role="button" tabindex="0" aria-expanded="false" aria-label="${escapeHtml(`${row.name}. ${trendAria}`)}">${trendLabel}${trendTooltip}</td></tr>`;
+  }).join("");
+}
+
+function chipSummary(chip) {
+  return chip ? chip.replace(/^Use\s+/, "").split("|")[0].trim() : "No chip";
+}
+
+function nameList(rows) {
+  const names = rows.map((row) => row.name);
+  if (names.length < 2) return names[0] || "the current lineup";
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")}, and ${names.at(-1)}`;
+}
+
+function renderContextRows(rows) {
+  els.contextList.innerHTML = rows.map(([label, detail]) => {
+    const transferDetail = typeof detail === "object";
+    const content = transferDetail
+      ? `<dd class="transfer-detail"><span class="transfer-out"><b>Out</b>${escapeHtml(detail.out)}</span><span class="transfer-in"><b>In</b>${escapeHtml(detail.in)}</span></dd>`
+      : `<dd>${escapeHtml(detail)}</dd>`;
+    return `<div><dt>${escapeHtml(label)}</dt>${content}</div>`;
+  }).join("");
+}
+
+function squadPriceWatch(rows, limitless = false) {
+  if (limitless) return "Limitless picks are temporary, so their price rises will not build your retained squad's value.";
+  const movers = rows.filter((row) => String(row.projected_price_delta_m ?? "").trim() !== "");
+  const rises = movers.filter((row) => number(row.projected_price_delta_m) > 0)
+    .sort((a, b) => number(b.projected_price_delta_m) - number(a.projected_price_delta_m));
+  const falls = movers.filter((row) => number(row.projected_price_delta_m) < 0)
+    .sort((a, b) => number(a.projected_price_delta_m) - number(b.projected_price_delta_m));
+  const describe = (row) => `${row.name} (${number(row.projected_price_delta_m) > 0 ? "+" : "-"}$${format(Math.abs(number(row.projected_price_delta_m)))}M)`;
+  const parts = [];
+  if (rises.length) parts.push(`Largest projected rises: ${rises.slice(0, 3).map(describe).join(", ")}.`);
+  if (falls.length) parts.push(`Watch for falls: ${falls.map(describe).join(", ")}.`);
+  if (!parts.length) return movers.length ? "No price moves are projected for this squad at the current points estimates." : "Price projections are not available for this squad yet.";
+  return `${parts.join(" ")} These depend on the points scored this weekend.`;
+}
+
+function renderRaceContext() {
+  if (!els.contextList) return;
+  const trackLogic = "Interlagos combines flowing corners, long straights and uphill traction. Tyre management and balanced race pace matter; overtaking opportunities allow strategy flexibility.";
+  const priceWatch = "Brazil thresholds use Austin and Mexico scores for established assets. Camara's thresholds are a low-confidence estimate based on Brazil points alone.";
+  const afterPractice = state.modelMode === "After Practice";
+  const postQuali = state.modelMode === "Post-Quali";
+  const practiceContext = [
+    ["Model status", afterPractice ? "FP1, FP2 and FP3 are included, with deleted laps excluded. Verstappen led FP3 by 0.025s from Antonelli, with Norris third. Hulkenberg returned in FP3; Hamilton had limited running. Qualifying is not included." : postQuali ? "Post-qualifying forecast." : "Pre-weekend Brazil forecast using five completed races through Mexico."],
+    ["Practice outlook", "Mercedes and Antonelli were the Friday benchmark. McLaren reported a positive step from its updates. Different long-run compounds limit direct comparisons; no extra media-based pace bonus is added."],
+    ["Tyres and surface", "C3 Hard, C4 Medium and C5 Soft. Sections between Turns 3-5 and 8-9 have been resurfaced." + (afterPractice ? " Long-run pace compares laps on the same compound at similar tyre ages." : "")],
+    ["Weather", "Sunday race-weather assumptions are separate from Friday practice conditions. Rain and temperature changes can materially alter this outlook."],
+    ["Driver change", "Rafael Camara replaces Hirakawa at Haas. His $6.0M Fantasy price is confirmed. His estimated price thresholds do not inherit another driver's scores."],
+    ["Grid outlook", afterPractice || postQuali ? "Confirmed: Russell 5 places, Leclerc 10, Verstappen 30. Expected from the FIA component report: Hamilton 10, Perez 30; individual decisions pending. The model places the 30-place penalties in the back group. Final grid pending. Camara has a reprimand, not a grid drop." : "Starting positions remain provisional."],
+  ];
+  if (!state.recommendation) {
+    els.contextTitle.textContent = "Brazil context.";
+    els.contextIntro.textContent = `${state.modelMode} Brazil forecast using post-Mexico prices.`;
+    renderContextRows([
+      ["Track logic", trackLogic],
+      ["Constructor logic", postQuali ? "Constructor projections include completed qualifying scores and forecast race points for both drivers." : afterPractice ? "Constructor projections combine practice-informed forecasts for both drivers with the penalty-adjusted starting outlook." : "Balance cooling, aerodynamic efficiency and traction with reliable points from both drivers."],
+      ...practiceContext,
+      ["Chip plan", state.modelMode === "Post-Quali" ? "The weekend deadline has passed. New weekend chips cannot be activated. Final Fix, if eligible, requires a separate Sunday-only comparison." : "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
+      ["Price watch", priceWatch],
+    ]);
+    return;
+  }
+
+  const rows = state.recommendedRows;
+  const current = new Set([...state.currentDrivers, ...state.currentConstructors]);
+  const recommended = new Set(rows.map((row) => row.key));
+  const incoming = rows.filter((row) => !current.has(row.key));
+  const outgoing = state.projections.filter((row) => current.has(row.key) && !recommended.has(row.key));
+  const constructors = rows.filter((row) => row.entity_type === "constructor");
+  const retainedConstructors = constructors.filter((row) => current.has(row.key));
+  const totalCost = rows.reduce((sum, row) => sum + number(row.price_m), 0);
+  const priceDelta = rows.reduce((sum, row) => sum + number(row.projected_price_delta_m), 0);
+  const priceOutlookAvailable = rows.every((row) => String(row.projected_price_delta_m ?? "").trim() !== "");
+  const chip = chipSummary(state.recommendation.chip);
+  const limitless = state.recommendation.chip?.includes("Limitless");
+  const budgetLeft = number(els.budget.value) - totalCost;
+  const transferDetail = incoming.length
+    ? { out: nameList(outgoing), in: nameList(incoming) }
+    : "The model retains your current squad, so no transfer is needed.";
+  const constructorDetail = retainedConstructors.length === constructors.length
+    ? `${nameList(constructors)} retain your existing constructor exposure under the current budget and strategy.`
+    : `${nameList(constructors)} provide the best projected constructor combination under your current budget and strategy. ${postQuali ? "Final qualifying and the provisional starting grid are included." : afterPractice ? "Practice is included; qualifying and the final grid are still pending." : "This remains a pre-practice estimate."}`;
+  const chipDetail = state.recommendation.chipReason || (chip === "No chip"
+    ? "Hold your chips. No available option creates enough projected upside over the standard transfer route."
+    : limitless
+      ? "Limitless is recommended because it unlocks the highest projected squad without the usual budget ceiling."
+      : `${chip} is the recommended edge under your current budget and transfer constraints.`);
+  const budgetDetail = limitless
+    ? "This is a temporary squad. Your original team returns after the weekend; temporary picks are not counted as lasting budget growth."
+    : priceOutlookAvailable
+      ? `$${format(Math.max(0, budgetLeft))}m remains after changes, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`
+      : `$${format(Math.max(0, budgetLeft))}m remains after changes. Price growth is unavailable for at least one selected asset.`;
+
+  els.contextTitle.textContent = "Your Brazil plan.";
+  els.contextIntro.textContent = `${state.recommendation.points} projected from a lineup tailored to your saved team, budget, and transfer plan.`;
+  renderContextRows([
+    ["Track logic", trackLogic],
+    ["Constructor logic", constructorDetail],
+    ...practiceContext,
+    ["Chip plan", chipDetail],
+    ["Price watch", squadPriceWatch(rows, limitless)],
+    ["Transfer plan", transferDetail],
+    ["Budget outlook", budgetDetail],
+  ]);
+}
+
+function renderRecommendationSummary(rows, result, incoming, boost) {
+  const totalCost = rows.reduce((sum, row) => sum + number(row.price_m), 0);
+  const projectedValue = rows.reduce((sum, row) => sum + number(row.projected_price_delta_m), 0);
+  const priceOutlookAvailable = rows.every((row) => String(row.projected_price_delta_m ?? "").trim() !== "");
+  const budgetLeft = number(els.budget.value) - totalCost;
+  const limitless = result.chip?.includes("Limitless");
+  const transferLabel = `${incoming.length} move${incoming.length === 1 ? "" : "s"}`;
+  const transferDetail = limitless
+    ? "Limitless removes transfer penalties"
+    : result.chip === "Wildcard" ? "Wildcard removes transfer penalties"
+    : result.paidTransfers ? `${result.paidTransfers} paid` : "Free moves cover it";
+  const valueDirection = priceOutlookAvailable ? (projectedValue >= 0 ? "up" : "down") : "";
+  const valueArrow = projectedValue >= 0 ? "&uarr;" : "&darr;";
+  els.summary.hidden = false;
+  els.summary.innerHTML = `
+    <div><span>Projected</span><strong>${escapeHtml(result.points)}</strong><small>Net of penalties</small></div>
+    <div><span>Squad cost</span><strong>$${format(totalCost)}m</strong><small>${limitless ? "No budget cap" : `${format(Math.max(0, budgetLeft))}m left`}</small></div>
+    <div><span>Transfers</span><strong>${transferLabel}</strong><small>${transferDetail}</small></div>
+    <div><span>${result.tripleBoost ? "3x / 2x boosts" : "2x boost"}</span><strong>${escapeHtml(result.tripleBoost?.name || boost?.name || "--")}</strong><small>${result.tripleBoost ? `2x: ${escapeHtml(boost?.name || "--")}` : "Selected driver"}</small></div>
+    <div><span>Chip</span><strong>${escapeHtml(chipSummary(result.chip))}</strong><small>${result.chip ? "Recommended" : "Save for later"}</small></div>
+    <div class="projected-value ${valueDirection}"><span>Projected value</span><strong>${limitless ? "Temporary squad" : priceOutlookAvailable ? `<i aria-hidden="true">${valueArrow}</i> ${format(Math.abs(projectedValue))}m` : "--"}</strong><small>${limitless ? "Original team returns" : priceOutlookAvailable ? "Expected price path" : "Thresholds pending"}</small></div>`;
+}
+
+function renderRecommendation(rows, result) {
+  const current = new Set([...state.currentDrivers, ...state.currentConstructors]);
+  const incoming = rows.filter((row) => !current.has(row.key));
+  const boost = result.boost || rows.filter((row) => row.entity_type === "driver").sort((a, b) => number(b.expected_fantasy_points) - number(a.expected_fantasy_points))[0];
+  state.recommendedRows = rows;
+  state.recommendation = result;
+  state.lineupView = "recommended";
+  renderRecommendationSummary(rows, result, incoming, boost);
+  renderLineupTable();
+  renderRaceContext();
+}
+
+function combinations(items, size) {
+  const result = [];
+  const selected = [];
+  const visit = (start) => {
+    if (selected.length === size) {
+      result.push([...selected]);
+      return;
+    }
+    for (let index = start; index <= items.length - (size - selected.length); index += 1) {
+      selected.push(items[index]);
+      visit(index + 1);
+      selected.pop();
+    }
+  };
+  visit(0);
+  return result;
+}
+
+function negativeProtection(row) {
+  // Approximation: negative expected categories, not simulated category outcomes.
+  return ["dnf_penalty_points_est", "sprint_dnf_penalty_points_est", "position_change_points_est",
+    "sprint_position_change_points_est", "qualifying_points_est", "constructor_bonus_points_est"]
+    .reduce((sum, field) => sum + Math.max(0, -number(row[field])), 0);
+}
+
+function scoreLineup(drivers, constructors, { ignoreBudget = false, unlimitedTransfers = false, activeChip = "" } = {}) {
+  const rows = [...drivers, ...constructors];
+  const cost = rows.reduce((total, row) => total + number(row.price_m), 0);
+  const budget = number(els.budget.value);
+  if (!ignoreBudget && cost > budget + 0.001) return null;
+
+  const current = new Set([...state.currentDrivers, ...state.currentConstructors]);
+  const incoming = rows.filter((row) => !current.has(row.key));
+  const transferCount = incoming.length;
+  const freeTransfers = Math.max(0, Math.floor(number(els.transfers.value)));
+  const paidTransfers = unlimitedTransfers ? 0 : Math.max(0, transferCount - freeTransfers);
+  const expected = rows.reduce((total, row) => total + number(row.expected_fantasy_points), 0);
+  const pointsFor = (row) => number(row.expected_fantasy_points) + (activeChip === "no_negative" ? negativeProtection(row) : 0);
+  const ranked = [...drivers].sort((left, right) => pointsFor(right) - pointsFor(left));
+  const tripleBoost = activeChip === "x3" ? ranked[0] : null;
+  const boost = ranked[tripleBoost ? 1 : 0];
+  const protection = activeChip === "no_negative" ? rows.reduce((sum, row) => sum + negativeProtection(row), 0) : 0;
+  const netPoints = expected + protection + pointsFor(boost) + (tripleBoost ? 2 * pointsFor(tripleBoost) : 0) - paidTransfers * 10;
+  const pricePath = rows.reduce((total, row) => total + number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m)), 0);
+  const strategy = els.strategy.value;
+  const strategyScore = strategy === "budget_growth"
+    ? netPoints + (activeChip === "limitless" ? 0 : pricePath * 14)
+    : strategy === "current_friendly"
+      ? netPoints - (unlimitedTransfers ? 0 : transferCount * 1.5)
+      : netPoints;
+  return { rows, cost, incoming, transferCount, paidTransfers, boost, tripleBoost, netPoints, strategyScore, activeChip };
+}
+
+function findBestLineup(options = {}) {
+  const currentFriendly = els.strategy.value === "current_friendly" && !options.unlimitedTransfers && !options.allowPaidTransfers;
+  const freeTransfers = Math.max(0, Math.floor(number(els.transfers.value)));
+  const current = new Set([...state.currentDrivers, ...state.currentConstructors]);
+  const budget = options.ignoreBudget ? Infinity : number(els.budget.value) + 0.001;
+  const strategy = els.strategy.value;
+  // Summarize every combination once; no driver shortlist can discard a funding path.
+  const summarize = (rows, driverGroup) => {
+    const points = rows.map((row) => number(row.expected_fantasy_points) +
+      (options.activeChip === "no_negative" ? negativeProtection(row) : 0));
+    const ranked = driverGroup ? [...points].sort((a, b) => b - a) : [];
+    return {
+      rows,
+      cost: rows.reduce((sum, row) => sum + number(row.price_m), 0),
+      points: points.reduce((sum, value) => sum + value, 0) +
+        (driverGroup ? (options.activeChip === "x3" ? 2 * ranked[0] + ranked[1] : ranked[0]) : 0),
+      transfers: rows.filter((row) => !current.has(row.key)).length,
+      pricePath: rows.reduce((sum, row) => sum + number(row.risk_adjusted_price_delta_m, number(row.projected_price_delta_m)), 0),
+    };
+  };
+  let best = null;
+  const driverCombos = combinations(rowsFor("driver"), 5).map((rows) => summarize(rows, true));
+  const constructorCombos = combinations(rowsFor("constructor"), 2).map((rows) => summarize(rows, false));
+  for (const drivers of driverCombos) {
+    if (drivers.cost > budget) continue;
+    for (const constructors of constructorCombos) {
+      if (drivers.cost + constructors.cost > budget) continue;
+      const transfers = drivers.transfers + constructors.transfers;
+      if (currentFriendly && transfers > freeTransfers) continue;
+      const penalty = options.unlimitedTransfers ? 0 : Math.max(0, transfers - freeTransfers) * 10;
+      const netPoints = drivers.points + constructors.points - penalty;
+      const strategyScore = strategy === "budget_growth"
+        ? netPoints + (options.activeChip === "limitless" ? 0 : (drivers.pricePath + constructors.pricePath) * 14)
+        : strategy === "current_friendly" ? netPoints - (options.unlimitedTransfers ? 0 : transfers * 1.5) : netPoints;
+      if (!best || strategyScore > best.strategyScore) best = { drivers, constructors, strategyScore };
+    }
+  }
+  return best ? scoreLineup(best.drivers.rows, best.constructors.rows, options) : null;
+}
+
+function directRecommendation() {
+  let base = findBestLineup();
+  if (!base && els.strategy.value === "current_friendly") {
+    base = findBestLineup({ allowPaidTransfers: true });
+  }
+  if (!base) throw new Error("No valid lineup fits the current budget. Edit your team or budget and try again.");
+  if (state.modelMode === "Post-Quali") {
+    return { ...base, chip: "", chipReason: "The weekend deadline has passed. This is a lineup comparison, not a new transfer or chip instruction. Already activated chips remain locked. Final Fix eligibility and Sunday-only gains are not evaluated here." };
+  }
+  const available = new Set(els.chips.filter((input) => input.checked).map((input) => input.value));
+  const labels = { x3: "Triple Boost", limitless: "Limitless", no_negative: "No Negative", wildcard: "Wildcard" };
+  const candidates = [];
+  for (const activeChip of Object.keys(labels)) {
+    if (!available.has(activeChip)) continue;
+    const unlimitedTransfers = activeChip === "limitless" || activeChip === "wildcard";
+    const candidate = findBestLineup({ activeChip, unlimitedTransfers, ignoreBudget: activeChip === "limitless" });
+    if (candidate) candidates.push({ ...candidate, chip: labels[activeChip], gain: candidate.netPoints - base.netPoints });
+  }
+  const finalSprint = base.rows.some((row) => row.next_gp === "Singapore" && row.sprint_weekend === "TRUE");
+  const best = candidates.filter((row) => row.gain > 0 && row.strategyScore > base.strategyScore)
+    .sort((a, b) => b.strategyScore - a.strategyScore)[0];
+  const comparison = candidates.map((row) => `${row.chip}: ${row.gain >= 0 ? "+" : ""}${format(row.gain)} pts${row.activeChip === "no_negative" ? " (approx.)" : ""}`).join("; ");
+  const limits = `${available.has("final_fix") ? " Final Fix is deferred until qualifying results are available." : ""}${available.has("auto_pilot") ? " Auto Pilot's gain is not quantified without joint driver-score simulations." : ""}`;
+  const context = finalSprint ? "Last Sprint weekend: no future Sprint is being reserved for these chips. " : "Current-weekend comparison only; future chip value is not modelled. ";
+  return { ...(best || base), chip: best?.chip || "", chipReason: context +
+    (best ? `${best.chip} has the strongest score under your selected approach. ` : "No evaluated chip improves the selected strategy. ") +
+    comparison + "." + limits };
+}
+
+function runOptimizer() {
+  els.teamStatus.hidden = true;
+  if (!hasCompleteTeam()) {
+    els.stageCopy.textContent = "Choose 5 drivers and 2 constructors before optimizing.";
+    els.teamStatus.textContent = els.stageCopy.textContent;
+    els.teamStatus.hidden = false;
+    openMobileTeam();
+    trackEvent("optimizer_validation_failed", { reason: "incomplete_team" });
+    return;
+  }
+  if (number(els.budget.value) <= 0 || els.transfers.value === "") {
+    els.stageCopy.textContent = "Enter your budget and free transfers before optimizing.";
+    els.teamStatus.textContent = els.stageCopy.textContent;
+    els.teamStatus.hidden = false;
+    openMobileTeam();
+    trackEvent("optimizer_validation_failed", { reason: "missing_team_settings" });
+    return;
+  }
+  els.optimize.disabled = true;
+  els.mobileOptimize.disabled = true;
+  els.optimize.innerHTML = "Optimizing <span>...</span>";
+  els.stageCopy.textContent = `Calculating with the live ${state.modelMode} model.`;
+  trackEvent("optimizer_run", {
+    strategy: els.strategy.value,
+    budget_range: budgetRange(els.budget.value),
+    free_transfers: Math.max(0, Math.floor(number(els.transfers.value))),
+    available_chip_count: els.chips.filter((chip) => chip.checked).length,
+  });
+
+  window.setTimeout(() => {
+    try {
+      const result = directRecommendation();
+      renderRecommendation(result.rows, {
+        points: `${format(result.netPoints)} pts`,
+        paidTransfers: result.paidTransfers,
+        boost: result.boost,
+        chip: result.chip,
+        tripleBoost: result.tripleBoost,
+        chipReason: result.chipReason,
+      });
+      els.stageCopy.textContent = `${state.modelMode} recommendation updated from the live optimizer.`;
+      if (window.matchMedia("(max-width: 820px)").matches) closeMobileTeam();
+      trackEvent("optimizer_result", {
+        strategy: els.strategy.value,
+        transfer_count: result.transferCount,
+        paid_transfers: result.paidTransfers,
+        recommended_chip: result.chip || "hold",
+      });
+    } catch (error) {
+      els.stageCopy.textContent = error.message;
+      els.teamStatus.textContent = error.message;
+      els.teamStatus.hidden = false;
+      openMobileTeam();
+      trackEvent("optimizer_error", { reason: "no_valid_lineup" });
+    } finally {
+      els.optimize.disabled = false;
+      els.optimize.innerHTML = "Optimize Team <span>→</span>";
+      renderMobileTeamState();
+    }
+  }, 0);
+}
+
+function renderAuditDialog() {
+  const audit = activeAudit();
+  const rows = auditRowsFor(audit);
+  const auditFlags = {
+    Netherlands: ["netherlands", "Netherlands"],
+    Italy: ["italy", "Italy"],
+    Madrid: ["spain", "Spain"],
+    Azerbaijan: ["azerbaijan", "Azerbaijan"],
+    Bahrain: ["malaysia", "Malaysia"],
+    Singapore: ["singapore", "Singapore"],
+    "United States": ["usa", "United States"],
+    Mexico: ["mexico", "Mexico"],
+  };
+  const [flagClass, flagLabel] = auditFlags[audit.gp_key] || ["spain", "Spain"];
+  els.auditFlag.className = `audit-flag flag-${flagClass}`;
+  const flagImage = { Bahrain: "malaysia-flag.svg", Singapore: "singapore-flag.svg", "United States": "usa-flag.svg", Mexico: "mexico-flag.svg" }[audit.gp_key];
+  els.auditFlag.style.backgroundImage = flagImage ? `url("${flagImage}")` : "";
+  els.auditFlag.style.backgroundSize = flagImage ? "100% 100%" : "";
+  els.auditFlag.setAttribute("aria-label", `${flagLabel} flag`);
+  els.auditTitle.textContent = `${audit.gp_display} | ${audit.mode}`;
+  els.auditNote.textContent = audit.forecast_source === "replayed"
+    ? ""
+    : "Locked forecast compared with official F1 Fantasy scoring. DNF-affected assets remain marked in the source audit.";
+  els.auditNote.hidden = !els.auditNote.textContent;
+  const tableRows = (type) => rows.filter((row) => row.entity_type === type).sort((left, right) => Math.abs(auditDelta(left)) - Math.abs(auditDelta(right)) || left.name.localeCompare(right.name))
+    .map((row) => {
+      const delta = auditDelta(row);
+      const teamDetail = type === "driver" && row.team ? `<small>${escapeHtml(row.team)}</small>` : "";
+      return `<tr><td><strong>${escapeHtml(row.name)}</strong>${teamDetail}</td><td>${format(row.estimated_points)}</td><td>${format(row.actual_points)}</td><td class="${delta >= 0 ? "up" : "down"}">${delta >= 0 ? "+" : ""}${format(delta)}</td></tr>`;
+    }).join("");
+  els.auditDriverRows.innerHTML = tableRows("driver");
+  els.auditConstructorRows.innerHTML = tableRows("constructor");
+  for (const [type, body] of [["driver", els.auditDriverRows], ["constructor", els.auditConstructorRows]]) {
+    const group = rows.filter((row) => row.entity_type === type);
+    const section = body.closest("section");
+    let metric = section.querySelector(".audit-deviation");
+    if (!metric) {
+      metric = document.createElement("p");
+      metric.className = "audit-deviation";
+      section.querySelector("h3").after(metric);
+    }
+    const deviation = group.length ? group.reduce((sum, row) => sum + Math.abs(auditDelta(row)), 0) / group.length : null;
+    metric.innerHTML = `<span>Average absolute deviation</span><strong>${deviation === null ? "--" : format(deviation)}<small> pts</small></strong>`;
+  }
+  if (!els.auditDialog.open) els.auditDialog.showModal();
+}
+
+async function renderSiteUpdated() {
+  const container = document.getElementById("topbar-updated");
+  container.hidden = true;
+  try {
+    const pageUrl = new URL(window.location.href);
+    pageUrl.search = "";
+    pageUrl.hash = "";
+    const response = await fetch(pageUrl, { method: "HEAD", cache: "no-store" });
+    const modified = response.headers.get("Last-Modified");
+    const date = new Date(modified || "");
+    if (!response.ok || !Number.isFinite(date.getTime())) return;
+    const time = document.getElementById("topbar-updated-time");
+    time.dateTime = date.toISOString();
+    time.textContent = new Intl.DateTimeFormat("en-GB", {
+      day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+      timeZone: "UTC", timeZoneName: "short", hourCycle: "h23",
+    }).format(date);
+    container.hidden = false;
+  } catch {
+    // Do not substitute the model run time or the visitor's current time.
+  }
+}
+
+async function initialise() {
+  void renderSiteUpdated();
+  const [projectionResponse, auditResponse, auditRowsResponse, priceThresholdResponse] = await Promise.all([
+    fetch(`${DATA_ROOT}/fantasy_projections.csv`, { cache: "no-store" }),
+    fetch(`${DATA_ROOT}/fantasy_forecast_tracker.csv`, { cache: "no-store" }),
+    fetch(`${DATA_ROOT}/fantasy_forecast_asset_audit.csv`, { cache: "no-store" }),
+    fetch(`${DATA_ROOT}/fantasy_price_thresholds.csv`, { cache: "no-store" }),
+  ]);
+  if (!projectionResponse.ok || !auditResponse.ok || !auditRowsResponse.ok || !priceThresholdResponse.ok) throw new Error("Could not load the Fantasy data files.");
+  state.projections = parseCsv(await projectionResponse.text());
+  state.audits = parseCsv(await auditResponse.text());
+  state.auditRows = parseCsv(await auditRowsResponse.text());
+  state.priceThresholds = parseCsv(await priceThresholdResponse.text());
+  const restoredTeam = restoreSavedTeam();
+  renderChipCount();
+  renderCurrentTeam();
+  renderLineupTable();
+  renderSchedule();
+  populateAuditSelect();
+  const sample = state.projections[0];
+  state.modelMode = sample.mode;
+  renderRaceContext();
+  renderPredictionStage(sample.mode);
+  state.dataReady = true;
+  initialiseRatingPrompt();
+  els.optimize.disabled = false;
+  els.optimize.innerHTML = "Optimize Team <span>→</span>";
+  renderMobileTeamState();
+  els.lineupHeading.textContent = "Recommended Lineup";
+  els.stageCopy.textContent = restoredTeam
+    ? "Saved team restored. Run the optimizer to refresh the recommendation."
+    : `Live ${sample.mode} model loaded. Enter your team details to build a recommendation.`;
+}
+
+document.querySelectorAll("[data-picker]").forEach((button) => button.addEventListener("click", () => openPicker(button.dataset.picker)));
+els.pickerOptions.addEventListener("click", (event) => {
+  const option = event.target.closest("[data-picker-key]");
+  if (!option) return;
+  const key = option.dataset.pickerKey;
+  const maximum = state.pickerType === "driver" ? 5 : 2;
+  if (state.pickerSelection.has(key)) state.pickerSelection.delete(key);
+  else if (state.pickerSelection.size < maximum) state.pickerSelection.add(key);
+  renderPickerOptions();
+  els.pickerOptions.querySelector(`[data-picker-key="${CSS.escape(key)}"]`)?.focus({ preventScroll: true });
+});
+els.pickerSearch.addEventListener("input", renderPickerOptions);
+els.pickerSearch.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") event.preventDefault();
+});
+els.applyPicker.addEventListener("click", applyPicker);
+els.optimize.addEventListener("click", runOptimizer);
+els.mobileTeamCta.addEventListener("click", () => {
+  if (els.teamPanel.classList.contains("mobile-team-expanded")) closeMobileTeam();
+  else openMobileTeam();
+});
+els.mobileRaceCta.addEventListener("click", () => {
+  if (els.teamPanel.classList.contains("mobile-team-expanded")) closeMobileTeam();
+  const context = document.querySelector("#race-context");
+  context.focus({ preventScroll: true });
+  context.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+els.rows.addEventListener("click", (event) => {
+  if (event.target.closest('[data-lineup-action="optimize"]')) els.optimize.click();
+  else if (event.target.closest("[data-setup-team]")) openMobileTeam();
+});
+els.mobileTeamCollapse.addEventListener("click", closeMobileTeam);
+els.mobileOptimize.addEventListener("click", () => els.optimize.click());
+els.viewControls.forEach((button) => button.addEventListener("click", () => {
+  state.lineupView = button.dataset.lineupView;
+  renderLineupTable();
+  trackEvent("lineup_view_changed", { view: state.lineupView });
+}));
+els.saveTeam.addEventListener("change", () => {
+  if (els.saveTeam.checked) {
+    if (!hasCompleteTeam() || number(els.budget.value) <= 0 || els.transfers.value === "") {
+      els.saveTeam.checked = false;
+      els.stageCopy.textContent = "Enter your budget, transfers, and full team before saving.";
+      trackEvent("team_save_blocked", { reason: "incomplete_setup" });
+      return;
+    }
+    saveTeam();
+    trackEvent("team_save_changed", { enabled: true });
+    return;
+  }
+  window.localStorage.removeItem(TEAM_STORAGE_KEY);
+  els.stageCopy.textContent = "Team saving is off for this browser.";
+  trackEvent("team_save_changed", { enabled: false });
+});
+[els.budget, els.transfers, els.strategy, ...els.chips].forEach((input) => input.addEventListener("change", () => {
+  if (input.matches(".chip-settings input")) {
+    renderChipCount();
+    trackEvent("chip_availability_changed", { chip: input.value, enabled: input.checked });
+  }
+  if (input === els.strategy) trackEvent("strategy_changed", { strategy: els.strategy.value });
+  if (input === els.budget) trackEvent("budget_changed", { budget_range: budgetRange(els.budget.value) });
+  if (input === els.transfers) trackEvent("transfers_changed", { free_transfers: Math.max(0, Math.floor(number(els.transfers.value))) });
+  updateBudgetWarning();
+  renderMobileTeamState();
+  if (!state.recommendation) renderLineupTable();
+  persistTeamIfEnabled();
+  renderRaceContext();
+}));
+els.auditSelect.addEventListener("change", () => {
+  renderAuditStages(document.querySelector('input[name="audit-stage"]:checked')?.value);
+  renderAudit();
+  if (els.auditDialog.open) renderAuditDialog();
+  const audit = activeAudit();
+  trackEvent("audit_selection_changed", { grand_prix: audit?.gp_key || "", stage: audit?.mode || "" });
+});
+document.querySelector("#audit-stage-options").addEventListener("change", () => {
+  renderAudit();
+  if (els.auditDialog.open) renderAuditDialog();
+  const audit = activeAudit();
+  trackEvent("audit_selection_changed", { grand_prix: audit?.gp_key || "", stage: audit?.mode || "" });
+});
+els.openAudit.addEventListener("click", () => {
+  renderAuditDialog();
+  const audit = activeAudit();
+  trackEvent("audit_opened", { grand_prix: audit?.gp_key || "", stage: audit?.mode || "" });
+});
+els.confirmAnalytics.addEventListener("click", confirmAnalyticsConsent);
+els.closeRatingPrompt.addEventListener("click", dismissRatingPrompt);
+els.ratingButtons.forEach((button) => button.addEventListener("click", () => selectSiteRating(Number(button.dataset.siteRating))));
+els.submitSiteRating.addEventListener("click", submitSiteRating);
+els.ratingFeedback.addEventListener("input", () => {
+  els.submitSiteRating.disabled = !state.selectedSiteRating || !els.ratingFeedback.value.trim();
+});
+[els.rows].forEach((list) => {
+  const toggleGuidance = (event) => {
+    const cell = event.target.closest(".trend-cell, .points-cell");
+    if (!cell) return;
+    const shown = !cell.classList.contains("show-table-tooltip");
+    closeTableGuidance();
+    cell.classList.toggle("show-table-tooltip", shown);
+    cell.setAttribute("aria-expanded", String(shown));
+  };
+  list.addEventListener("click", toggleGuidance);
+  list.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    if (!event.target.closest(".trend-cell, .points-cell")) return;
+    event.preventDefault();
+    toggleGuidance(event);
+  });
+});
+function closeTableGuidance() {
+  els.rows.querySelectorAll(".show-table-tooltip").forEach((cell) => {
+    cell.classList.remove("show-table-tooltip");
+    cell.setAttribute("aria-expanded", "false");
+  });
+}
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".trend-cell, .points-cell")) closeTableGuidance();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeTableGuidance();
+});
+document.querySelectorAll("[data-analytics-link]").forEach((link) => link.addEventListener("click", () => {
+  trackEvent("outbound_link_clicked", { destination: link.dataset.analyticsLink });
+}));
+
+initialiseAnalyticsConsent();
+
+initialise().catch((error) => {
+  els.stageCopy.textContent = error.message;
+});
