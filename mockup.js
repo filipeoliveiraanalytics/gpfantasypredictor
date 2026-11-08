@@ -687,12 +687,12 @@ function renderRaceContext() {
   const afterPractice = state.modelMode === "After Practice";
   const postQuali = state.modelMode === "Post-Quali";
   const practiceContext = [
-    ["Model status", afterPractice ? "FP1, FP2 and FP3 are included, with deleted laps excluded. Verstappen led FP3 by 0.025s from Antonelli, with Norris third. Hulkenberg returned in FP3; Hamilton had limited running. Qualifying is not included." : postQuali ? "Post-qualifying forecast." : "Pre-weekend Brazil forecast using five completed races through Mexico."],
+    ["Model status", afterPractice ? "FP1, FP2 and FP3 are included, with deleted laps excluded. Verstappen led FP3 by 0.025s from Antonelli, with Norris third. Hulkenberg returned in FP3; Hamilton had limited running. Qualifying is not included." : postQuali ? "FP1, FP2, FP3 and the FIA final qualifying classification are included. Wet qualifying was interrupted; deleted laps are excluded from the official results. Norris qualified first, Russell second and Antonelli third." : "Pre-weekend Brazil forecast using five completed races through Mexico."],
     ["Practice outlook", "Mercedes and Antonelli were the Friday benchmark. McLaren reported a positive step from its updates. Different long-run compounds limit direct comparisons; no extra media-based pace bonus is added."],
     ["Tyres and surface", "C3 Hard, C4 Medium and C5 Soft. Sections between Turns 3-5 and 8-9 have been resurfaced." + (afterPractice ? " Long-run pace compares laps on the same compound at similar tyre ages." : "")],
     ["Weather", "Sunday race-weather assumptions are separate from Friday practice conditions. Rain and temperature changes can materially alter this outlook."],
     ["Driver change", "Rafael Camara replaces Hirakawa at Haas. His $6.0M Fantasy price is confirmed. His estimated price thresholds do not inherit another driver's scores."],
-    ["Grid outlook", afterPractice || postQuali ? "Grid penalties: Russell 5 places, Leclerc 10. Hamilton, Verstappen and Perez start in the back-of-grid group, ordered by qualifying position. Final grid pending." : "Starting positions remain provisional."],
+    ["Grid outlook", postQuali ? "FIA provisional grid applied: Norris P1, Antonelli P2, Lawson P3, Hulkenberg P4, Hadjar P5. Russell P7, Leclerc P14, Hamilton P20, Verstappen P21 and Perez P22. Penalties are included once. Final grid pending." : afterPractice ? "Grid penalties: Russell 5 places, Leclerc 10. Hamilton, Verstappen and Perez start in the back-of-grid group, ordered by qualifying position. Final grid pending." : "Starting positions remain provisional."],
   ];
   if (!state.recommendation) {
     els.contextTitle.textContent = "Brazil context.";
