@@ -536,3 +536,36 @@ constructor,AUD,Audi,Audi,11.6,290,2026-11-04,TRUE
 constructor,WIL,Williams,Williams,12.6,234,2026-11-04,TRUE
 constructor,CAD,Cadillac,Cadillac,3.0,-102,2026-11-04,TRUE
 constructor,AMR,Aston Martin,Aston Martin,4.5,-111,2026-11-04,TRUE
+driver,ANT,Kimi Antonelli,Mercedes,27.6,770,2026-11-10,TRUE
+driver,VER,Max Verstappen,Red Bull Racing,29.1,627,2026-11-10,TRUE
+driver,HAM,Lewis Hamilton,Ferrari,25.1,547,2026-11-10,TRUE
+driver,LEC,Charles Leclerc,Ferrari,25.0,526,2026-11-10,TRUE
+driver,RUS,George Russell,Mercedes,27.2,478,2026-11-10,TRUE
+driver,NOR,Lando Norris,McLaren,26.0,434,2026-11-10,TRUE
+driver,PIA,Oscar Piastri,McLaren,22.7,302,2026-11-10,TRUE
+driver,HAD,Isack Hadjar,Red Bull Racing,16.5,258,2026-11-10,TRUE
+driver,LAW,Liam Lawson,Racing Bulls,11.7,212,2026-11-10,TRUE
+driver,LIN,Arvid Lindblad,Racing Bulls,9.4,151,2026-11-10,TRUE
+driver,GAS,Pierre Gasly,Alpine,8.4,146,2026-11-10,TRUE
+driver,SAI,Carlos Sainz,Williams,7.8,125,2026-11-10,TRUE
+driver,COL,Franco Colapinto,Alpine,7.0,114,2026-11-10,TRUE
+driver,BOR,Gabriel Bortoleto,Audi,6.4,103,2026-11-10,TRUE
+driver,BEA,Oliver Bearman,Haas F1 Team,5.0,63,2026-11-10,TRUE
+driver,HUL,Nico Hulkenberg,Audi,7.2,53,2026-11-10,TRUE
+driver,PER,Sergio Perez,Cadillac,3.6,42,2026-11-10,TRUE
+driver,ALO,Fernando Alonso,Aston Martin,4.8,22,2026-11-10,TRUE
+driver,ALB,Alexander Albon,Williams,4.4,9,2026-11-10,TRUE
+driver,CAM,Rafael Camara,Haas F1 Team,5.4,-9,2026-11-10,TRUE
+driver,BOT,Valtteri Bottas,Cadillac,3.0,-153,2026-11-10,TRUE
+driver,STR,Lance Stroll,Aston Martin,3.0,-184,2026-11-10,TRUE
+constructor,MER,Mercedes,Mercedes,34.0,1554,2026-11-10,TRUE
+constructor,FER,Ferrari,Ferrari,29.1,1314,2026-11-10,TRUE
+constructor,RBR,Red Bull Racing,Red Bull Racing,33.6,1102,2026-11-10,TRUE
+constructor,MCL,McLaren,McLaren,33.3,989,2026-11-10,TRUE
+constructor,RBL,Racing Bulls,Racing Bulls,18.3,626,2026-11-10,TRUE
+constructor,ALP,Alpine,Alpine,17.6,399,2026-11-10,TRUE
+constructor,AUD,Audi,Audi,12.2,322,2026-11-10,TRUE
+constructor,HAA,Haas F1 Team,Haas F1 Team,12.2,296,2026-11-10,TRUE
+constructor,WIL,Williams,Williams,13.2,237,2026-11-10,TRUE
+constructor,AMR,Aston Martin,Aston Martin,3.9,-116,2026-11-10,TRUE
+constructor,CAD,Cadillac,Cadillac,3.0,-117,2026-11-10,TRUE
