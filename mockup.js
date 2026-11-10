@@ -301,7 +301,7 @@ function priceTrendTiers(row) {
   const gpName = normalizeGp(row.next_gp);
   const threshold = state.priceThresholds.find((entry) => normalizeGp(entry.source_gp) === gpName && entry.entity_type === row.entity_type && entry.key === row.key);
   if (!threshold) return null;
-  const title = threshold.method === "debut_single_race" ? "Estimated first-race price thresholds" : "Price change after this GP";
+  const title = threshold.method === "debut_single_race" ? "Estimated first-race price thresholds" : threshold.method === "rolling_2race" ? "Estimated early-career price thresholds" : "Price change after this GP";
 
   const premiumAsset = number(row.price_m) >= 18.5;
   const tiers = premiumAsset ? { good: 0.1, great: 0.3, poor: 0.1 } : { good: 0.2, great: 0.6, poor: 0.2 };
@@ -451,7 +451,7 @@ function saveTeam({ announce = true } = {}) {
   };
   try {
     window.localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(saved));
-    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the Brazil GP.";
+    if (announce) els.stageCopy.textContent = "Team will stay saved in this browser for the Las Vegas GP.";
   } catch {
     if (announce) els.stageCopy.textContent = "This browser could not save the team.";
   }
@@ -541,7 +541,7 @@ function populateAuditSelect() {
   const preferred = audits.find((audit) => audit.gp_key === gps[0].gp_key && audit.mode === "Post-Quali") || audits[0];
   els.auditSelect.value = preferred.gp_key;
   renderAuditStages(preferred.mode);
-  els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Mexico.";
+  els.auditTeaserCopy.textContent = "Compare completed forecasts with official Fantasy scores, now including Brazil.";
   els.auditButtonLabel.textContent = "Browse forecast reviews";
   renderAudit();
 }
@@ -682,24 +682,23 @@ function squadPriceWatch(rows, limitless = false) {
 
 function renderRaceContext() {
   if (!els.contextList) return;
-  const trackLogic = "Interlagos combines flowing corners, long straights and uphill traction. Tyre management and balanced race pace matter; overtaking opportunities allow strategy flexibility.";
-  const priceWatch = "Brazil thresholds use Austin and Mexico scores for established assets. Camara's thresholds are a low-confidence estimate based on Brazil points alone.";
+  const trackLogic = "Las Vegas rewards straight-line efficiency, heavy braking and traction. Cold tyres and long straights make warm-up and energy management important.";
+  const priceWatch = "Las Vegas thresholds use Mexico and Brazil scores at post-Brazil prices. Camara has only his Brazil score; his two-race estimate is low confidence.";
   const afterPractice = state.modelMode === "After Practice";
   const postQuali = state.modelMode === "Post-Quali";
   const practiceContext = [
-    ["Model status", afterPractice ? "FP1, FP2 and FP3 are included, with deleted laps excluded. Verstappen led FP3 by 0.025s from Antonelli, with Norris third. Hulkenberg returned in FP3; Hamilton had limited running. Qualifying is not included." : postQuali ? "FP1, FP2, FP3 and the FIA final qualifying classification are included. Wet qualifying was interrupted; deleted laps are excluded from the official results. Norris qualified first, Russell second and Antonelli third." : "Pre-weekend Brazil forecast using five completed races through Mexico."],
-    ["Practice outlook", "Mercedes and Antonelli were the Friday benchmark. McLaren reported a positive step from its updates. Different long-run compounds limit direct comparisons; no extra media-based pace bonus is added."],
-    ["Tyres and surface", "C3 Hard, C4 Medium and C5 Soft. Sections between Turns 3-5 and 8-9 have been resurfaced." + (afterPractice ? " Long-run pace compares laps on the same compound at similar tyre ages." : "")],
-    ["Weather", "Sunday race-weather assumptions are separate from Friday practice conditions. Rain and temperature changes can materially alter this outlook."],
-    ["Driver change", "Rafael Camara replaces Hirakawa at Haas. His $6.0M Fantasy price is confirmed. His estimated price thresholds do not inherit another driver's scores."],
-    ["Grid outlook", postQuali ? "FIA provisional grid applied: Norris P1, Antonelli P2, Lawson P3, Hulkenberg P4, Hadjar P5. Russell P7, Leclerc P14, Hamilton P20, Verstappen P21 and Perez P22. Penalties are included once. Final grid pending." : afterPractice ? "Grid penalties: Russell 5 places, Leclerc 10. Hamilton, Verstappen and Perez start in the back-of-grid group, ordered by qualifying position. Final grid pending." : "Starting positions remain provisional."],
+    ["Model status", "Pre-weekend Las Vegas forecast using five completed races through Brazil. No Las Vegas practice or qualifying is included. Confidence is low before on-track running."],
+    ["Tyres", "C3 Hard, C4 Medium and C5 Soft are provisional model inputs; the 2026 nomination has not been verified."],
+    ["Weather", "Cold-night conditions are a circuit prior, not a live race-hour forecast. Tyre warm-up and changing temperatures can materially alter this outlook."],
+    ["Haas seat", "Camara's Fantasy price is $5.4M after Brazil. He remains a provisional Las Vegas scenario until the driver entry is confirmed; no Ocon or Hirakawa history is inherited."],
+    ["Grid outlook", "No Las Vegas grid penalties are applied. Brazil's penalties do not carry over; starting positions remain provisional."],
   ];
   if (!state.recommendation) {
-    els.contextTitle.textContent = "Brazil context.";
-    els.contextIntro.textContent = `${state.modelMode} Brazil forecast using post-Mexico prices.`;
+    els.contextTitle.textContent = "Las Vegas context.";
+    els.contextIntro.textContent = `${state.modelMode} Las Vegas forecast using post-Brazil prices.`;
     renderContextRows([
       ["Track logic", trackLogic],
-      ["Constructor logic", postQuali ? "Constructor projections include completed qualifying scores and forecast race points for both drivers." : afterPractice ? "Constructor projections combine practice-informed forecasts for both drivers with the penalty-adjusted starting outlook." : "Balance cooling, aerodynamic efficiency and traction with reliable points from both drivers."],
+      ["Constructor logic", postQuali ? "Constructor projections include completed qualifying scores and forecast race points for both drivers." : afterPractice ? "Constructor projections combine practice-informed forecasts for both drivers with the penalty-adjusted starting outlook." : "Balance straight-line efficiency, braking and tyre warm-up with reliable points from both drivers."],
       ...practiceContext,
       ["Chip plan", state.modelMode === "Post-Quali" ? "The weekend deadline has passed. New weekend chips cannot be activated. Final Fix, if eligible, requires a separate Sunday-only comparison." : "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
       ["Price watch", priceWatch],
@@ -737,7 +736,7 @@ function renderRaceContext() {
       ? `$${format(Math.max(0, budgetLeft))}m remains after changes, with ${priceDelta >= 0 ? "+" : ""}${format(priceDelta)}m projected price momentum across the lineup.`
       : `$${format(Math.max(0, budgetLeft))}m remains after changes. Price growth is unavailable for at least one selected asset.`;
 
-  els.contextTitle.textContent = "Your Brazil plan.";
+  els.contextTitle.textContent = "Your Las Vegas plan.";
   els.contextIntro.textContent = `${state.recommendation.points} projected from a lineup tailored to your saved team, budget, and transfer plan.`;
   renderContextRows([
     ["Track logic", trackLogic],
@@ -981,10 +980,11 @@ function renderAuditDialog() {
     Singapore: ["singapore", "Singapore"],
     "United States": ["usa", "United States"],
     Mexico: ["mexico", "Mexico"],
+    Brazil: ["brazil", "Brazil"],
   };
   const [flagClass, flagLabel] = auditFlags[audit.gp_key] || ["spain", "Spain"];
   els.auditFlag.className = `audit-flag flag-${flagClass}`;
-  const flagImage = { Bahrain: "malaysia-flag.svg", Singapore: "singapore-flag.svg", "United States": "usa-flag.svg", Mexico: "mexico-flag.svg" }[audit.gp_key];
+  const flagImage = { Bahrain: "malaysia-flag.svg", Singapore: "singapore-flag.svg", "United States": "usa-flag.svg", Mexico: "mexico-flag.svg", Brazil: "brazil-flag.svg" }[audit.gp_key];
   els.auditFlag.style.backgroundImage = flagImage ? `url("${flagImage}")` : "";
   els.auditFlag.style.backgroundSize = flagImage ? "100% 100%" : "";
   els.auditFlag.setAttribute("aria-label", `${flagLabel} flag`);
