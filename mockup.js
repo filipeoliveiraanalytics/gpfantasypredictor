@@ -691,7 +691,8 @@ function renderRaceContext() {
     ["Tyres", "C3 Hard, C4 Medium and C5 Soft are provisional model inputs; the 2026 nomination has not been verified."],
     ["Weather", "Cold-night conditions are a circuit prior, not a live race-hour forecast. Tyre warm-up and changing temperatures can materially alter this outlook."],
     ["Haas seat", "Camara's Fantasy price is $5.4M after Brazil. He remains a provisional Las Vegas scenario until the driver entry is confirmed; no Ocon or Hirakawa history is inherited."],
-    ["Grid outlook", "No Las Vegas grid penalties are applied. Brazil's penalties do not carry over; starting positions remain provisional."],
+    ["Grid outlook", "Piastri: confirmed 10-place grid drop for an extra engine, applied to the projected race start only. Qualifying points are unaffected. Other drivers are promoted accordingly; the final grid remains provisional."],
+    ["McLaren update", "New turbochargers and aerodynamic parts are reported. No extra pace gain is assumed before practice evidence; Piastri's grid drop is included."],
   ];
   if (!state.recommendation) {
     els.contextTitle.textContent = "Las Vegas context.";
