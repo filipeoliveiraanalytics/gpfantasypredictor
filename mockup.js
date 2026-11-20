@@ -687,19 +687,20 @@ function renderRaceContext() {
   const afterPractice = state.modelMode === "After Practice";
   const postQuali = state.modelMode === "Post-Quali";
   const practiceContext = [
-    ["Model status", "Pre-weekend Las Vegas forecast using five completed races through Brazil. No Las Vegas practice or qualifying is included. Confidence is low before on-track running."],
-    ["Tyres", "C3 Hard, C4 Medium and C5 Soft are provisional model inputs; the 2026 nomination has not been verified."],
+    ["Model status", "FP1 and FP2 reviewed. FP1 had no timed laps; FP2 used wet and intermediate tyres only. No comparable dry pace is available, so the forecast retains its historical dry-pace baseline and low confidence. FP3 and qualifying are not included."],
+    ["Practice review", "Russell led wet FP2 ahead of Gasly and Leclerc. FIA deleted laps are excluded. Verstappen reported balance and energy-management issues; the limited wet sample is not treated as a dry-race pace verdict."],
+    ["Tyres", "C3 Hard, C4 Medium and C5 Soft confirmed in the FIA Pirelli preview. No dry-tyre practice running is available yet."],
     ["Weather", "Cold-night conditions are a circuit prior, not a live race-hour forecast. Tyre warm-up and changing temperatures can materially alter this outlook."],
-    ["Haas seat", "Camara's Fantasy price is $5.4M after Brazil. He remains a provisional Las Vegas scenario until the driver entry is confirmed; no Ocon or Hirakawa history is inherited."],
-    ["Grid outlook", "Piastri: confirmed 10-place grid drop for an extra engine, applied to the projected race start only. Qualifying points are unaffected. Other drivers are promoted accordingly; the final grid remains provisional."],
-    ["McLaren update", "New turbochargers and aerodynamic parts are reported. No extra pace gain is assumed before practice evidence; Piastri's grid drop is included."],
+    ["Haas seat", "Camara is confirmed for the Las Vegas race at $5.4M. Hirakawa drove Bearman's car in untimed FP1 only. No substitute-driver scores or history are inherited; Camara's price thresholds remain low confidence."],
+    ["Grid outlook", "Confirmed: Antonelli 5 places; Piastri, Sainz and Stroll 10 each; Bearman 35 places, back of grid. Applied once to race starts, with other drivers promoted. Qualifying points are unaffected; final starting positions remain provisional."],
+    ["McLaren update", "New turbochargers and aerodynamic parts are reported. No additional pace gain is assumed from wet-only practice; Piastri's grid drop is included."],
   ];
   if (!state.recommendation) {
     els.contextTitle.textContent = "Las Vegas context.";
     els.contextIntro.textContent = `${state.modelMode} Las Vegas forecast using post-Brazil prices.`;
     renderContextRows([
       ["Track logic", trackLogic],
-      ["Constructor logic", postQuali ? "Constructor projections include completed qualifying scores and forecast race points for both drivers." : afterPractice ? "Constructor projections combine practice-informed forecasts for both drivers with the penalty-adjusted starting outlook." : "Balance straight-line efficiency, braking and tyre warm-up with reliable points from both drivers."],
+      ["Constructor logic", postQuali ? "Constructor projections include completed qualifying scores and forecast race points for both drivers." : afterPractice ? "Constructor projections use historical dry pace and the revised penalty-adjusted starting outlook. Wet practice provides no comparable dry-pace signal." : "Balance straight-line efficiency, braking and tyre warm-up with reliable points from both drivers."],
       ...practiceContext,
       ["Chip plan", state.modelMode === "Post-Quali" ? "The weekend deadline has passed. New weekend chips cannot be activated. Final Fix, if eligible, requires a separate Sunday-only comparison." : "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
       ["Price watch", priceWatch],
