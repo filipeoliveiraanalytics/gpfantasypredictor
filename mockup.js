@@ -687,13 +687,14 @@ function renderRaceContext() {
   const afterPractice = state.modelMode === "After Practice";
   const postQuali = state.modelMode === "Post-Quali";
   const practiceContext = [
-    ["Model status", "FP1 and FP2 reviewed. FP1 had no timed laps; FP2 used wet and intermediate tyres only. No comparable dry pace is available, so the forecast retains its historical dry-pace baseline and low confidence. FP3 and qualifying are not included."],
-    ["Practice review", "Russell led wet FP2 ahead of Gasly and Leclerc. FIA deleted laps are excluded. Verstappen reported balance and energy-management issues; the limited wet sample is not treated as a dry-race pace verdict."],
-    ["Tyres", "C3 Hard, C4 Medium and C5 Soft confirmed in the FIA Pirelli preview. No dry-tyre practice running is available yet."],
+    ["Model status", "Post-quali update includes valid dry FP3 timing and the FIA final qualifying classification. FP1 was untimed and wet FP2 is excluded from dry pace. Only one dry practice session is available; the race remains a forecast."],
+    ["Practice review", "Russell led dry FP3 ahead of Antonelli and Norris. FIA deleted laps, including Hulkenberg's 1:36.029, are excluded. Qualifying was strongly affected by slipstream timing; no extra media-based pace adjustment is added."],
+    ["Qualifying", "Antonelli qualified first, Verstappen second and Russell third. Leclerc and Hamilton were eliminated in Q2. Bearman was not classified under 107%, so his qualifying NC penalty is included; the FIA has permitted him to start."],
+    ["Tyres", "C3 Hard, C4 Medium and C5 Soft. Dry FP3 timing is included; wet FP2 does not provide a comparable slick-tyre pace signal."],
     ["Weather", "Cold-night conditions are a circuit prior, not a live race-hour forecast. Tyre warm-up and changing temperatures can materially alter this outlook."],
     ["Haas seat", "Camara is confirmed for the Las Vegas race at $5.4M. Hirakawa drove Bearman's car in untimed FP1 only. No substitute-driver scores or history are inherited; Camara's price thresholds remain low confidence."],
-    ["Grid outlook", "Confirmed: Antonelli 5 places; Piastri, Sainz and Stroll 10 each; Bearman 35 places, back of grid. Applied once to race starts, with other drivers promoted. Qualifying points are unaffected; final starting positions remain provisional."],
-    ["McLaren update", "New turbochargers and aerodynamic parts are reported. No additional pace gain is assumed from wet-only practice; Piastri's grid drop is included."],
+    ["Grid outlook", "FIA provisional grid applied: Verstappen P1, Russell P2, Norris P3, Hadjar P4, Lindblad P5, Antonelli P6. Leclerc P10, Hamilton P11, Piastri P17 and Bearman P22. This grid already includes penalties; none are applied twice. Lindblad's unsafe-release decision is a team fine, not a grid drop."],
+    ["McLaren update", "New turbochargers and aerodynamic parts are reported. Performance is updated from measured dry FP3 and qualifying inputs, without an additional speculative upgrade bonus. Piastri's grid drop is included."],
   ];
   if (!state.recommendation) {
     els.contextTitle.textContent = "Las Vegas context.";
@@ -702,7 +703,7 @@ function renderRaceContext() {
       ["Track logic", trackLogic],
       ["Constructor logic", postQuali ? "Constructor projections include completed qualifying scores and forecast race points for both drivers." : afterPractice ? "Constructor projections use historical dry pace and the revised penalty-adjusted starting outlook. Wet practice provides no comparable dry-pace signal." : "Balance straight-line efficiency, braking and tyre warm-up with reliable points from both drivers."],
       ...practiceContext,
-      ["Chip plan", state.modelMode === "Post-Quali" ? "The weekend deadline has passed. New weekend chips cannot be activated. Final Fix, if eligible, requires a separate Sunday-only comparison." : "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
+      ["Chip plan", state.modelMode === "Post-Quali" ? "The weekend deadline has passed. New weekend chips cannot be activated. Final Fix, if eligible, requires a separate race-only comparison." : "Keep flexibility through practice. The model will only surface a chip when it clears the transfer and budget trade-off."],
       ["Price watch", priceWatch],
     ]);
     return;
@@ -886,7 +887,7 @@ function directRecommendation() {
   }
   if (!base) throw new Error("No valid lineup fits the current budget. Edit your team or budget and try again.");
   if (state.modelMode === "Post-Quali") {
-    return { ...base, chip: "", chipReason: "The weekend deadline has passed. This is a lineup comparison, not a new transfer or chip instruction. Already activated chips remain locked. Final Fix eligibility and Sunday-only gains are not evaluated here." };
+    return { ...base, chip: "", chipReason: "The weekend deadline has passed. This is a lineup comparison, not a new transfer or chip instruction. Already activated chips remain locked. Final Fix eligibility and race-only gains are not evaluated here." };
   }
   const available = new Set(els.chips.filter((input) => input.checked).map((input) => input.value));
   const labels = { x3: "Triple Boost", limitless: "Limitless", no_negative: "No Negative", wildcard: "Wildcard" };
